@@ -1,0 +1,1481 @@
+---
+title: "Discharge delays v2"
+output:
+  html_document:
+    toc: yes
+    toc_float: yes
+    theme: paper
+  pdf_document:
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+rm(list = ls())
+
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE)
+
+devtools::install_github('THF-evaluative-analytics/THFstyle')
+
+pacman::p_load(dplyr,
+               janitor,
+               data.table,
+               purrr,
+               lubridate,
+               tidyr,
+               here, 
+               gtsummary,
+               kableExtra, 
+               ggplot2, 
+               plotly, 
+               THFstyle, 
+               stringr,
+               ggrepel)
+
+
+options(scipen = 999)
+
+dis_data<-readRDS(here('dis_data.RDS'))
+dis_nat<-readRDS(here('dis_nat.RDS'))
+dis_dest<-readRDS(here('destination_data.RDS'))
+dis_data_sep_23<-readRDS(here('dis_data_sep_23.RDS'))
+dis_barriers<-readRDS(here('barriers_data.RDS'))
+# dis_reg<- readRDS(here('dis_reg.RDS'))
+
+
+```
+
+
+# Data
+
+This document is for exploratory purposes and is not intended for use outside of the Health Foundation.\
+Data were obtained from [NHS discharge ready date data](https://www.england.nhs.uk/statistics/statistical-work-areas/discharge-delays-acute-data).
+
+NB. Data for the total bed days delayed in Oct 2024 were obtained by aggregating the daily data, rather than using the monthly file, as it is currently unavailable. This means there may be inconsistencies with other months, particularly as it doesn't seem to differentiate between trusts that submit acceptable and unacceptable levels of data. 
+
+### National data
+
+The number of trusts submitting acceptable data increased from 79 in October 2023 to 119 in Sep 2024 (of the 16 trusts that had unacceptable data in Sep 2024, 10 had submitted acceptable data over the same time period). The percentage of patients discharged on the date they were considered ready for discharge - i.e. those with no discharge delay - remained remarkably constant around 86% between October 2023 and Sep 2024, despite the growing number of trusts reporting.
+
+The average length of delay among delayed patients also remained constant between 6.0-6.4 days. 
+
+```{r, include=FALSE}
+dis_date_acceptable <- dis_data %>%
+  filter(date == "2024-10-01") %>%
+  count(n_prov_acceptable)
+
+dis_date_not_acceptable <- dis_data %>% 
+  filter(n_prov_acceptable == "Unacceptable" & date == "2024-10-01") %>% 
+  select(org_code) # %>% 
+
+dis_date_not_acceptable_trust <- dis_data %>% 
+  filter(org_code %in% dis_date_not_acceptable$org_code & n_prov_acceptable == "Acceptable")
+```
+
+### Regional
+
+NB. For data before Sep 2024, each region as a whole isn't given so is calculated from the trusts and from Oct 2023 - Dec 2023 there is no region in the dataset, but I could do this using a lookup?
+
+**Table 1: Regional data with largest improvements in the average no. of days patients are delayed patients**
+
+There was regional variation across changes in the % of patients being discharged on their discharge ready date and in the average number of days patients are delayed between Jan 2024 and Sep 2024. The Midlands had the greatest reduction in the average number of days delayed (-1.6), followed by the South West (-0.7) and the North East and Yorkshire (-0.61). The average delay increased by a day for patients in the South East, whilst their % of patients being discharged on their discharge ready date decreased by 0.2%. London had the greatest increase in the % of patients being discharged on their discharge ready date decreased (4.8%), followed by the North West (2.4%) and the South West (2.3%).
+
+```{r}
+#print(names(dis_data))
+# traj_region <- dis_reg %>%
+#   filter((date == '2024-09-01' | date == '2024-01-01') & !is.na(dis_on_ready)) %>%
+#   select(date, region, dis_on_ready, av_delay_after) %>%
+#  pivot_wider(names_from = date, values_from =  c(dis_on_ready, av_delay_after)) %>%
+#  clean_names() %>%
+#   mutate(traj_perc = dis_on_ready_2024_09_01 - dis_on_ready_2024_01_01,
+#          traj_delay = av_delay_after_2024_09_01 - av_delay_after_2024_01_01) %>%
+#   ungroup()
+# 
+# 
+# tibble_region <- traj_region %>%
+#   arrange(traj_delay)# %>%
+#   #select(-traj_delay, -traj_perc, -traj_beddays)
+#  
+# 
+# knitr::kable(tibble_region,
+#              format = "html",
+#              col.names = c('Name', '% patients discharged on discharge ready date (Jan 2024)', '% patients discharged on discharge ready date (Sep 2024)', 'Average delay among delayed patients (Jan 2024, days)', 'Average delay among delayed patients (Sep 2024, days)', 'Change in % of patients being discharged on discharge ready date', 'Change in average delay among delayed patients (days)'),
+#              escape = FALSE,
+#              align = "lcccccc")
+```
+
+### Trust data
+
+In Sep 2024, the median percentage of patients discharged on their discharge ready date was 87.2% (range: 54.6%-100%). The median average delay across trusts was 6.4 days (range: 1.5-20.4 days).
+
+The median number of bed days used by patients after their discharge ready date was 2097 in Sep 2024 (range: 0-8179), across trusts. This changed to 2594 (range: 164-10705) in Oct 2024.
+
+```{r, include=FALSE}
+# Data filtered to selected month
+dis_data_Oct_24 <- dis_data %>%
+  filter(date == '2024-10-01') 
+
+# Median % pts dc'd on their drd
+dis_data %>%
+  filter(date == '2024-10-01') %>%
+  pull(dis_on_ready) %>%
+  median(na.rm = TRUE) 
+
+# Min % pts dc'd on their drd 
+dis_data %>%
+  filter(date == '2024-10-01') %>%
+  pull(dis_on_ready) %>%
+  min(na.rm = TRUE)
+
+# Max % pts dc'd on their drd
+dis_data %>%
+  filter(date == '2024-10-01') %>%
+  pull(dis_on_ready) %>%
+  max(na.rm = TRUE) 
+
+# Median no. of days delayed
+dis_data %>%
+  filter(date == '2024-10-01') %>%
+  pull(av_delay_after) %>%
+  median(na.rm = TRUE) 
+
+# Min no. of days delayed
+dis_data %>%
+  filter(date == '2024-10-01') %>%
+  pull(av_delay_after) %>%
+  min(na.rm = TRUE)
+
+# Max no. of days delayed
+dis_data %>%
+  filter(date == '2024-10-01') %>%
+  pull(av_delay_after) %>%
+  max(na.rm = TRUE)
+
+# Max no. of days delayed
+dis_data %>%
+  filter(date == '2024-10-01') %>%
+  pull(total_beddays_delay) %>%
+  median(na.rm = TRUE)
+
+#Min total no. of bed days delayed
+dis_data %>%
+  filter(date == '2024-10-01') %>%
+  pull(total_beddays_delay) %>%
+  min(na.rm = TRUE)
+
+#Max total no. of bed days delayed
+dis_data %>%
+  filter(date == '2024-10-01') %>%
+  pull(total_beddays_delay) %>%
+  max(na.rm = TRUE)
+
+
+```
+
+
+# Trajectories
+
+
+Table 2 below shows trusts with the largest improvements in the percentage of bed days used for delayed patients in Oct 2024. 
+
+In Oct 2024, the trust with the largest improvements were Buckinghamshire (-14.2 p.p.), Salisbury (-13.7 p.p.), Gateshead (-11.2 p.p.) and Norfolk and Norwich (-11.2 p.p.).
+
+In Sep 2024, the trusts with the largest improvements were Buckinghamshire (-9.5 p.p.), Wirral (-9.1 p.p.) and Morecambe Bay (-6.6 p.p.). 
+
+For two of those trusts (Buckinghamshire and Morecambe Bay), the average delay among patients whose discharge was delayed decreased by 1.9-3.2 days between October 2023 and Sep 2024. The average delay among patients whose discharge was delayed increased by 1.6 days in Wirral. The percentage of patients discharged on their discharge ready rate increased by 2.2 - 5.2% between these two dates for the 3 trusts.
+
+**Table 2: Top 10 trusts with largest improvements in percentage of bed days used for delayed patients between Oct 23 - Oct 24**
+
+```{r}
+#print(names(dis_data))
+traj <- dis_data %>%
+  filter(n_prov_acceptable == "Acceptable") %>% 
+  filter((date == '2024-10-01' | date == '2023-10-01')) %>%  #& !is.na(dis_on_ready)) %>%
+  filter(!grepl('CHILDREN|WOMEN|VICTORIA|PAPWORTH|ORTHOPAEDIC|HEART|CHRISTIE|CANCER|EYE', organisation_name)) %>% 
+  select(date, organisation_name, dis_on_ready, av_delay_after, total_beddays_delay, pct_bed_delays) %>%
+  pivot_wider(names_from = date, values_from =  c(dis_on_ready, av_delay_after, total_beddays_delay, pct_bed_delays)) %>%
+ clean_names() %>%
+  mutate(traj_perc = dis_on_ready_2024_10_01 - dis_on_ready_2023_10_01,
+         traj_delay = av_delay_after_2024_10_01 - av_delay_after_2023_10_01,
+         traj_beddays = round((total_beddays_delay_2024_10_01 - total_beddays_delay_2023_10_01)/total_beddays_delay_2023_10_01*100, 1),
+         traj_pctbeddays = pct_bed_delays_2024_10_01 - pct_bed_delays_2023_10_01) %>%
+  ungroup()
+
+
+tibble <- traj %>%
+  arrange(traj_pctbeddays) %>%
+  select(-traj_delay, -traj_perc, -traj_beddays) %>%
+  head(10)
+
+knitr::kable(tibble,
+             format = "html",
+             col.names = c('Name', '% patients discharged on discharge ready date (Oct 2023)', '% patients discharged on discharge ready date (Oct 2024)', 'Average delay among delayed patients (Oct 2023, days)', 'Average delay among delayed patients (Oct 2024, days)', 'Total bed days for delays (Oct 2023)', 'Total bed days for delays (Oct 2024)', '% beds occupied by delayed patients (Oct 2023)', '% beds occupied by delayed patients (Oct 2024)',  'Change in % beds occupied by delays (p.p.)'),
+             escape = FALSE,
+             align = "lcccccc")
+```
+
+
+
+
+**Table 4: Top 10 trusts with largest improvements in percentage of bed days used for delayed patients in each quarter**
+```{r}
+#print(names(dis_data))
+
+#Oct 23 - Jun 24
+traj_oct_dec <- dis_data %>%
+    filter(n_prov_acceptable == "Acceptable") %>% 
+  filter((date == '2023-12-01' | date == '2023-10-01') & !is.na(dis_on_ready)) %>%
+    filter(!grepl('CHILDREN|WOMEN|VICTORIA|PAPWORTH|ORTHOPAEDIC|HEART|CHRISTIE|CANCER|EYE', organisation_name)) %>% 
+  select(date, organisation_name, dis_on_ready, av_delay_after, total_beddays_delay, pct_bed_delays) %>%
+ pivot_wider(names_from = date, values_from =  c(dis_on_ready, av_delay_after, total_beddays_delay, pct_bed_delays)) %>%
+ clean_names() %>%
+  mutate(traj_perc = dis_on_ready_2023_12_01 - dis_on_ready_2023_10_01,
+         traj_delay = av_delay_after_2023_12_01 - av_delay_after_2023_10_01,
+         traj_beddays = round((total_beddays_delay_2023_12_01 - total_beddays_delay_2023_10_01)/total_beddays_delay_2023_10_01*100, 1),
+         traj_pctbeddays_oct_dec = pct_bed_delays_2023_12_01 - pct_bed_delays_2023_10_01) %>%
+  ungroup()
+
+
+tibble_oct_dec <- traj_oct_dec %>%
+  arrange(traj_pctbeddays_oct_dec) %>%
+  select(organisation_name, traj_pctbeddays_oct_dec) %>%
+  head(10)
+
+#Jan 24  - Mar 24
+traj_jan_mar <- dis_data %>%
+    filter(n_prov_acceptable == "Acceptable") %>% 
+  filter((date == '2024-03-01' | date == '2024-01-01') & !is.na(dis_on_ready)) %>%
+    filter(!grepl('CHILDREN|WOMEN|VICTORIA|PAPWORTH|ORTHOPAEDIC|HEART|CHRISTIE|CANCER|EYE', organisation_name)) %>% 
+  select(date, organisation_name, dis_on_ready, av_delay_after, total_beddays_delay, pct_bed_delays) %>%
+ pivot_wider(names_from = date, values_from =  c(dis_on_ready, av_delay_after, total_beddays_delay, pct_bed_delays)) %>%
+ clean_names() %>%
+  mutate(traj_perc = dis_on_ready_2024_03_01 - dis_on_ready_2024_01_01,
+         traj_delay = av_delay_after_2024_03_01 - av_delay_after_2024_01_01,
+         traj_beddays = round((total_beddays_delay_2024_03_01 - total_beddays_delay_2024_01_01)/total_beddays_delay_2024_01_01*100, 1),
+         traj_pctbeddays_jan_mar = pct_bed_delays_2024_03_01 - pct_bed_delays_2024_01_01) %>%
+  ungroup()
+
+
+tibble_jan_mar <- traj_jan_mar %>%
+  arrange(traj_pctbeddays_jan_mar) %>%
+  select(organisation_name, traj_pctbeddays_jan_mar) %>%
+  head(10)
+
+# Apr 24 to Jun 24
+traj_apr_jun <- dis_data %>%
+    filter(n_prov_acceptable == "Acceptable") %>% 
+  filter((date == '2024-08-01' | date == '2024-06-01') & !is.na(dis_on_ready)) %>%
+    filter(!grepl('CHILDREN|WOMEN|VICTORIA|PAPWORTH|ORTHOPAEDIC|HEART|CHRISTIE|CANCER|EYE', organisation_name)) %>% 
+  select(date, organisation_name, dis_on_ready, av_delay_after, total_beddays_delay, pct_bed_delays) %>%
+ pivot_wider(names_from = date, values_from =  c(dis_on_ready, av_delay_after, total_beddays_delay, pct_bed_delays)) %>%
+ clean_names() %>%
+  mutate(traj_perc = dis_on_ready_2024_08_01 - dis_on_ready_2024_06_01,
+         traj_delay = av_delay_after_2024_08_01 - av_delay_after_2024_06_01,
+         traj_beddays = round((total_beddays_delay_2024_08_01 - total_beddays_delay_2024_06_01)/total_beddays_delay_2024_06_01*100, 1),
+         traj_pctbeddays_apr_jun = pct_bed_delays_2024_08_01 - pct_bed_delays_2024_06_01) %>%
+  ungroup()
+
+
+tibble_apr_jun <- traj_apr_jun %>%
+  arrange(traj_pctbeddays_apr_jun) %>%
+  select(organisation_name, traj_pctbeddays_apr_jun) %>%
+  head(10)
+
+# Jul 24 to Sep 24
+traj_jul_sep <- dis_data %>%
+  filter(n_prov_acceptable == "Acceptable") %>% 
+  filter((date == '2024-09-01' | date == '2024-07-01') & !is.na(dis_on_ready)) %>%
+    filter(!grepl('CHILDREN|WOMEN|VICTORIA|PAPWORTH|ORTHOPAEDIC|HEART|CHRISTIE|CANCER|EYE', organisation_name)) %>% 
+  select(date, organisation_name, dis_on_ready, av_delay_after, total_beddays_delay, pct_bed_delays) %>%
+ pivot_wider(names_from = date, values_from =  c(dis_on_ready, av_delay_after, total_beddays_delay, pct_bed_delays)) %>%
+ clean_names() %>%
+  mutate(traj_perc = dis_on_ready_2024_09_01 - dis_on_ready_2024_07_01,
+         traj_delay = av_delay_after_2024_09_01 - av_delay_after_2024_07_01,
+         traj_beddays = round((total_beddays_delay_2024_09_01 - total_beddays_delay_2024_07_01)/total_beddays_delay_2024_07_01*100, 1),
+         traj_pctbeddays_jul_sep = pct_bed_delays_2024_09_01 - pct_bed_delays_2024_07_01) %>%
+  ungroup()
+
+
+tibble_jul_sep <- traj_jul_sep %>%
+  arrange(traj_pctbeddays_jul_sep) %>%
+  select(organisation_name, traj_pctbeddays_jul_sep) %>%
+  head(10)
+
+#join data
+
+tibble_quarterly_org_names <- full_join(tibble_oct_dec, tibble_jan_mar, by = "organisation_name")
+tibble_quarterly_org_names <- full_join(tibble_quarterly_org_names, tibble_apr_jun, by = "organisation_name")
+tibble_quarterly_org_names <- full_join(tibble_quarterly_org_names, tibble_jul_sep, by = "organisation_name")
+
+knitr::kable(tibble_quarterly_org_names,
+             format = "html",
+             col.names = c('Name', 'Change in % beds occupied by delays (p.p.) between Oct 23 - Dec 23', 'Change in % beds occupied by delays (p.p.) between Jan 24 - Mar 24', 'Change in % beds occupied by delays (p.p.) between Apr 24 - Jun 24', 'Change in % beds occupied by delays (p.p.) between Jul 23 - Sep 24'),
+             escape = FALSE,
+             align = "lcccccc")
+```
+
+```{r}
+#tibble_recent_and_quarterly_org_names <- full_join(tibble_quarterly_org_names, tibble_org_names)
+
+# write_rds(tibble_recent_and_quarterly_org_names,here('dis_trust_ranking.RDS'))
+
+```
+
+
+**Table 5 showing the trusts with the lowest % of bed occupied by delays, Oct 2023 - Sept 2024**
+# ```{r}
+# dis_data_top <- dis_data %>% 
+#   filter(!is.na(dis_on_ready)) %>%
+#   filter(!grepl('CHILDREN|WOMEN|VICTORIA|PAPWORTH|ORTHOPAEDIC|HEART|CHRISTIE|CANCER|EYE', organisation_name))
+# 
+# dis_data_top_avg_med <- dis_data_top%>% 
+#    select(date, organisation_name, pct_bed_delays) %>%
+#   group_by(organisation_name) %>%
+#   mutate(avg_pct_bed_delays = mean(pct_bed_delays),
+#                                    med_pct_bed_delays = median(pct_bed_delays)) %>% 
+#   select(organisation_name, avg_pct_bed_delays, med_pct_bed_delays) 
+# 
+# dis_data_top_avg_med <- distinct(dis_data_top_avg_med)
+#   
+# dis_data_top_month <- dis_data_top %>% 
+#     select(date, organisation_name, pct_bed_delays) %>%
+# pivot_wider(names_from = date, values_from =  c(pct_bed_delays)) %>%
+#   clean_names() %>%
+#   ungroup()
+# 
+# dis_data_top_a <- full_join(dis_data_top_month, dis_data_top_avg_med)
+# 
+# dis_data_top_a <- dis_data_top_a %>% 
+#   arrange(avg_pct_bed_delays) %>% 
+#   head(30)
+# 
+# knitr::kable(dis_data_top_a,
+#              format = "html",
+#              col.names = c('Name', '% beds occupied by delays (p.p.) Oct 23', '% beds occupied by delays (p.p.) Nov 23', '% beds occupied by delays (p.p.) Dec 23', '% beds occupied by delays (p.p.) Jan 24', '% beds occupied by delays (p.p.) Feb 24', '% beds occupied by delays (p.p.) Mar 24', '% beds occupied by delays (p.p.) Apr 24', '% beds occupied by delays (p.p.) May 24', '% beds occupied by delays (p.p.) Jun 24', '% beds occupied by delays (p.p.) Jul 24', '% beds occupied by delays (p.p.) Aug 24', '% beds occupied by delays (p.p.) Sep 24', 'Average % beds occupied', 'Median % beds occupied'),
+#              escape = FALSE,
+#              align = "lcccccc")
+# 
+# ```
+
+
+**Table 6 showing the trusts with average largest reduction in % total bed days between Oct 23 - Aug/Sep/Oct 24**
+
+```{r}
+# Oct 23 to Aug 24
+traj_oct_aug <- dis_data %>%
+    filter(n_prov_acceptable == "Acceptable") %>% 
+  filter((date == '2024-08-01' | date == '2023-10-01') & !is.na(dis_on_ready)) %>%
+    filter(!grepl('CHILDREN|WOMEN|VICTORIA|PAPWORTH|ORTHOPAEDIC|HEART|CHRISTIE|CANCER|EYE', organisation_name)) %>% 
+  select(date, organisation_name, dis_on_ready, av_delay_after, total_beddays_delay, pct_bed_delays) %>%
+ pivot_wider(names_from = date, values_from =  c(dis_on_ready, av_delay_after, total_beddays_delay, pct_bed_delays)) %>%
+ clean_names() %>%
+  mutate(traj_perc = dis_on_ready_2024_08_01 - dis_on_ready_2023_10_01,
+         traj_delay = av_delay_after_2024_08_01 - av_delay_after_2023_10_01,
+         traj_beddays = round((total_beddays_delay_2024_08_01 - total_beddays_delay_2023_10_01)/total_beddays_delay_2023_10_01*100, 1),
+         traj_pctbeddays_oct_aug = pct_bed_delays_2024_08_01 - pct_bed_delays_2023_10_01) %>%
+  ungroup()
+
+
+tibble_oct_aug <- traj_oct_aug %>%
+  arrange(traj_pctbeddays_oct_aug) %>%
+  select(organisation_name, traj_pctbeddays_oct_aug) 
+
+# Oct 23 to Sep 24
+traj_oct_sep <- dis_data %>%
+    filter(n_prov_acceptable == "Acceptable") %>% 
+  filter((date == '2024-09-01' | date == '2023-10-01') & !is.na(dis_on_ready)) %>%
+    filter(!grepl('CHILDREN|WOMEN|VICTORIA|PAPWORTH|ORTHOPAEDIC|HEART|CHRISTIE|CANCER|EYE', organisation_name)) %>% 
+  select(date, organisation_name, dis_on_ready, av_delay_after, total_beddays_delay, pct_bed_delays) %>%
+ pivot_wider(names_from = date, values_from =  c(dis_on_ready, av_delay_after, total_beddays_delay, pct_bed_delays)) %>%
+ clean_names() %>%
+  mutate(traj_perc = dis_on_ready_2024_09_01 - dis_on_ready_2023_10_01,
+         traj_delay = av_delay_after_2024_09_01 - av_delay_after_2023_10_01,
+         traj_beddays = round((total_beddays_delay_2024_09_01 - total_beddays_delay_2023_10_01)/total_beddays_delay_2023_10_01*100, 1),
+         traj_pctbeddays_oct_sep = pct_bed_delays_2024_09_01 - pct_bed_delays_2023_10_01) %>%
+  ungroup()
+
+
+tibble_oct_sep <- traj_oct_sep %>%
+  arrange(traj_pctbeddays_oct_sep) %>%
+  select(organisation_name, traj_pctbeddays_oct_sep) 
+
+# Oct 23 to Oct 24
+traj_oct_oct <- dis_data %>%
+    filter(n_prov_acceptable == "Acceptable") %>% 
+  filter((date == '2024-10-01' | date == '2023-10-01')) %>%  #& !is.na(dis_on_ready)) %>%
+    filter(!grepl('CHILDREN|WOMEN|VICTORIA|PAPWORTH|ORTHOPAEDIC|HEART|CHRISTIE|CANCER|EYE', organisation_name)) %>% 
+  select(date, pct_bed_delays, organisation_name) %>%
+ pivot_wider(names_from = date, values_from =  c(pct_bed_delays)) %>%
+ clean_names() %>%
+  mutate(traj_pctbeddays_oct_oct = x2024_10_01 - x2023_10_01) %>%
+  ungroup()
+
+
+tibble_oct_oct <- traj_oct_oct %>%
+  arrange(traj_pctbeddays_oct_oct) %>%
+  select(organisation_name, traj_pctbeddays_oct_oct) 
+
+
+#join data
+
+tibble_org_names <- full_join(tibble_oct_aug, tibble_oct_sep, by = "organisation_name")
+tibble_org_names <- full_join(tibble_org_names, tibble_oct_oct, by = "organisation_name")
+tibble_org_names <- tibble_org_names %>% filter(!if_any(everything(), is.na)) #Removing trusts that are missing a submission 
+
+tibble_org_names <- tibble_org_names %>% 
+  mutate(average_change =  rowMeans(tibble_org_names[,2:4])) %>% 
+  arrange(average_change) %>% 
+  head(12) 
+
+knitr::kable(tibble_org_names,
+             format = "html",
+             col.names = c('Name', 'Change in % beds occupied by delays (p.p.) between Oct 23 - Aug 24', 'Change in % beds occupied by delays (p.p.) between Oct 23 - Sep 24', 'Change in % beds occupied by delays (p.p.) between Oct 23 - Oct 24', 'Average change in % beds occupied by delays (p.p)'),
+             escape = FALSE,
+             align = "lcccccc")
+```
+
+```{r}
+# #print(names(dis_data))
+# traj_3_month <- dis_data %>%
+#   filter((!is.na(dis_on_ready))) %>%
+#   select(date, organisation_name, dis_on_ready, av_delay_after, total_beddays_delay, pct_bed_delays) %>%
+#  pivot_wider(names_from = date, values_from =  c(dis_on_ready, av_delay_after, total_beddays_delay, pct_bed_delays)) %>%
+#  clean_names() %>%
+#   mutate(traj_perc = dis_on_ready_2024_09_01 - dis_on_ready_2023_10_01,
+#          traj_delay = av_delay_after_2024_09_01 - av_delay_after_2023_10_01,
+#          traj_beddays = round((total_beddays_delay_2024_09_01 - total_beddays_delay_2023_10_01)/total_beddays_delay_2023_10_01*100, 1),
+#          traj_pctbeddays = pct_bed_delays_2024_09_01 - pct_bed_delays_2023_10_01) %>%
+#   ungroup()
+# 
+# 
+# tibble <- traj %>%
+#   arrange(traj_pctbeddays) %>%
+#   select(-traj_delay, -traj_perc, -traj_beddays) %>%
+#   head(10)
+# 
+# knitr::kable(tibble,
+#              format = "html",
+#              col.names = c('Name', '% patients discharged on discharge ready date (Oct 2023)', '% patients discharged on discharge ready date (Sep 2024)', 'Average delay among delayed patients (Oct 2023, days)', 'Average delay among delayed patients (Sep 2024, days)', 'Total bed days for delays (Oct 2023)', 'Total bed days for delays (Sep 2024)', '% beds occupied by delayed patients (Oct 2023)', '% beds occupied by delayed patients (Sep 2024)',  'Change in % beds occupied by delays (p.p.)'),
+#              escape = FALSE,
+#              align = "lcccccc")
+```
+
+# Plots {.tabset}
+
+## National performance - % pt dc'd on drd
+
+```{r}
+fig1 <- dis_nat %>%
+  ggplot(aes(x=date, y=dis_on_ready, color = organisation_name)) +
+  geom_line()+
+  theme_THF()+
+  scale_colour_THF() +
+  ggtitle("Figure 1. Percentage of patients discharged on discharge ready date") +
+  labs(x = "Month",
+       y = "Percentage of patients", 
+       color = "") +
+  scale_x_date(date_labels = "%b %Y", date_breaks = "1 month") +
+  expand_limits(y = 0) +
+  theme(axis.title.y = element_text(size = 12))
+
+
+ggplotly(fig1, width = 1000, height = 500)
+```
+
+## National performance - split by days delayed (%)
+
+```{r}
+# fig2_tibble <- dis_nat %>% 
+#   #day_split <- c('x1_day', 'x2_3_days', 'x4_6_days', 'x7_13_days', 'x14_20_days', 'x21_days_or_more')
+#    select(date, x1_day, x2_3_days, x4_6_days, x7_13_days, x14_20_days, x21_days_or_more) %>% 
+#   ggplot(aes(x=date, y=c(x1_day, x2_3_days, x4_6_days, x7_13_days, x14_20_days, x21_days_or_more), color = date)) +
+#   geom_line() +
+#   theme_THF()+
+#   scale_colour_THF() +
+#   ggtitle("Figure 2. Percentage of patients discharged on after their discharge ready date by % of days delayed") +
+#   labs(x = "Month",
+#        y = "Percentage of patients", 
+#        color ='#53a9cd', '#ee9b90', '#744284', '#ffd412', '#2a7979', '#f39214', '#dd0031', '#0c402b', '#005078', '#2ca365', 'blue', 'black') +
+#   scale_x_date(date_labels = "%b %Y", date_breaks = "1 month") +
+#   expand_limits(y = 0) +
+#   theme(axis.title.y = element_text(size = 12)) 
+# 
+# 
+# ggplotly(fig2_tibble, width = 1000, height = 500)
+```
+
+## Ranking changes for top 10 performers
+
+```{r}
+# Fig 3 ####
+# graph of ranking over previous 12 months for top 10 eligible trusts
+
+#Ranking of top performing trusts against all (specialist/non-specialist and varying between the months) acceptable trusts
+data_trusts_all <- dis_data %>% 
+  filter(!n_prov_acceptable == 'Unacceptable') %>% 
+  filter((date == '2024-10-01' | date == '2023-10-01')) %>% 
+  group_by(date) %>% 
+  arrange(pct_bed_delays) %>%
+  mutate(rank_eligible = row_number(), 
+         percentile_rank = round(rank_eligible/max(rank_eligible)*100, 1)) %>%
+  ungroup() %>% 
+  filter(org_code %in% c('RXQ','RTX','RAE','RNA','RK5','RM1', 'RBL')) %>%
+  select(organisation_name, org_code, date, pct_bed_delays, rank_eligible, percentile_rank) %>% 
+     mutate(organisation_name = str_remove(organisation_name, fixed(" TEACHING HOSPITALS NHS FOUNDATION TRUST")),
+         organisation_name = str_remove(organisation_name, fixed(" GROUP NHS FOUNDATION TRUST")), 
+         organisation_name = str_remove(organisation_name, fixed("THE")),
+         organisation_name = str_remove(organisation_name, fixed("UNIVERSITY HOSPITALS OF ")),         
+         organisation_name = str_remove(organisation_name, fixed("HOSPITALS NHS FOUNDATION TRUST")),
+         organisation_name = str_remove(organisation_name, fixed(" HOSPITALS NHS FOUNDATION TRUST")),
+         organisation_name = str_remove(organisation_name, fixed(" NHS FOUNDATION TRUST")),
+         organisation_name = str_remove(organisation_name, fixed(" UNIVERSITY")),
+         organisation_name = str_remove(organisation_name, fixed("HEALTHCARE NHS TRUST")), 
+         organisation_name = str_remove(organisation_name, fixed(" LONDON")), 
+         organisation_name = str_remove(organisation_name, fixed(" TEACHING HOSPITAL"))) 
+
+#October trust list
+Oct_trust_list <- dis_data %>% 
+  filter((date== '2023-10-01' & n_prov_acceptable == 'Acceptable')) %>% 
+  select(org_code)
+
+#Ranking all non-specialist acceptable trusts against the same October 2023 cohort
+data_trusts_non_specialists <- dis_data %>%
+  filter(!n_prov_acceptable == 'Unacceptable') %>% 
+  filter(!grepl('CHILDREN|WOMEN|VICTORIA|PAPWORTH|ORTHOPAEDIC|HEART|CHRISTIE|CANCER|EYE', organisation_name)) %>% 
+  filter((date == '2024-10-01' | date == '2023-10-01')) %>% 
+  filter(org_code %in% c(Oct_trust_list$org_code)) %>%
+  group_by(date) %>% 
+  arrange(pct_bed_delays) %>%
+  mutate(rank_eligible = row_number(),
+percentile_rank = round(rank_eligible/max(rank_eligible)*100, 1)) %>%
+  ungroup() %>% 
+  filter(org_code %in% c('RXQ','RTX','RAE','RNA','RK5','RM1', 'RBL')) %>%
+  select(organisation_name, date, rank_eligible, percentile_rank) %>% 
+     mutate(organisation_name = str_remove(organisation_name, fixed(" TEACHING HOSPITALS NHS FOUNDATION TRUST")),
+         organisation_name = str_remove(organisation_name, fixed(" GROUP NHS FOUNDATION TRUST")), 
+         organisation_name = str_remove(organisation_name, fixed("THE")),
+         organisation_name = str_remove(organisation_name, fixed("UNIVERSITY HOSPITALS OF ")),         
+         organisation_name = str_remove(organisation_name, fixed("HOSPITALS NHS FOUNDATION TRUST")),
+         organisation_name = str_remove(organisation_name, fixed(" HOSPITALS NHS FOUNDATION TRUST")),
+         organisation_name = str_remove(organisation_name, fixed(" NHS FOUNDATION TRUST")),
+         organisation_name = str_remove(organisation_name, fixed(" UNIVERSITY")),
+         organisation_name = str_remove(organisation_name, fixed("HEALTHCARE NHS TRUST")), 
+         organisation_name = str_remove(organisation_name, fixed(" LONDON")), 
+         organisation_name = str_remove(organisation_name, fixed(" TEACHING HOSPITAL"))) %>% 
+  pivot_wider(names_from = date, values_from = percentile_rank) %>% 
+  select(organisation_name, `2023-10-01`, `2024-10-01`)
+  
+
+  
+#Ranking all non-specialist trusts in October 2024
+data_trusts_non_specialists_october_24 <- dis_data %>% 
+  filter(!n_prov_acceptable == 'Unacceptable') %>% 
+  filter(date == '2024-10-01') %>% 
+  filter(!grepl('CHILDREN|WOMEN|VICTORIA|PAPWORTH|ORTHOPAEDIC|HEART|CHRISTIE|CANCER|EYE', organisation_name)) %>%
+    arrange(pct_bed_delays) %>%
+    mutate(rank_eligible = row_number(),
+  percentile_rank = round(rank_eligible/max(rank_eligible)*100, 1)) %>%
+  filter(org_code %in% c('RXQ','RTX','RAE','RNA','RK5','RM1', 'RBL')) %>%
+  select(organisation_name, date, rank_eligible, percentile_rank) %>% 
+    mutate(organisation_name = str_remove(organisation_name, fixed(" TEACHING HOSPITALS NHS FOUNDATION TRUST")),
+         organisation_name = str_remove(organisation_name, fixed(" GROUP NHS FOUNDATION TRUST")), 
+         organisation_name = str_remove(organisation_name, fixed("THE")),
+         organisation_name = str_remove(organisation_name, fixed("UNIVERSITY HOSPITALS OF ")),         
+         organisation_name = str_remove(organisation_name, fixed("HOSPITALS NHS FOUNDATION TRUST")),
+         organisation_name = str_remove(organisation_name, fixed(" HOSPITALS NHS FOUNDATION TRUST")),
+         organisation_name = str_remove(organisation_name, fixed(" NHS FOUNDATION TRUST")),
+         organisation_name = str_remove(organisation_name, fixed(" UNIVERSITY")),
+         organisation_name = str_remove(organisation_name, fixed("HEALTHCARE NHS TRUST")), 
+         organisation_name = str_remove(organisation_name, fixed(" LONDON")), 
+         organisation_name = str_remove(organisation_name, fixed(" TEACHING HOSPITAL"))) %>% 
+  pivot_wider(names_from = date, values_from = percentile_rank) %>% 
+  mutate('2024-10-01-all-oct24' = `2024-10-01`) %>% 
+  select(organisation_name, '2024-10-01-all-oct24')
+
+# labels <- function(x) {
+#   if(paste(max(x), "better performing trusts")) else x
+#   # if(paste(min(x), "worst performing trusts")) else
+#   #   return(x)
+# }
+
+fig <- data_trusts_all %>%
+  arrange(date) %>%
+  ggplot(data = ., aes(x = factor(date), y = percentile_rank, label = pct_bed_delays, group = organisation_name, colour = organisation_name, text = organisation_name)) +
+  #ggplot(aes(x=date, y=percentile_rank, label = pct_bed_delays, colour = organisation_name, text = organisation_name))  +
+ # geom_text()
+  geom_line() +
+  geom_point() +
+  theme_THF()+
+  labs(x = "",
+       y = "Trust ranking (Percentage)",
+       color = "") +
+  #geom_text(aes(label = pct_bed_delays, y= rank_eligible*1.05), size = 2.5, colour="black") +
+  geom_text_repel(label.size = 2.5) +
+  #scale_y_continuous(label = dates) +
+  #scale_x_discrete(breaks = date) +
+  theme(axis.title.y = element_text(size = 10)) +
+  theme(legend.position="right") +
+  scale_y_reverse(
+    breaks = seq(140, 0, by = -10)
+  )  +
+  scale_colour_manual(values = c('#53a9cd', '#ee9b90', '#744284', '#ffd412', '#2a7979', '#f39214', '#dd0031', '#0c402b', '#005078', '#2ca365'))
+
+fig
+
+
+```
+### Table for trust ranking
+
+```{r}
+trust_rank_table <- left_join(data_trusts_non_specialists, data_trusts_non_specialists_october_24)
+
+knitr::kable(trust_rank_table,
+             format = "html",
+             col.names = c('Name', 'Ranking of non-specialist hospitals (Oct 2023, n = 75)', 'Ranking against non-specialist hospitals present in the Oct 2023 data (Oct 2024, n = 70)', 'Ranking of non-specialist hospitals (Oct 2024, n = 102)'),
+             escape = FALSE,
+             align = "lcccccc")
+```
+The five trusts (excluding orthopaedic hospitals) with the largest improvement in the percentage of bed days used for delayed patients (Wirral, Morecambe Bay, Buckinghamshire, Airdale, Bradford) were used as exemplars for further analysis. The following plots show the percentage of patients discharged on their discharge ready date (Fig. 1), the average delay among delayed discharge patients (Fig. 2), the total bed days used for delays (Fig. 3), and the percentage of beds used for delayed discharge patients (Fig. 4), between October 2023 and Sep 2024 for the three exemplar trusts.
+
+## Whole year performers 
+### Percent discharged on ready date
+
+
+```{r}
+tibble_2trusts <- dis_data %>%
+  subset(org_code == 'RXQ' | org_code == 'RNZ' | org_code =='RR7' | org_code =='RM1')%>%
+  select(date, organisation_name, dis_on_ready, av_delay_after, total_beddays_delay, pct_bed_delays) 
+
+
+
+fig1 <- tibble_2trusts %>%
+  ggplot(aes(x=date, y=dis_on_ready, color = organisation_name)) +
+  geom_line() +
+  theme_THF()+
+  scale_colour_THF() +
+  ggtitle("Figure 1. Percentage of patients discharged on discharge ready date") +
+  labs(x = "Month",
+       y = "Percentage of patients", 
+       color = "") +
+  scale_x_date(date_labels = "%b %Y", date_breaks = "1 month") +
+  expand_limits(y = 0) +
+  theme(axis.title.y = element_text(size = 12)) 
+
+
+ggplotly(fig1, width = 1000, height = 500)
+
+```
+
+
+### Average delay among delayed discharge patients
+
+```{r}
+
+fig2 <- tibble_2trusts %>%
+  ggplot(aes(x=date, y=av_delay_after, color = organisation_name)) +
+  geom_line() +
+  theme_THF()+
+  scale_colour_THF() +
+  ggtitle("Figure 2. Average delay among delayed patients") +
+  labs(x = "Month",
+       y = "Delay in days", 
+       color = "") +
+  scale_x_date(date_labels = "%b %Y", date_breaks = "1 month") +
+  expand_limits(y = 0) +
+  theme(axis.title.y = element_text(size = 12)) 
+
+
+ggplotly(fig2, width = 1000, height = 500)
+
+```
+
+### Total bed days used for delays
+
+```{r}
+
+fig3 <- tibble_2trusts %>%
+  ggplot(aes(x=date, y=total_beddays_delay, color = organisation_name)) +
+  geom_line() +
+  theme_THF()+
+  scale_colour_THF() +
+  ggtitle("Figure 3. Total bed days used for delayed discharge patients") +
+  labs(x = "Month",
+       y = "Bed days", 
+       color = "") +
+  scale_x_date(date_labels = "%b %Y", date_breaks = "1 month") +
+  expand_limits(y = 0) +
+  theme(axis.title.y = element_text(size = 12)) 
+
+
+ggplotly(fig3, width = 1000, height = 500)
+
+```
+
+
+### Percentage of beds used for delayed discharge patients
+
+```{r}
+
+fig4 <- tibble_2trusts %>%
+  ggplot(aes(x=date, y=pct_bed_delays, color = organisation_name)) +
+  geom_line() +
+  theme_THF()+
+  scale_colour_THF() +
+  ggtitle("Figure 4. Percentage of bed days used for delayed discharge patients") +
+  labs(x = "Month",
+       y = "Percentage of bed days", 
+       color = "") +
+  scale_x_date(date_labels = "%b %Y", date_breaks = "1 month") +
+  expand_limits(y = 0) +
+  theme(axis.title.y = element_text(size = 12)) 
+
+
+ggplotly(fig4, width = 1000, height = 500)
+
+```
+
+
+## Oct 2023 - recent months - 3% reduction
+### Percent discharged on ready date
+
+
+```{r}
+tibble_3trusts <- dis_data %>%
+  subset(org_code == 'RXQ' | org_code == 'RTX' | org_code =='RAE')%>%
+  select(date, organisation_name, dis_on_ready, av_delay_after, total_beddays_delay, pct_bed_delays, g_a_occupancy_adj, g_a_beds_available, g_a_escalation_beds_available, g_a_covid_void_beds) 
+
+fig1 <- tibble_3trusts %>%
+  ggplot(aes(x=date, y=dis_on_ready, color = organisation_name)) +
+  geom_line() +
+  theme_THF()+
+  scale_colour_THF() +
+  ggtitle("Figure 1. Percentage of patients discharged on discharge ready date") +
+  labs(x = "Month",
+       y = "Percentage of patients", 
+       color = "") +
+  scale_x_date(date_labels = "%b %Y", date_breaks = "1 month") +
+  expand_limits(y = 0) +
+  theme(axis.title.y = element_text(size = 12)) 
+
+
+ggplotly(fig1, width = 1000, height = 500)
+
+```
+
+
+### Average delay among delayed discharge patients
+
+```{r}
+
+fig2 <- tibble_3trusts %>%
+  ggplot(aes(x=date, y=av_delay_after, color = organisation_name)) +
+  geom_line() +
+  theme_THF()+
+  scale_colour_THF() +
+  ggtitle("Figure 2. Average delay among delayed patients") +
+  labs(x = "Month",
+       y = "Delay in days", 
+       color = "") +
+  scale_x_date(date_labels = "%b %Y", date_breaks = "1 month") +
+  expand_limits(y = 0) +
+  theme(axis.title.y = element_text(size = 12)) 
+
+
+ggplotly(fig2, width = 1000, height = 500)
+
+```
+
+### Total bed days used for delays
+
+```{r}
+
+fig3 <- tibble_3trusts %>%
+  ggplot(aes(x=date, y=total_beddays_delay, color = organisation_name)) +
+  geom_line() +
+  theme_THF()+
+  scale_colour_THF() +
+  ggtitle("Figure 3. Total bed days used for delayed discharge patients") +
+  labs(x = "Month",
+       y = "Bed days", 
+       color = "") +
+  scale_x_date(date_labels = "%b %Y", date_breaks = "1 month") +
+  expand_limits(y = 0) +
+  theme(axis.title.y = element_text(size = 12)) 
+
+
+ggplotly(fig3, width = 1000, height = 500)
+
+```
+
+
+### Percentage of beds used for delayed discharge patients
+
+```{r}
+
+fig4 <- tibble_3trusts %>%
+  ggplot(aes(x=date, y=pct_bed_delays, color = organisation_name)) +
+  geom_line() +
+  theme_THF()+
+  scale_colour_THF() +
+  ggtitle("Figure 4. Percentage of bed days used for delayed discharge patients") +
+  labs(x = "Month",
+       y = "Percentage of bed days", 
+       color = "") +
+  scale_x_date(date_labels = "%b %Y", date_breaks = "1 month") +
+  expand_limits(y = 0) +
+  theme(axis.title.y = element_text(size = 12)) 
+
+
+ggplotly(fig4, width = 1000, height = 500)
+
+```
+
+
+
+## Average change graph Oct 23 - Aug/Sep/Oct 24 change
+
+```{r}
+tibble_4trusts <- dis_data %>%
+  subset(org_code %in% c('RXQ','RTX','RAE','RNA','RK5','RM1', 'RBL'))%>%
+   mutate(organisation_name = str_remove(organisation_name, fixed(" TEACHING HOSPITALS NHS FOUNDATION TRUST")),
+          organisation_name = str_remove(organisation_name, fixed(" GROUP NHS FOUNDATION TRUST")), 
+         organisation_name = str_remove(organisation_name, fixed("THE")),
+         organisation_name = str_remove(organisation_name, fixed("UNIVERSITY HOSPITALS OF ")),         
+         organisation_name = str_remove(organisation_name, fixed("HOSPITALS NHS FOUNDATION TRUST")),
+         organisation_name = str_remove(organisation_name, fixed(" HOSPITALS NHS FOUNDATION TRUST")),
+         organisation_name = str_remove(organisation_name, fixed(" NHS FOUNDATION TRUST")),
+         organisation_name = str_remove(organisation_name, fixed(" UNIVERSITY")),
+         organisation_name = str_remove(organisation_name, fixed("HEALTHCARE NHS TRUST")), 
+         organisation_name = str_remove(organisation_name, fixed(" LONDON")), 
+         organisation_name = str_remove(organisation_name, fixed(" TEACHING HOSPITAL")), 
+         g_a_beds_available = as.numeric(g_a_beds_available),
+         g_a_escalation_beds_available = as.numeric(g_a_escalation_beds_available),
+         g_a_core_beds_available = as.numeric(g_a_core_beds_available),
+         g_a_covid_void_beds = as.numeric(g_a_covid_void_beds)
+) %>% 
+  select(date, organisation_name, dis_on_ready, av_delay_after, total_beddays_delay, pct_bed_delays, g_a_occupancy_adj, g_a_beds_available, g_a_core_beds_available, g_a_escalation_beds_available, g_a_covid_void_beds) 
+
+tibble_4trusts_sep23 <- tibble_4trusts %>% select(date, organisation_name, pct_bed_delays)
+
+dis_data_sep_23 <- dis_data_sep_23 %>%  select(date, organisation_name, pct_bed_delays) %>% 
+  mutate(organisation_name = str_remove(organisation_name, fixed(" TEACHING HOSPITALS NHS FOUNDATION TRUST")),
+          organisation_name = str_remove(organisation_name, fixed(" GROUP NHS FOUNDATION TRUST")), 
+         organisation_name = str_remove(organisation_name, fixed("THE")),
+         organisation_name = str_remove(organisation_name, fixed("UNIVERSITY HOSPITALS OF ")),         
+         organisation_name = str_remove(organisation_name, fixed("HOSPITALS NHS FOUNDATION TRUST")),
+         organisation_name = str_remove(organisation_name, fixed(" HOSPITALS NHS FOUNDATION TRUST")),
+         organisation_name = str_remove(organisation_name, fixed(" NHS FOUNDATION TRUST")),
+         organisation_name = str_remove(organisation_name, fixed(" UNIVERSITY")),
+         organisation_name = str_remove(organisation_name, fixed("HEALTHCARE NHS TRUST")), 
+         organisation_name = str_remove(organisation_name, fixed(" LONDON")), 
+         organisation_name = str_remove(organisation_name, fixed(" TEACHING HOSPITAL")))
+
+tibble_4trusts_sep23<- rbind(dis_data_sep_23, tibble_4trusts, fill = TRUE)
+
+fig4 <- tibble_4trusts_sep23 %>%
+  ggplot(aes(x=date, y=pct_bed_delays, color = organisation_name)) +
+  geom_line() +
+  theme_THF()+
+  scale_colour_THF() +
+  ggtitle("Figure 1. Percentage of bed days used for delayed discharge patients") +
+  labs(x = "Month",
+       y = "Percentage of bed days", 
+       color = "") +
+  scale_x_date(date_labels = "%b %Y", date_breaks = "1 month") +
+  expand_limits(y = 0) +
+  theme(axis.title.y = element_text(size = 12)) 
+
+
+ggplotly(fig4, width = 1000, height = 500)
+
+```
+
+### Occupancy
+
+```{r}
+
+fig3 <- tibble_4trusts %>%
+  ggplot(aes(x=date, y= g_a_occupancy_adj, color = organisation_name)) +
+  geom_line() +
+  theme_THF()+
+  scale_colour_THF() +
+  ggtitle("Figure 2. Rates of Bed Occupancy") +
+  labs(x = "Month",
+       y = "Percentage of beds occupied", 
+       color = "") +
+  #scale_y_continuous(breaks = 5, limits = c(80,100)) +
+   expand_limits(y = c(80, 100)) +
+  theme(axis.title.y = element_text(size = 12)) 
+
+
+ggplotly(fig3, width = 1000, height = 500)
+
+```
+
+### beds - core
+
+```{r}
+
+fig4 <- tibble_4trusts %>%
+  ggplot(aes(x=date, y= g_a_beds_available, color = organisation_name)) +
+  geom_line() +
+  theme_THF()+
+  scale_colour_THF() +
+  ggtitle("Figure 3. All general and acute bed capacity") +
+  labs(x = "Month",
+       y = "Bed capacity", 
+       color = "") +
+  scale_x_date(date_labels = "%b %Y", date_breaks = "1 month") +
+  scale_y_continuous(limits = c(430, 1000)) + #, breaks = seq(430, 700, by = 50)) +
+  #expand_limits(y = 0) +
+  theme(axis.title.y = element_text(size = 12)) 
+
+
+ggplotly(fig4, width = 1000, height = 500)
+
+```
+
+### beds - escalation
+
+```{r}
+
+fig5 <- tibble_4trusts %>%
+  ggplot(aes(x=date, y= g_a_escalation_beds_available, color = organisation_name)) +
+  geom_line() +
+  theme_THF()+
+  scale_colour_THF() +
+  ggtitle("Figure 4. Escalation bed capacity") +
+  labs(x = "Month",
+       y = "Bed capacity", 
+       color = "") +
+  scale_x_date(date_labels = "%b %Y", date_breaks = "1 month") +
+  #scale_y_continuous(limits = c(430, 1000)) + #, breaks = seq(430, 700, by = 50)) +
+  #expand_limits(y = 0) +
+  theme(axis.title.y = element_text(size = 12)) 
+
+
+ggplotly(fig5, width = 1000, height = 500)
+
+```
+
+### beds - combined escalation and core
+
+```{r}
+#g_a_beds_available = both core and escalation beds - need to get core beds only to make the graph I want
+tibble_4trusts_capacity <- tibble_4trusts %>% 
+  select(c(date, organisation_name, g_a_beds_available)) %>% 
+  #melt(tibble_4trusts[,c(g_a_beds_available, g_a_core_beds_available)], id.vars = g_a_beds_available)
+pivot_longer(., cols = c(g_a_beds_available), names_to = 'Var', values_to = 'Capacity')  
+
+# tibble_4trusts_capacity$organisation_name <- if_else(Var %in% c('g_a_core_beds_available'), gsub(), organisation_name)
+
+  fig7 <- tibble_4trusts_capacity %>%   ggplot(aes(x=date, y= Capacity, color = organisation_name)) +
+  geom_line() +
+  theme_THF()+
+  scale_colour_THF() +
+  ggtitle("Figure 3. Bed capacity") +
+  labs(x = "Month",
+       y = "Bed capacity", 
+       color = "") +
+  scale_x_date(date_labels = "%b %Y", date_breaks = "1 month") +
+  #scale_y_continuous(limits = c(430, 1000)) + #, breaks = seq(430, 700, by = 50)) +
+  #expand_limits(y = 0) +
+  theme(axis.title.y = element_text(size = 12)) 
+
+
+ggplotly(fig7, width = 1000, height = 500)
+
+```
+
+### discharge destination % - all pathways
+
+```{r}
+tibble_5trusts <- dis_dest %>%
+  subset(organisation_code == 'RXQ' | organisation_code == 'RTX' | organisation_code =='RAE' | organisation_code =='RNA' | organisation_code =='RK5' | organisation_code == 'RM1')%>%
+   mutate(organisation_name = str_remove(organisation_name, fixed(" TEACHING HOSPITALS NHS FOUNDATION TRUST")),
+          organisation_name = str_remove(organisation_name, fixed(" GROUP NHS FOUNDATION TRUST")), 
+         organisation_name = str_remove(organisation_name, fixed("THE")),
+         organisation_name = str_remove(organisation_name, fixed("UNIVERSITY HOSPITALS OF ")),         
+         organisation_name = str_remove(organisation_name, fixed("HOSPITALS NHS FOUNDATION TRUST")),
+         organisation_name = str_remove(organisation_name, fixed(" HOSPITALS NHS FOUNDATION TRUST")),
+         organisation_name = str_remove(organisation_name, fixed(" NHS FOUNDATION TRUST")),
+         organisation_name = str_remove(organisation_name, fixed(" UNIVERSITY")),
+         organisation_name = str_remove(organisation_name, fixed("HEALTHCARE NHS TRUST")),
+         pathway_0_total = as.numeric(pathway_0_total),
+         pathway_1_total = as.numeric(pathway_1_total),
+         pathway_2_total = as.numeric(pathway_2_total),
+         pathway_3_total = as.numeric(pathway_3_total),
+         total = rowSums(across(c(pathway_0_total, pathway_1_total, pathway_2_total, pathway_3_total))),
+         Pct_pathway_0 = ((pathway_0_total/total)*100),
+         Pct_pathway_1 = ((pathway_1_total/total)*100),
+         Pct_pathway_2 = ((pathway_2_total/total)*100),
+         Pct_pathway_3 = ((pathway_3_total/total)*100)) %>%
+  filter((date == '2024-10-01'| date == '2023-10-01')) %>% 
+  select(date, organisation_code, organisation_name, Pct_pathway_0, Pct_pathway_1, Pct_pathway_2, Pct_pathway_3) %>% 
+  pivot_longer(., cols = -c(1:3), names_to = 'Pathway', values_to = 'Percentage_discharged') %>% 
+  pivot_wider(names_from = 'date', values_from = 'Percentage_discharged') %>% 
+  mutate(percentage_difference = (`2024-10-01` - `2023-10-01`)) #%>% 
+  
+        
+  Pathways <- c('Pct_pathway_0', 'Pct_pathway_1', 'Pct_pathway_2', 'Pct_pathway_3')
+  Pathways_neat <- c('Pathway 0', 'Pathway 1', 'Pathway 2', 'Pathway 3')
+  
+  tibble_5trusts$Pathway <- replace(tibble_5trusts$Pathway, tibble_5trusts$Pathway %in% Pathways, Pathways_neat)
+  
+fig6 <- ggplot(tibble_5trusts, aes(x=Pathway, y= percentage_difference, fill=Pathway)) +
+  geom_bar(stat = "identity") +
+  theme_THF()+
+  scale_colour_THF() +
+  ggtitle("Figure 4. Change in percentage of patients discharged by pathway type") +
+  labs(x = " ",
+       y = "Percentage of discharged patients") +
+  scale_colour_manual(values = c('#53a9cd', '#ee9b90', '#744284', '#ffd412')) +
+  theme(axis.title.y = element_text(size = 12)) +
+  theme(legend.position="none") +
+  facet_wrap(~organisation_name)
+
+
+ggplotly(fig6, width = 1000, height = 500)
+```
+
+### discharge destination % - pathways 1-3
+
+```{r}
+tibble_5trustsb <- dis_dest %>%
+  subset(organisation_code == 'RXQ' | organisation_code == 'RTX' | organisation_code =='RAE' | organisation_code =='RNA' | organisation_code =='RK5' | organisation_code == 'RM1')%>%
+   mutate(organisation_name = str_remove(organisation_name, fixed(" TEACHING HOSPITALS NHS FOUNDATION TRUST")),
+          organisation_name = str_remove(organisation_name, fixed(" GROUP NHS FOUNDATION TRUST")), 
+         organisation_name = str_remove(organisation_name, fixed("THE")),
+         organisation_name = str_remove(organisation_name, fixed("UNIVERSITY HOSPITALS OF ")),         
+         organisation_name = str_remove(organisation_name, fixed("HOSPITALS NHS FOUNDATION TRUST")),
+
+         organisation_name = str_remove(organisation_name, fixed(" HOSPITALS NHS FOUNDATION TRUST")),
+         organisation_name = str_remove(organisation_name, fixed(" NHS FOUNDATION TRUST")),
+         organisation_name = str_remove(organisation_name, fixed(" UNIVERSITY")),
+         organisation_name = str_remove(organisation_name, fixed("HEALTHCARE NHS TRUST")),
+         pathway_0_total = as.numeric(pathway_0_total),
+         pathway_1_total = as.numeric(pathway_1_total),
+         pathway_2_total = as.numeric(pathway_2_total),
+         pathway_3_total = as.numeric(pathway_3_total),
+         total = rowSums(across(c(pathway_0_total, pathway_1_total, pathway_2_total, pathway_3_total))),
+         Pct_pathway_0 = ((pathway_0_total/total)*100),
+         Pct_pathway_1 = ((pathway_1_total/total)*100),
+         Pct_pathway_2 = ((pathway_2_total/total)*100),
+         Pct_pathway_3 = ((pathway_3_total/total)*100)) %>%
+  filter((date == '2024-10-01'| date == '2023-10-01')) %>% 
+  select(date, organisation_code, organisation_name, Pct_pathway_0, Pct_pathway_1, Pct_pathway_2, Pct_pathway_3) %>% 
+  pivot_longer(., cols = -c(1:3), names_to = 'Pathway', values_to = 'Percentage_discharged') %>% 
+  filter(!Pathway == 'Pct_pathway_0')
+ 
+fig6b <- ggplot(tibble_5trustsb, aes(x=date, y= Percentage_discharged, fill = Pathway)) +
+  geom_bar(position = "stack", stat = "identity") +
+  theme_THF()+
+  scale_colour_THF() +
+  ggtitle("Figure 5. Percentage of patients discharged by pathway types 1-3") +
+  labs(x = "Month",
+       y = "Percentage of discharged patients", 
+       color = "") +
+  theme(axis.title.y = element_text(size = 12)) +
+  facet_wrap(~organisation_name)
+
+
+ggplotly(fig6b, width = 1000, height = 500)
+```
+
+### discharge destination numbers - pathways 1-3
+
+```{r}
+tibble_5trustsc <- dis_dest %>%
+  subset(organisation_code == 'RXQ' | organisation_code == 'RTX' | organisation_code =='RAE' | organisation_code =='RNA' | organisation_code =='RK5' | organisation_code == 'RM1')%>%
+   mutate(organisation_name = str_remove(organisation_name, fixed(" TEACHING HOSPITALS NHS FOUNDATION TRUST")),
+          organisation_name = str_remove(organisation_name, fixed(" GROUP NHS FOUNDATION TRUST")), 
+         organisation_name = str_remove(organisation_name, fixed("THE")),
+         organisation_name = str_remove(organisation_name, fixed("UNIVERSITY HOSPITALS OF ")),         
+         organisation_name = str_remove(organisation_name, fixed("HOSPITALS NHS FOUNDATION TRUST")),
+
+         organisation_name = str_remove(organisation_name, fixed(" HOSPITALS NHS FOUNDATION TRUST")),
+         organisation_name = str_remove(organisation_name, fixed(" NHS FOUNDATION TRUST")),
+         organisation_name = str_remove(organisation_name, fixed(" UNIVERSITY")),
+         organisation_name = str_remove(organisation_name, fixed("HEALTHCARE NHS TRUST")),
+         pathway_0_total = as.numeric(pathway_0_total),
+         pathway_1_total = as.numeric(pathway_1_total),
+         pathway_2_total = as.numeric(pathway_2_total),
+         pathway_3_total = as.numeric(pathway_3_total),
+         total = rowSums(across(c(pathway_0_total, pathway_1_total, pathway_2_total, pathway_3_total))),
+         Pct_pathway_0 = ((pathway_0_total/total)*100),
+         Pct_pathway_1 = ((pathway_1_total/total)*100),
+         Pct_pathway_2 = ((pathway_2_total/total)*100),
+         Pct_pathway_3 = ((pathway_3_total/total)*100)) %>%
+  filter((date == '2024-10-01'| date == '2023-10-01')) %>% 
+  select(date, organisation_code, organisation_name, pathway_0_total, pathway_1_total, pathway_2_total, pathway_3_total) %>% 
+  pivot_longer(., cols = -c(1:3), names_to = 'Pathway', values_to = 'Number_discharged')
+ 
+ 
+fig6c <- ggplot(tibble_5trustsc, aes(x=date, y= Number_discharged, fill = Pathway)) +
+  geom_bar(position = "stack", stat = "identity") +
+  theme_THF()+
+  scale_colour_THF() +
+  ggtitle("Figure 5. Number of patients discharged by pathway") +
+  labs(x = "Month",
+       y = "Number of discharged patients", 
+       color = "") +
+  theme(axis.title.y = element_text(size = 12)) +
+  facet_wrap(~organisation_name)
+
+
+ggplotly(fig6c, width = 1000, height = 500)
+```
+
+
+### discharge destination numbers - pathways 1-3
+
+```{r}
+tibble_5trustsd <- dis_dest %>%
+  subset(organisation_code == 'RXQ' | organisation_code == 'RTX' | organisation_code =='RAE' | organisation_code =='RNA' | organisation_code =='RK5' | organisation_code == 'RM1')%>%
+   mutate(organisation_name = str_remove(organisation_name, fixed(" TEACHING HOSPITALS NHS FOUNDATION TRUST")),
+          organisation_name = str_remove(organisation_name, fixed(" GROUP NHS FOUNDATION TRUST")), 
+         organisation_name = str_remove(organisation_name, fixed("THE")),
+         organisation_name = str_remove(organisation_name, fixed("UNIVERSITY HOSPITALS OF ")),         
+         organisation_name = str_remove(organisation_name, fixed("HOSPITALS NHS FOUNDATION TRUST")),
+
+         organisation_name = str_remove(organisation_name, fixed(" HOSPITALS NHS FOUNDATION TRUST")),
+         organisation_name = str_remove(organisation_name, fixed(" NHS FOUNDATION TRUST")),
+         organisation_name = str_remove(organisation_name, fixed(" UNIVERSITY")),
+         organisation_name = str_remove(organisation_name, fixed("HEALTHCARE NHS TRUST")),
+         pathway_0_total = as.numeric(pathway_0_total),
+         pathway_1_total = as.numeric(pathway_1_total),
+         pathway_2_total = as.numeric(pathway_2_total),
+         pathway_3_total = as.numeric(pathway_3_total),
+         total = rowSums(across(c(pathway_0_total, pathway_1_total, pathway_2_total, pathway_3_total))),
+         Pct_pathway_0 = ((pathway_0_total/total)*100),
+         Pct_pathway_1 = ((pathway_1_total/total)*100),
+         Pct_pathway_2 = ((pathway_2_total/total)*100),
+         Pct_pathway_3 = ((pathway_3_total/total)*100)) %>%
+  filter((date == '2024-10-01'| date == '2023-10-01')) %>% 
+  select(date, organisation_code, organisation_name, pathway_0_total, pathway_1_total, pathway_2_total, pathway_3_total) %>% 
+  pivot_longer(., cols = -c(1:3), names_to = 'Pathway', values_to = 'Number_discharged') %>% 
+  filter(!Pathway == 'pathway_0_total')
+ 
+fig6d <- ggplot(tibble_5trustsd, aes(x=date, y= Number_discharged, fill = Pathway)) +
+  geom_bar(position = "stack", stat = "identity") +
+  theme_THF()+
+  scale_colour_THF() +
+  ggtitle("Figure 5. Number of patients discharged by pathway types 1-3") +
+  labs(x = "Month",
+       y = "Number of discharged patients", 
+       color = "") +
+  theme(axis.title.y = element_text(size = 12)) +
+  facet_wrap(~organisation_name)
+
+
+ggplotly(fig6d, width = 1000, height = 500)
+```
+
+
+### Pathway 1 
+
+```{r}
+# fig6 <- tibble_5trusts %>%
+#   ggplot(aes(x=date, y= Pct_pathway_1, color = organisation_name)) +
+#   geom_line() +
+#   theme_THF()+
+#   scale_colour_THF() +
+#   ggtitle("Figure 5. Percentage of patients discharged on pathway 1") +
+#   labs(x = "Month",
+#        y = "Percentage of discharged patients", 
+#        color = "") +
+#   scale_x_date(date_labels = "%b %Y", date_breaks = "1 month") +
+#   #scale_y_continuous(limits = c(430, 1000)) + #, breaks = seq(430, 700, by = 50)) +
+#   #expand_limits(y = 0) +
+#   theme(axis.title.y = element_text(size = 12)) 
+# 
+# 
+# ggplotly(fig6, width = 1000, height = 500)
+```
+
+### Pathway 2
+
+```{r}
+# fig7 <- tibble_5trusts %>%
+#   ggplot(aes(x=date, y= Pct_pathway_2, color = organisation_name)) +
+#   geom_line() +
+#   theme_THF()+
+#   scale_colour_THF() +
+#   ggtitle("Figure 6. Percentage of patients discharged on pathway 2") +
+#   labs(x = "Month",
+#        y = "Percentage of discharged patients", 
+#        color = "") +
+#   scale_x_date(date_labels = "%b %Y", date_breaks = "1 month") +
+#   #scale_y_continuous(limits = c(430, 1000)) + #, breaks = seq(430, 700, by = 50)) +
+#   #expand_limits(y = 0) +
+#   theme(axis.title.y = element_text(size = 12)) 
+
+
+#ggplotly(fig7, width = 1000, height = 500)
+```
+
+### Pathway 3
+
+```{r}
+# fig8 <- tibble_5trusts %>%
+#   ggplot(aes(x=date, y= Pct_pathway_3, color = organisation_name)) +
+#   geom_line() +
+#   theme_THF()+
+#   scale_colour_THF() +
+#   ggtitle("Figure 7. Percentage of patients discharged on pathway 3") +
+#   labs(x = "Month",
+#        y = "Percentage of discharged patients", 
+#        color = "") +
+#   scale_x_date(date_labels = "%b %Y", date_breaks = "1 month") +
+#   #scale_y_continuous(limits = c(430, 1000)) + #, breaks = seq(430, 700, by = 50)) +
+#   #expand_limits(y = 0) +
+#   theme(axis.title.y = element_text(size = 12)) 
+# 
+# 
+# ggplotly(fig8, width = 1000, height = 500)
+```
+
+### Barriers 
+
+```{r}
+# dis_barriers <- dis_barriers %>%  mutate_at(c('awaiting_a_medical_decision_intervention_including_writing_the_discharge_summary', 'awaiting_diagnostic_test', 'awaiting_medicines_to_take_home', 'awaiting_therapy_decision_to_discharge', 'awaiting_referral_to_community_single_point_of_access', 'remains_in_hospital_to_avoid_spread_of_non_covid_19_infectious_disease_and_because_there_is_no_other_suitable_location_to_discharge_to', 'no_plan', 'pathway_3_awaiting_availability_of_a_bed_in_a_residential_or_nursing_home_that_is_likely_to_be_a_permanent_placement', 'pathway_2_awaiting_availability_of_rehabilitation_bed_in_community_hospital_or_other_bedded_setting', 'pathway_1_awaiting_availability_of_resource_for_assessment_and_start_of_care_at_home', 'awaiting_community_equipment_and_adaptations_to_housing', 'awaiting_transport', 'repatriation_transfer_to_another_acute_trust_for_specialist_treatment_or_ongoing_treatment', 'awaiting_confirmation_from_community_hub_single_point_of_access_that_referral_received_and_actioned', 'safeguarding_concern_preventing_discharge_or_court_of_protection', 'individual_family_not_in_agreement_with_discharge_plans', 'declared_as_not_meeting_the_criteria_to_reside_at_morning_board_round_and_then_later_in_day_meets_the_criteria_to_reside_so_discharge_stopped'), as.numeric)
+# Barriers <- dis_barriers %>%
+#   filter(organisation_code %in% c('RXQ','RTX','RAE','RNA','RK5','RM1', 'RBL')) %>%
+#      mutate(organisation_name = str_remove(organisation_name, fixed(" TEACHING HOSPITALS NHS FOUNDATION TRUST")),
+#          organisation_name = str_remove(organisation_name, fixed(" GROUP NHS FOUNDATION TRUST")),
+#          organisation_name = str_remove(organisation_name, fixed("THE")),
+#          organisation_name = str_remove(organisation_name, fixed("UNIVERSITY HOSPITALS OF ")),
+#          organisation_name = str_remove(organisation_name, fixed("HOSPITALS NHS FOUNDATION TRUST")),
+#          organisation_name = str_remove(organisation_name, fixed(" HOSPITALS NHS FOUNDATION TRUST")),
+#          organisation_name = str_remove(organisation_name, fixed(" NHS FOUNDATION TRUST")),
+#          organisation_name = str_remove(organisation_name, fixed(" UNIVERSITY")),
+#          organisation_name = str_remove(organisation_name, fixed("HEALTHCARE NHS TRUST")),
+#          organisation_name = str_remove(organisation_name, fixed(" LONDON")),
+#          organisation_name = str_remove(organisation_name, fixed(" TEACHING HOSPITAL"))) %>%
+#         mutate(hospital_process_barrier = rowSums(across(c(awaiting_a_medical_decision_intervention_including_writing_the_discharge_summary, awaiting_diagnostic_test, awaiting_medicines_to_take_home, awaiting_therapy_decision_to_discharge, awaiting_referral_to_community_single_point_of_access, remains_in_hospital_to_avoid_spread_of_non_covid_19_infectious_disease_and_because_there_is_no_other_suitable_location_to_discharge_to, no_plan))),
+#                 well_being_barrier = rowSums(across(c(individual_family_not_in_agreement_with_discharge_plans))),
+#                 care_transfer_barrier = rowSums(across(c(awaiting_confirmation_from_community_hub_single_point_of_access_that_referral_received_and_actioned, repatriation_transfer_to_another_acute_trust_for_specialist_treatment_or_ongoing_treatment, awaiting_transport))),
+#                 interface_barriers = rowSums(across(c(awaiting_community_equipment_and_adaptations_to_housing)), na.rm=FALSE),
+#                 capacity_barrier_pre = rowSums(across(c(pathway_1_awaiting_availability_of_resource_for_assessment_and_start_of_care_at_home, pathway_2_awaiting_availability_of_rehabilitation_bed_in_community_hospital_or_other_bedded_setting, pathway_3_awaiting_availability_of_a_bed_in_a_residential_or_nursing_home_that_is_likely_to_be_a_permanent_placement)))) %>%
+#  .[,c(19:21, 59:68)] %>%
+#   pivot_longer(., cols = c(4,9), names_to = c('hospital_process_b'))#, 'well_being_concerns', 'interface_process', 'capacity') , values_to = )
+# 
+#  # fig8 <- fig <- data_trusts_all %>%
+ #  arrange(date) %>%
+ #  ggplot(data = ., aes(x = factor(date), y = percentile_rank, label = pct_bed_delays, group = organisation_name, colour = organisation_name, text = organisation_name)) +
+ #  geom_line() +
+ #  geom_point() +
+ #  theme_THF()+
+ #  ggtitle("Figure 9. Barriers to data") +
+ #  labs(x = "Month",
+ #       y = "Percentage of discharged patients",
+ #       color = "") +
+ #  scale_x_date(date_labels = "%b %Y", date_breaks = "1 month") +
+ #  #scale_y_continuous(limits = c(430, 1000)) + #, breaks = seq(430, 700, by = 50)) +
+ #  #expand_limits(y = 0) +
+ #  theme(axis.title.y = element_text(size = 12))
+```
+
+## Oct 2023 - recent months - 2% reduction
+### Percent discharged on ready date
+
+
+```{r}
+
+tibble_4trusts_change_delay <- tibble_4trusts %>% 
+  select(date, organisation_name, dis_on_ready, av_delay_after, total_beddays_delay, pct_bed_delays) %>%
+   mutate(organisation_name = str_remove(organisation_name, fixed(" TEACHING HOSPITALS NHS FOUNDATION TRUST")),
+          organisation_name = str_remove(organisation_name, fixed(" GROUP NHS FOUNDATION TRUST")), 
+         organisation_name = str_remove(organisation_name, fixed("THE")),
+         organisation_name = str_remove(organisation_name, fixed("UNIVERSITY HOSPITALS OF ")),         
+         organisation_name = str_remove(organisation_name, fixed("HOSPITALS NHS FOUNDATION TRUST")),
+         organisation_name = str_remove(organisation_name, fixed(" HOSPITALS NHS FOUNDATION TRUST")),
+         organisation_name = str_remove(organisation_name, fixed(" NHS FOUNDATION TRUST")),
+         organisation_name = str_remove(organisation_name, fixed(" UNIVERSITY")),
+         organisation_name = str_remove(organisation_name, fixed("HEALTHCARE NHS TRUST")))
+
+
+
+fig1 <- tibble_4trusts_change_delay %>%
+  ggplot(aes(x=date, y=dis_on_ready, color = organisation_name)) +
+  geom_line() +
+  theme_THF()+
+  scale_colour_THF() +
+  ggtitle("Figure 1. Percentage of patients discharged on discharge ready date") +
+  labs(x = "Month",
+       y = "Percentage of patients", 
+       color = "") +
+  scale_x_date(date_labels = "%b %Y", date_breaks = "1 month") +
+  expand_limits(y = 0) +
+  theme(axis.title.y = element_text(size = 12)) 
+
+
+ggplotly(fig1, width = 1000, height = 500)
+
+```
+
+
+### Average delay among delayed discharge patients
+
+```{r}
+
+fig2 <- tibble_4trusts_change_delay %>% 
+  ggplot(aes(x=date, y=av_delay_after, color = organisation_name)) +
+  geom_line() +
+  theme_THF()+
+  scale_colour_THF() +
+  ggtitle("Figure 2. Average delay among delayed patients") +
+  labs(x = "Month",
+       y = "Delay in days", 
+       color = "") +
+  scale_x_date(date_labels = "%b %Y", date_breaks = "1 month") +
+  expand_limits(y = 0) +
+  theme(axis.title.y = element_text(size = 12)) 
+
+
+ggplotly(fig2, width = 1000, height = 500)
+
+```
+
+### Total bed days used for delays
+
+```{r}
+
+fig3 <- tibble_4trusts %>%
+  ggplot(aes(x=date, y=total_beddays_delay, color = organisation_name)) +
+  geom_line() +
+  theme_THF()+
+  scale_colour_THF() +
+  ggtitle("Figure 3. Total bed days used for delayed discharge patients") +
+  labs(x = "Month",
+       y = "Bed days", 
+       color = "") +
+  scale_x_date(date_labels = "%b %Y", date_breaks = "1 month") +
+  expand_limits(y = 0) +
+  theme(axis.title.y = element_text(size = 12)) 
+
+
+ggplotly(fig3, width = 1000, height = 500)
+
+```
+
+
+### Percentage of beds used for delayed discharge patients
+
+```{r}
+
+fig4 <- tibble_4trusts %>%
+  ggplot(aes(x=date, y=pct_bed_delays, color = organisation_name)) +
+  geom_line() +
+  theme_THF()+
+  scale_colour_THF() +
+  ggtitle("Figure 4. Percentage of bed days used for delayed discharge patients") +
+  labs(x = "Month",
+       y = "Percentage of bed days", 
+       color = "") +
+  scale_x_date(date_labels = "%b %Y", date_breaks = "1 month") +
+  expand_limits(y = 0) +
+  theme(axis.title.y = element_text(size = 12)) 
+
+
+ggplotly(fig4, width = 1000, height = 500)
+
+```
+
+
+
+## Quarterly data 
+### Percent discharged on ready date
+
+
+```{r}
+tibble_4trusts <- dis_data %>%
+  subset(org_code == 'RXQ' | org_code == 'RNZ' | org_code =='RTE' | org_code =='RM1' | org_code =='RNN' | org_code =='RBD' | org_code =='RTP')%>%
+  select(date, organisation_name, dis_on_ready, av_delay_after, total_beddays_delay, pct_bed_delays) 
+
+
+
+fig1 <- tibble_4trusts %>%
+  ggplot(aes(x=date, y=dis_on_ready, color = organisation_name)) +
+  geom_line() +
+  theme_THF()+
+  scale_colour_THF() +
+  ggtitle("Figure 1. Percentage of patients discharged on discharge ready date") +
+  labs(x = "Month",
+       y = "Percentage of patients", 
+       color = "") +
+  scale_x_date(date_labels = "%b %Y", date_breaks = "1 month") +
+  expand_limits(y = 0) +
+  theme(axis.title.y = element_text(size = 12)) 
+
+
+ggplotly(fig1, width = 1000, height = 500)
+
+```
+
+
+### Average delay among delayed discharge patients
+
+```{r}
+
+fig2 <- tibble_4trusts %>%
+  ggplot(aes(x=date, y=av_delay_after, color = organisation_name)) +
+  geom_line() +
+  theme_THF()+
+  scale_colour_THF() +
+  ggtitle("Figure 2. Average delay among delayed patients") +
+  labs(x = "Month",
+       y = "Delay in days", 
+       color = "") +
+  scale_x_date(date_labels = "%b %Y", date_breaks = "1 month") +
+  expand_limits(y = 0) +
+  theme(axis.title.y = element_text(size = 12)) 
+
+
+ggplotly(fig2, width = 1000, height = 500)
+
+```
+
+### Total bed days used for delays
+
+```{r}
+
+fig3 <- tibble_4trusts %>%
+  ggplot(aes(x=date, y=total_beddays_delay, color = organisation_name)) +
+  geom_line() +
+  theme_THF()+
+  scale_colour_THF() +
+  ggtitle("Figure 3. Total bed days used for delayed discharge patients") +
+  labs(x = "Month",
+       y = "Bed days", 
+       color = "") +
+  scale_x_date(date_labels = "%b %Y", date_breaks = "1 month") +
+  expand_limits(y = 0) +
+  theme(axis.title.y = element_text(size = 12)) 
+
+
+ggplotly(fig3, width = 1000, height = 500)
+
+```
+
+
+### Percentage of beds used for delayed discharge patients
+
+```{r}
+
+fig4 <- tibble_4trusts %>%
+  ggplot(aes(x=date, y=pct_bed_delays, color = organisation_name)) +
+  geom_line() +
+  theme_THF()+
+  scale_colour_THF() +
+  ggtitle("Figure 4. Percentage of bed days used for delayed discharge patients") +
+  labs(x = "Month",
+       y = "Percentage of bed days", 
+       color = "") +
+  scale_x_date(date_labels = "%b %Y", date_breaks = "1 month") +
+  expand_limits(y = 0) +
+  theme(axis.title.y = element_text(size = 12)) 
+
+
+ggplotly(fig4, width = 1000, height = 500)
+
+```
