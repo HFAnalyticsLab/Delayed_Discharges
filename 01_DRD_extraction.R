@@ -1,5 +1,5 @@
 
-# 16/06/2025 - Discharge Ready Data (DRD) extraction - GitHub
+# 16/06/2025 - Discharge Ready Data (DRD) extraction
 
 # Clear environment
 
@@ -70,14 +70,14 @@ sapply(DRDlinks, function(link) {
 names_vec <- str_extract(DRDlinks, "(?<=webfile-)[A-Za-z]+[-]?[0-9]{4}")
 names_vec <- str_replace_all(names_vec, "-", "")
 
-# Replace NA values with fallback names like NA1, NA2, etc.
+# Replace NA values with fallback (NA1, NA2)
 na_indices <- which(is.na(names_vec))
 names_vec[na_indices] <- paste0("NA", seq_along(na_indices))
 print(names_vec)
 
 DRD_data_list <- setNames(vector("list", length(DRDlinks)), names_vec)
 
-# Download Provider sheets
+# Download 'Provider' sheets
 for (i in seq_along(DRDlinks)) {
   temp_file <- tempfile(fileext = ".xlsx")
   download.file(DRDlinks[i], temp_file, mode = "wb")
@@ -103,7 +103,7 @@ colnames(Oct_23) <- as.character(Oct_23[14, ])
 Oct_23 <- Oct_23[-c(1:12, 14), ]
 Oct_23 <- Oct_23[, -c(8, 11, 18, 25)]
 
-# Nov 23
+# Nov 23 - Appears to lack Region, ICB and Data Source, thus 19 variables
 Nov_23 <- November2023
 rm(November2023)
 
@@ -251,13 +251,81 @@ colnames(Apr_25) <- as.character(Apr_25[14, ])
 Apr_25 <- Apr_25[-c(1:12, 14), ]
 Apr_25 <- Apr_25[, -c(8, 11, 14, 22, 30, 37, 44)]
 
+# 4 Adjust column names #########################################################
+
+colnames_22 <- c('Region', 'ICB', 'Org Code', 'Org Name', '# of providers with acceptable data', '% of providers with acceptable data', 'Data Source', 'DoD is same as DRD (%)',
+'DoD is 1+ days after DRD (%)','Patients delayed but discharged within 1 day (%)', 'Patients delayed but discharged within 2-3 days (%) ', 'Patients delayed but discharged within 4-6 days (%) ',
+'Patients delayed but discharged within 7-13 days (%) ', 'Patients delayed but discharged within 14-20 days (%) ','Patients delayed but discharged within 21 days or more (%) ', 
+'Total bed days after DRD for patients discharged within 1 day', 'Total bed days after DRD for patients discharged within 2-3 days', 'Total bed days after DRD for patients discharged within 4-6 days', 
+'Total bed days after DRD for patients discharged within 7-13 days','Total bed days after DRD for patients discharged within 14-20 days', 'Total bed days after DRD for patients discharged within 21 days or more',
+'Average days from DRD to DoD (exc 0-day delays)')
+
+colnames_39 <- c('Region', 'ICB', 'Org Code', 'Org Name', '# of providers with acceptable data', '% of providers with acceptable data', 'Data Source', 'Total # of patients discharged', 'Total bed days lost to DD', 
+'DoD is same as DRD (%)', 'DoD is 1+ days after DRD (%)',
+
+'No delay between DoD & DRD (#)', '1 day delay between DoD & DRD (#)', '2-3 day delay between DoD & DRD (#)', '4-6 day delay between DoD & DRD (#)', '7-13 day delay between DoD & DRD (#)', '14-20 day delay between DoD & DRD (#)', '21 day delay between DoD & DRD (#)',
+
+'No delay between DoD & DRD (%)', '1 day delay between DoD & DRD (%)', '2-3 day delay between DoD & DRD (%)', '4-6 day delay between DoD & DRD (%)', '7-13 day delay between DoD & DRD (%)', '14-20 day delay between DoD & DRD (%)', '21 day delay between DoD & DRD (%)',
+
+'Patients delayed but discharged within 1 day (%)', 'Patients delayed but discharged within 2-3 days (%) ', 'Patients delayed but discharged within 4-6 days (%) ',
+'Patients delayed but discharged within 7-13 days (%) ', 'Patients delayed but discharged within 14-20 days (%) ','Patients delayed but discharged within 21 days or more (%) ', 
+
+'Total bed days after DRD for patients discharged within 1 day', 'Total bed days after DRD for patients discharged within 2-3 days', 'Total bed days after DRD for patients discharged within 4-6 days', 
+'Total bed days after DRD for patients discharged within 7-13 days','Total bed days after DRD for patients discharged within 14-20 days', 'Total bed days after DRD for patients discharged within 21 days or more',
+
+'Average days from DRD to DoD (inc 0-day delays)','Average days from DRD to DoD (exc 0-day delays)')
+
+colnames_Nov <- colnames_22
+colnames_Nov <- colnames_Nov[-c(1,2,7)]
 
 
+# Pre-Sep 2024
+colnames(Sep_23) <- colnames_22
+Sep_23 <- Sep_23[-c(1), ]
+colnames(Oct_23) <- colnames_22
+Oct_23 <- Oct_23[-c(1), ]
+colnames(Dec_23) <- colnames_22
+Dec_23 <- Dec_23[-c(1), ]
+colnames(Jan_24) <- colnames_22
+Jan_24 <- Jan_24[-c(1), ]
+colnames(Feb_24) <- colnames_22
+Feb_24 <- Feb_24[-c(1), ]
+colnames(Mar_24) <- colnames_22
+Mar_24 <- Mar_24[-c(1), ]
+colnames(Apr_24) <- colnames_22
+Apr_24 <- Apr_24[-c(1), ]
+colnames(May_24) <- colnames_22
+May_24 <- May_24[-c(1), ]
+colnames(Jun_24) <- colnames_22
+Jun_24 <- Jun_24[-c(1), ]
+colnames(Jul_24) <- colnames_22
+Jul_24 <- Jul_24[-c(1), ]
+colnames(Aug_24) <- colnames_22
+Aug_24 <- Aug_24[-c(1), ]
 
+# Post-Sep 2024
 
+colnames(Sep_24) <- colnames_39
+Sep_24 <- Sep_24[-c(1), ]
+colnames(Oct_24) <- colnames_39
+Oct_24 <- Oct_24[-c(1), ]
+colnames(Nov_24) <- colnames_39
+Nov_24 <- Nov_24[-c(1), ]
+colnames(Dec_24) <- colnames_39
+Dec_24 <- Dec_24[-c(1), ]
+colnames(Jan_25) <- colnames_39
+Jan_25 <- Jan_25[-c(1), ]
+colnames(Feb_25) <- colnames_39
+Feb_25 <- Feb_25[-c(1), ]
+colnames(Mar_25) <- colnames_39
+Mar_25 <- Mar_25[-c(1), ]
+colnames(Apr_25) <- colnames_39
+Apr_25 <- Apr_25[-c(1), ]
 
+# November 2023
 
-
+colnames(Nov_23) <- colnames_Nov
+Nov_23 <- Nov_23[-c(1), ]
 
 
 
