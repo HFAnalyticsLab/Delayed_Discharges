@@ -19,6 +19,7 @@ library (readr)
 library (readxl)
 library (here)
 library (janitor)
+library (openxlsx)
 
 # Load functions
 
@@ -436,24 +437,20 @@ colnames_39 <- c('Region', 'ICB', 'Org Code', 'Org Name', '# of providers with a
 
 'Average days from DRD to DoD (inc 0-day delays)','Average days from DRD to DoD (exc 0-day delays)')
 
-colnames_Nov <- colnames_22
-colnames_Nov <- colnames_Nov[-c(1,2,7)]
-
-# Pre-Sep 2024
+# Pre-Apr 2024
 colnames(Sep_23) <- colnames_22
 colnames(Oct_23) <- colnames_22
 colnames(Dec_23) <- colnames_22
 colnames(Jan_24) <- colnames_22
 colnames(Feb_24) <- colnames_22
 colnames(Mar_24) <- colnames_22
-colnames(Apr_24) <- colnames_22
-colnames(May_24) <- colnames_22
-colnames(Jun_24) <- colnames_22
-colnames(Jul_24) <- colnames_22
-colnames(Aug_24) <- colnames_22
 
-# Post-Sep 2024
-
+# Post-Apr 2024
+colnames(Apr_24) <- colnames_39
+colnames(May_24) <- colnames_39
+colnames(Jun_24) <- colnames_39
+colnames(Jul_24) <- colnames_39
+colnames(Aug_24) <- colnames_39
 colnames(Sep_24) <- colnames_39
 colnames(Oct_24) <- colnames_39
 colnames(Nov_24) <- colnames_39
@@ -465,7 +462,8 @@ colnames(Apr_25) <- colnames_39
 colnames(May_25) <- colnames_39
 
 # November 2023
-
+colnames_Nov <- colnames_22
+colnames_Nov <- colnames_Nov[-c(1,2,7)]
 colnames(Nov_23) <- colnames_Nov
 
 # Clean #######################################################################
