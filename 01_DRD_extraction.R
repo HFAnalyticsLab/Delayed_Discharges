@@ -468,15 +468,15 @@ colnames(Nov_23) <- colnames_Nov
 
 # 5 Download England timeseries ##################################################
 
-England_DRD <- read.xlsx("https://www.england.nhs.uk/statistics/wp-content/uploads/sites/2/2025/07/Discharge-Ready-Date-Timeseries-webfile-Sept-2023-May-2025.xlsx", sheet = "Timeseries")
-England_DRD <- England_DRD %>%
+England_FULL <- read.xlsx("https://www.england.nhs.uk/statistics/wp-content/uploads/sites/2/2025/07/Discharge-Ready-Date-Timeseries-webfile-Sept-2023-May-2025.xlsx", sheet = "Timeseries")
+England_FULL <- England_FULL %>%
   {
     header_row_index <- which(.[[1]] == "Month")
     colnames(.) <- as.character(unlist(.[header_row_index, ]))
     .[(header_row_index + 1):nrow(.), ]
   }
 
-England_DRD <- England_DRD[, sapply(England_DRD, function(col) !all(is.na(col)))]
+England_FULL <- England_FULL[, sapply(England_FULL, function(col) !all(is.na(col)))]
 
 colnames_Eng <- c('Month', '# of providers with acceptable data', '% of providers with acceptable data', 'Total # of patients discharged', 'Total bed days lost to DD', 
                   'DoD is same as DRD (%)', 'DoD is 1+ days after DRD (%)','No delay between DoD & DRD (#)', '1 day delay between DoD & DRD (#)', '2-3 day delay between DoD & DRD (#)', '4-6 day delay between DoD & DRD (#)', '7-13 day delay between DoD & DRD (#)', '14-20 day delay between DoD & DRD (#)', '21+ day delay between DoD & DRD (#)',
@@ -487,18 +487,23 @@ colnames_Eng <- c('Month', '# of providers with acceptable data', '% of provider
                   'Total bed days after DRD for patients discharged within 7-13 days','Total bed days after DRD for patients discharged within 14-20 days', 'Total bed days after DRD for patients discharged within 21 days or more',
                   'Average days from DRD to DoD (inc 0-day delays)','Average days from DRD to DoD (exc 0-day delays)')
 
-colnames(England_DRD) <- colnames_Eng
+colnames(England_FULL) <- colnames_Eng
 
 Month_list <- c("Sep23","Oct23","Nov23","Dec23","Jan24","Feb24","Mar24","Apr24",
                 "May24","Jun24","Jul24","Aug24","Sep24","Oct24","Nov24","Dec24",
                 "Jan25","Feb25","Mar25","Apr25","May25")
 
-England_DRD$Month <- Month_list
+England_FULL$Month <- Month_list
 print(colnames_Eng)
-England_DRD[, -1] <- lapply(England_DRD[, -1], as.numeric)
-rownames(England_DRD) <- NULL
+England_FULL[, -1] <- lapply(England_FULL[, -1], as.numeric)
+rownames(England_FULL) <- NULL
 
-England_DRD$Month <- factor(England_DRD$Month, levels = England_DRD$Month)
+England_FULL$Month <- factor(England_FULL$Month, levels = England_FULL$Month)
+
+# Full month list
+
+Timeframe <- England_FULL$Month
+Timeframe
 
 # Clean #######################################################################
 

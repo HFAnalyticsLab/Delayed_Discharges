@@ -6,19 +6,19 @@
 # 1 Average % of discharges that are delayed ##################################
 
 # Total delayed column
-England_DRD$Total_delayed <- England_DRD$`1 day delay between DoD & DRD (#)`+ 
-                                England_DRD$`2-3 day delay between DoD & DRD (#)`+ 
-                                England_DRD$`4-6 day delay between DoD & DRD (#)`+
-                                England_DRD$`7-13 day delay between DoD & DRD (#)`+
-                                England_DRD$`14-20 day delay between DoD & DRD (#)`+
-                                England_DRD$`21+ day delay between DoD & DRD (#)` 
+England_FULL$Total_delayed <- England_FULL$`1 day delay between DoD & DRD (#)`+ 
+  England_FULL$`2-3 day delay between DoD & DRD (#)`+ 
+  England_FULL$`4-6 day delay between DoD & DRD (#)`+
+  England_FULL$`7-13 day delay between DoD & DRD (#)`+
+  England_FULL$`14-20 day delay between DoD & DRD (#)`+
+  England_FULL$`21+ day delay between DoD & DRD (#)` 
 
 # Average bed days with delayed discharge
-England_DRD <- England_DRD %>%
+England_FULL <- England_FULL %>%
   mutate(Avg_DD_bed_days = sum())
 
 # O y-axis scale
-delayed_discharges_plot <- ggplot(England_DRD, aes(x = Month, y = `DoD is 1+ days after DRD (%)`, group = 1)) +
+delayed_discharges_plot <- ggplot(England_FULL, aes(x = Month, y = `DoD is 1+ days after DRD (%)`, group = 1)) +
   geom_line(color = "blue", size = 1.2) +
   geom_smooth(method = "lm", se = FALSE, 
               color = "black", 
@@ -39,7 +39,7 @@ delayed_discharges_plot <- ggplot(England_DRD, aes(x = Month, y = `DoD is 1+ day
 ggsave("delayed discharges.png", plot = delayed_discharges_plot, width = 8, height = 6, dpi = 300)
 
 # 12 y-axis scale 
-delayed_discharges_plot_12 <- ggplot(England_DRD, aes(x = Month, y = `DoD is 1+ days after DRD (%)`, group = 1)) +
+delayed_discharges_plot_12 <- ggplot(England_FULL, aes(x = Month, y = `DoD is 1+ days after DRD (%)`, group = 1)) +
   geom_line(color = "blue", size = 1.2) +
   geom_smooth(method = "lm", se = FALSE, 
               color = "black", 
@@ -61,7 +61,7 @@ ggsave("delayed discharges 12.png", plot = delayed_discharges_plot_12, width = 8
 
 # 2 DoD = DRD #################################################################
 
-no_delay <- ggplot(England_DRD, aes (x = Month, y = `DoD is same as DRD (%)`, group = 1)) +
+no_delay <- ggplot(England_FULL, aes (x = Month, y = `DoD is same as DRD (%)`, group = 1)) +
   geom_line(color = 'blue', size = 1.2) +
   geom_smooth(method = 'lm', se = FALSE,
               color = 'black',
@@ -81,7 +81,7 @@ no_delay <- ggplot(England_DRD, aes (x = Month, y = `DoD is same as DRD (%)`, gr
   
 ggsave("no_delay.png", plot = no_delay, width = 8, height = 6, dpi = 300) 
 
-no_delay_80 <- ggplot(England_DRD, aes (x = Month, y = `DoD is same as DRD (%)`, group = 1)) +
+no_delay_80 <- ggplot(England_FULL, aes (x = Month, y = `DoD is same as DRD (%)`, group = 1)) +
   geom_line(color = 'blue', size = 1.2) +
   geom_smooth(method = 'lm', se = FALSE,
               color = 'black',
@@ -103,7 +103,7 @@ ggsave("no_delay_80.png", plot = no_delay_80, width = 8, height = 6, dpi = 300)
 
 # 3 Total bed days lost to delayed discharge ##################################
 
-total_bed_days_lost <- ggplot(England_DRD, aes (x = Month, y = `Total bed days lost to DD` , group = 1)) +
+total_bed_days_lost <- ggplot(England_FULL, aes (x = Month, y = `Total bed days lost to DD` , group = 1)) +
   geom_line(color = 'blue', size = 1.2) +
   geom_smooth(method = 'lm', se = FALSE,
               color = 'black',
@@ -124,7 +124,7 @@ total_bed_days_lost <- ggplot(England_DRD, aes (x = Month, y = `Total bed days l
 ggsave("total_bed_days_lost.png", plot = total_bed_days_lost, width = 8, height = 6, dpi = 300) 
 
 # 4 Average days from DRD to DoD (exc 0-day delays) ###########################
-Average_DRD_to_DoD <- ggplot(England_DRD, aes(x = Month, y = `Average days from DRD to DoD (exc 0-day delays)` , group = 1)) +
+Average_DRD_to_DoD <- ggplot(England_FULL, aes(x = Month, y = `Average days from DRD to DoD (exc 0-day delays)` , group = 1)) +
   geom_line(color = "blue", size = 1.2) +
     geom_smooth(method = "lm", se = FALSE, 
               color = "black", 
@@ -145,7 +145,7 @@ Average_DRD_to_DoD <- ggplot(England_DRD, aes(x = Month, y = `Average days from 
 
 ggsave("AverageDRD_to_DoD.png", plot = Average_DRD_to_DoD, width = 8, height = 6, dpi = 300)
 
-Average_DRD_to_DoD_5 <- ggplot(England_DRD, aes(x = Month, y = `Average days from DRD to DoD (exc 0-day delays)` , group = 1)) +
+Average_DRD_to_DoD_5 <- ggplot(England_FULL, aes(x = Month, y = `Average days from DRD to DoD (exc 0-day delays)` , group = 1)) +
   geom_line(color = "blue", size = 1.2) +
   geom_smooth(method = "lm", se = FALSE, 
               color = "black", 
@@ -167,7 +167,7 @@ Average_DRD_to_DoD_5 <- ggplot(England_DRD, aes(x = Month, y = `Average days fro
 ggsave("AverageDRD_to_DoD_5.png", plot = Average_DRD_to_DoD_5, width = 8, height = 6, dpi = 300)
 
 # 5 Discharge delays +1 day ###################################################
-delay_1_day <- ggplot(England_DRD, aes(x = Month, y = `1 day delay between DoD & DRD (%)` , group = 1)) +
+delay_1_day <- ggplot(England_FULL, aes(x = Month, y = `1 day delay between DoD & DRD (%)` , group = 1)) +
   geom_line(color = "blue", size = 1.2) +
   geom_smooth(method = "lm", se = FALSE, 
               color = "black", 
@@ -189,7 +189,7 @@ delay_1_day <- ggplot(England_DRD, aes(x = Month, y = `1 day delay between DoD &
 ggsave("delay_1_day.png", plot = delay_1_day, width = 8, height = 6, dpi = 300)
 
 # 6 Discharge delays 2-3 days #################################################
-delay_2_3_day <- ggplot(England_DRD, aes(x = Month, y = `2-3 day delay between DoD & DRD (%)` , group = 1)) +
+delay_2_3_day <- ggplot(England_FULL, aes(x = Month, y = `2-3 day delay between DoD & DRD (%)` , group = 1)) +
   geom_line(color = "blue", size = 1.2) +
   geom_smooth(method = "lm", se = FALSE, 
               color = "black", 
@@ -211,7 +211,7 @@ delay_2_3_day <- ggplot(England_DRD, aes(x = Month, y = `2-3 day delay between D
 ggsave("delay_2_3_day.png", plot = delay_2_3_day, width = 8, height = 6, dpi = 300)
 
 # 7 Discharge delays 4-6 days  ################################################
-delay_4_6_day <- ggplot(England_DRD, aes(x = Month, y = `4-6 day delay between DoD & DRD (%)` , group = 1)) +
+delay_4_6_day <- ggplot(England_FULL, aes(x = Month, y = `4-6 day delay between DoD & DRD (%)` , group = 1)) +
   geom_line(color = "blue", size = 1.2) +
   geom_smooth(method = "lm", se = FALSE, 
               color = "black", 
@@ -233,7 +233,7 @@ delay_4_6_day <- ggplot(England_DRD, aes(x = Month, y = `4-6 day delay between D
 ggsave("delay_4_6_day.png", plot = delay_4_6_day, width = 8, height = 6, dpi = 300)
 
 # 8 Discharge delays 7-13 days  ###############################################
-delay_7_13_day <- ggplot(England_DRD, aes(x = Month, y = `7-13 day delay between DoD & DRD (%)` , group = 1)) +
+delay_7_13_day <- ggplot(England_FULL, aes(x = Month, y = `7-13 day delay between DoD & DRD (%)` , group = 1)) +
   geom_line(color = "blue", size = 1.2) +
   geom_smooth(method = "lm", se = FALSE, 
               color = "black", 
@@ -255,7 +255,7 @@ delay_7_13_day <- ggplot(England_DRD, aes(x = Month, y = `7-13 day delay between
 ggsave("delay_7_13_day.png", plot = delay_7_13_day, width = 8, height = 6, dpi = 300)
 
 # 9 Discharge delays 14-20 days  ##############################################
-delay_14_20_day <- ggplot(England_DRD, aes(x = Month, y = `14-20 day delay between DoD & DRD (%)` , group = 1)) +
+delay_14_20_day <- ggplot(England_FULL, aes(x = Month, y = `14-20 day delay between DoD & DRD (%)` , group = 1)) +
   geom_line(color = "blue", size = 1.2) +
   geom_smooth(method = "lm", se = FALSE, 
               color = "black", 
@@ -277,7 +277,7 @@ delay_14_20_day <- ggplot(England_DRD, aes(x = Month, y = `14-20 day delay betwe
 ggsave("delay_14_20_day.png", plot = delay_14_20_day, width = 8, height = 6, dpi = 300)
 
 # 10 Discharge delays 21+ days  ###############################################
-delay_21_day <- ggplot(England_DRD, aes(x = Month, y = `21+ day delay between DoD & DRD (%)` , group = 1)) +
+delay_21_day <- ggplot(England_FULL, aes(x = Month, y = `21+ day delay between DoD & DRD (%)` , group = 1)) +
   geom_line(color = "blue", size = 1.2) +
   geom_smooth(method = "lm", se = FALSE, 
               color = "black", 
@@ -299,7 +299,7 @@ delay_21_day <- ggplot(England_DRD, aes(x = Month, y = `21+ day delay between Do
 ggsave("delay_21+_day.png", plot = delay_21_day, width = 8, height = 6, dpi = 300)
 
 # 11 Patients DD but within 1 day  ############################
-DD_1_day <- ggplot(England_DRD, aes(x = Month, y = `Patients delayed but discharged within 1 day (%)`, group = 1)) +
+DD_1_day <- ggplot(England_FULL, aes(x = Month, y = `Patients delayed but discharged within 1 day (%)`, group = 1)) +
   geom_line(color = "blue", size = 1.2) +
   geom_smooth(method = "lm", se = FALSE, 
               color = "black", 
@@ -321,7 +321,7 @@ DD_1_day <- ggplot(England_DRD, aes(x = Month, y = `Patients delayed but dischar
 ggsave("DD_1_day.png", plot = DD_1_day, width = 8, height = 6, dpi = 300)
 
 # 12 Patients DD but within 2-3 days  #########################
-DD_2_3_day <- ggplot(England_DRD, aes(x = Month, y = `Patients delayed but discharged within 2-3 days (%)`, group = 1)) +
+DD_2_3_day <- ggplot(England_FULL, aes(x = Month, y = `Patients delayed but discharged within 2-3 days (%)`, group = 1)) +
   geom_line(color = "blue", size = 1.2) +
   geom_smooth(method = "lm", se = FALSE, 
               color = "black", 
@@ -343,7 +343,7 @@ DD_2_3_day <- ggplot(England_DRD, aes(x = Month, y = `Patients delayed but disch
 ggsave("DD_2_3_day.png", plot = DD_2_3_day, width = 8, height = 6, dpi = 300)
 
 # 13 Patients DD but within 4-6 days  #########################
-DD_4_6_day <- ggplot(England_DRD, aes(x = Month, y = `Patients delayed but discharged within 4-6 days (%)`, group = 1)) +
+DD_4_6_day <- ggplot(England_FULL, aes(x = Month, y = `Patients delayed but discharged within 4-6 days (%)`, group = 1)) +
   geom_line(color = "blue", size = 1.2) +
   geom_smooth(method = "lm", se = FALSE, 
               color = "black", 
@@ -365,7 +365,7 @@ DD_4_6_day <- ggplot(England_DRD, aes(x = Month, y = `Patients delayed but disch
 ggsave("DD_4_6_day.png", plot = DD_4_6_day, width = 8, height = 6, dpi = 300)
 
 # 14 Patients DD but within 7-13 days  ########################
-DD_7_13_day <- ggplot(England_DRD, aes(x = Month, y = `Patients delayed but discharged within 7-13 days (%)`, group = 1)) +
+DD_7_13_day <- ggplot(England_FULL, aes(x = Month, y = `Patients delayed but discharged within 7-13 days (%)`, group = 1)) +
   geom_line(color = "blue", size = 1.2) +
   geom_smooth(method = "lm", se = FALSE, 
               color = "black", 
@@ -387,7 +387,7 @@ DD_7_13_day <- ggplot(England_DRD, aes(x = Month, y = `Patients delayed but disc
 ggsave("DD_7_13_day.png", plot = DD_7_13_day, width = 8, height = 6, dpi = 300)
 
 # 15 Patients DD but within 14-20 days  #######################
-DD_14_20_day <- ggplot(England_DRD, aes(x = Month, y = `Patients delayed but discharged within 14-20 days (%)`, group = 1)) +
+DD_14_20_day <- ggplot(England_FULL, aes(x = Month, y = `Patients delayed but discharged within 14-20 days (%)`, group = 1)) +
   geom_line(color = "blue", size = 1.2) +
   geom_smooth(method = "lm", se = FALSE, 
               color = "black", 
@@ -409,7 +409,7 @@ DD_14_20_day <- ggplot(England_DRD, aes(x = Month, y = `Patients delayed but dis
 ggsave("DD_14_20_day.png", plot = DD_14_20_day, width = 8, height = 6, dpi = 300)
 
 # 16 Patients DD but within 21+ days  #########################
-DD_21_day <- ggplot(England_DRD, aes(x = Month, y = `Patients delayed but discharged within 21 days or more (%)`, group = 1)) +
+DD_21_day <- ggplot(England_FULL, aes(x = Month, y = `Patients delayed but discharged within 21 days or more (%)`, group = 1)) +
   geom_line(color = "blue", size = 1.2) +
   geom_smooth(method = "lm", se = FALSE, 
               color = "black", 
