@@ -2,8 +2,10 @@
 # 08/07/2025 - Discharge Ready Data (DRD) descriptive analysis
 # National level descriptives #################################################
 
+dd_file_national$month <- factor(dd_file_national$month, 
+                                 levels = unique(dd_file_national$month))
 
-# 1 Average % of discharges that are delayed ##################################
+# 1 % of discharges that are delayed ##################################
 
 # Total delayed column
 England_FULL$Total_delayed <- England_FULL$`1 day delay between DoD & DRD (#)`+ 
@@ -17,9 +19,9 @@ England_FULL$Total_delayed <- England_FULL$`1 day delay between DoD & DRD (#)`+
 England_FULL <- England_FULL %>%
   mutate(Avg_DD_bed_days = sum())
 
-# O y-axis scale
-delayed_discharges_plot <- ggplot(England_FULL, aes(x = Month, y = `DoD is 1+ days after DRD (%)`, group = 1)) +
-  geom_line(color = "blue", size = 1.2) +
+# % of discharges that are delayed
+delayed_discharges_plot <- ggplot(dd_file_national, aes(x = month, y = as.numeric(delay_perc), group = 1)) +
+  geom_line(color = "firebrick1", linewidth = 1.2) +
   geom_smooth(method = "lm", se = FALSE, 
               color = "black", 
               linetype = "longdash",
@@ -32,32 +34,36 @@ delayed_discharges_plot <- ggplot(England_FULL, aes(x = Month, y = `DoD is 1+ da
     limits = c(0, 0.15),        
     breaks = seq(0, 0.15, 0.01)) +
   theme_gray() +
-  theme(axis.text.x = element_text(size = 7.5)) +
+  theme(axis.text.x = element_text(size = 6.5)) +
   theme(axis.title.x = element_text(margin = margin(t = 12)),
         axis.title.y = element_text(margin = margin(r = 12)))
 
+delayed_discharges_plot
 ggsave("delayed discharges.png", plot = delayed_discharges_plot, width = 8, height = 6, dpi = 300)
 
-# 12 y-axis scale 
-delayed_discharges_plot_12 <- ggplot(England_FULL, aes(x = Month, y = `DoD is 1+ days after DRD (%)`, group = 1)) +
-  geom_line(color = "blue", size = 1.2) +
+# 2 Total discharges
+dd_file_national$patients_discharged_volume[dd_file_national$patients_discharged_volume == 0] <- NA
+
+total_discharges_plot <- ggplot(dd_file_national, aes(x = month, y = as.numeric(`patients_discharged_volume`), group = 1)) +
+  geom_line(color = "firebrick1", linewidth = 1.2) +
   geom_smooth(method = "lm", se = FALSE, 
               color = "black", 
               linetype = "longdash",
               linewidth = 0.5) +
   geom_point(color = "black", size = 1.5) +
-  labs(title = "Percentage of discharges delayed, England, September 2023 - May 2025.",
+  labs(title = "Total number of patients discharged, England, April 2024 - May 2025 ",
        x = "Month",
-       y = "DOD is 1+ days after DRD (%)") +
+       y = "Number of patients") +
   scale_y_continuous(
-    limits = c(0.12, 0.15),        
-    breaks = seq(0.12, 0.15, 0.01)) +
+    limits = c(0, 400000),
+    breaks = seq(0, 400000, 50000)) +
   theme_gray() +
-  theme(axis.text.x = element_text(size = 7.5)) +
-  theme(axis.title.x = element_text(margin = margin(t = 12)),
-        axis.title.y = element_text(margin = margin(r = 12)))
+  theme(axis.text.x = element_text(size = 6.5)) +
+  theme(axis.title.x = element_text(margin = margin(t = 12))) +
+  theme(axis.title.y = element_text(margin = margin(r = 12)))
 
-ggsave("delayed discharges 12.png", plot = delayed_discharges_plot_12, width = 8, height = 6, dpi = 300)
+total_discharges_plot
+ggsave("total discharges.png", plot = total_discharges_plot, width = 8, height = 6, dpi = 300)
 
 # 2 DoD = DRD #################################################################
 
@@ -518,105 +524,14 @@ delay_length_timeseries
 ggsave("delay_length_timeseries.png", plot = delay_length_timeseries, width = 8, height = 6, dpi = 300)
 
 
-# Total discharges
 
-Total_discharges <- ggplot(England_FULL, aes(x = Month, y = `Total # of patients discharged`, group = 1)) +
-  geom_line(color = "blue", linewidth = 1.2) +
-  geom_smooth(method = "lm", se = FALSE, 
-              color = "black", 
-              linetype = "longdash",
-              linewidth = 0.5) +
-  geom_point(color = "black", size = 1.5) +
-  labs(title = "Total number of patients discharged, England, April 2024 - May 2025 ",
-       x = "Month",
-       y = "Number of patients") +
-  scale_y_continuous(
-    limits = c(0, 400000),
-    breaks = seq(0, 400000, 50000)) +
-  theme_gray() +
-  theme(axis.text.x = element_text(size = 7)) +
-  theme(axis.text.x = element_text(size = 7.5)) +
-  theme(axis.title.x = element_text(margin = margin(t = 12)),
-        axis.title.y = element_text(margin = margin(t = 12)))
+# Trust-level tests ############################################################
 
-ggsave("Total_discharges.png", plot = Total_discharges, width = 8, height = 6, dpi = 300)
+output_test_2 <- output_test_2 %>%
+  arrange(proportion_delayed_diff)
 
-Total_discharges
-=======
-
-#########
-#Trust level anaylsis - tests.
-
-Apr_24_redux <- Apr_24 %>%
-  rename(org_code = `Org Code`,
-         total_discharge_Apr_24 = `Total # of patients discharged`,
-         no_delay_Apr_24 = `No delay between DoD & DRD (#)`,
-         total_delay_beddays_Apr_24 = `Total bed days lost to DD`) %>% 
-  mutate(delays_Apr_24 = as.numeric(total_discharge_Apr_24) - as.numeric(no_delay_Apr_24)) %>% 
-  select(Region,org_code,total_discharge_Apr_24,no_delay_Apr_24,delays_Apr_24,total_delay_beddays_Apr_24)
-
-May_24_redux <- May_24 %>%
-  rename(org_code = `Org Code`,
-         total_discharge_May_24 = `Total # of patients discharged`,
-         no_delay_May_24 = `No delay between DoD & DRD (#)`,
-         total_delay_beddays_May_24 = `Total bed days lost to DD`) %>%
-  mutate(delays_May_24 = as.numeric(total_discharge_May_24) - as.numeric(no_delay_May_24)) %>% 
-  select(Region,org_code,total_discharge_May_24,no_delay_May_24,delays_May_24,total_delay_beddays_May_24)
-
-
-Apr_25_redux <- Apr_25 %>%
-  rename(org_code = `Org Code`,
-         total_discharge_Apr_25 = `Total # of patients discharged`,
-         no_delay_Apr_25 = `No delay between DoD & DRD (#)`,
-         total_delay_beddays_Apr_25 = `Total bed days lost to DD`) %>%
-  mutate(delays_Apr_25 = as.numeric(total_discharge_Apr_25) - as.numeric(no_delay_Apr_25)) %>% 
-  select(Region,org_code,total_discharge_Apr_25,no_delay_Apr_25,delays_Apr_25,total_delay_beddays_Apr_25)
-
-May_25_redux <- May_25 %>%
-  rename(org_code = `Org Code`,
-         total_discharge_May_25 = `Total # of patients discharged`,
-         no_delay_May_25 = `No delay between DoD & DRD (#)`,
-         total_delay_beddays_May_25 = `Total bed days lost to DD`) %>%
-  mutate(delays_May_25 = as.numeric(total_discharge_May_25) - as.numeric(no_delay_May_25)) %>% 
-  select(Region,org_code,total_discharge_May_25,no_delay_May_25,delays_May_25,total_delay_beddays_May_25)
-
-
-output <- full_join(Apr_24_redux,May_24_redux, by=c("Region","org_code"))
-output <- full_join(output,Apr_25_redux, by=c("Region","org_code"))
-output <- full_join(output,May_25_redux, by=c("Region","org_code"))
-
-
-output_test <- output %>% 
-  group_by(Region,org_code) %>% 
-  mutate(pre_total_discharge = as.numeric(total_discharge_Apr_24) + as.numeric(total_discharge_May_24),
-         pre_no_delay = as.numeric(no_delay_Apr_24) + as.numeric(no_delay_May_24),
-         pre_delays = as.numeric(delays_Apr_24) + as.numeric(delays_May_24),
-         pre_delayed_beddays = as.numeric(total_delay_beddays_Apr_24) + as.numeric(total_delay_beddays_May_24),
-         pre_proportion_delayed = pre_delays / pre_total_discharge,
-         pre_delay_los = pre_delayed_beddays / pre_delays,
-         post_total_discharge = as.numeric(total_discharge_Apr_25) + as.numeric(total_discharge_May_25),
-         post_no_delay = as.numeric(no_delay_Apr_25) + as.numeric(no_delay_May_25),
-         post_delays = as.numeric(delays_Apr_25) + as.numeric(delays_May_25),
-         post_delayed_beddays = as.numeric(total_delay_beddays_Apr_25) + as.numeric(total_delay_beddays_May_25),
-         post_proportion_delayed = post_delays / post_total_discharge,
-         post_delay_los = post_delayed_beddays / post_delays) %>% 
-  ungroup() %>% 
-  select(org_code,pre_proportion_delayed,pre_delay_los,post_proportion_delayed,post_delay_los) %>% 
-  filter(str_starts(org_code, "R")) %>% 
-  mutate(proportion_delayed_diff = post_proportion_delayed - pre_proportion_delayed,
-         delay_los_diff = post_delay_los - pre_delay_los)
-
-output_test_2 <- output_test %>%
-  mutate(across(everything(), ~ ifelse(is.nan(.), 0, .))) %>% 
-  filter(proportion_delayed_diff != 0)
-
-output_test_3 <- output_test %>%
-  mutate(across(everything(), ~ ifelse(is.nan(.), 0, .))) %>% 
-  filter(delay_los_diff != 0)
-
-
-ggplot(data = output_test_2, aes(x = org_code, y = proportion_delayed_diff)) +
-  geom_bar(stat = "identity", fill = "steelblue") +
+change_in_delayed_discharge_plot <- ggplot(data = output_test_2, aes(x = reorder(org_code, proportion_delayed_diff), y = as.numeric(proportion_delayed_diff))) +
+  geom_bar(stat = "identity", fill = "firebrick2", color = "black", linewidth = 0.3) +
   labs(
     title = "Absolute Difference in % Admissions with Delay between Apr-May 2025 and Apr-May 2024",
     x = "NHS Trust",
@@ -624,9 +539,12 @@ ggplot(data = output_test_2, aes(x = org_code, y = proportion_delayed_diff)) +
   ) +
   theme(axis.text.x = element_blank())
 
+change_in_delayed_discharge_plot
+ggsave("change_in_delayed_discharge.png", plot = change_in_delayed_discharge_plot, width = 8, height = 6, dpi = 300)
 
-ggplot(data = output_test_3, aes(x = org_code, y = delay_los_diff)) +
-  geom_bar(stat = "identity", fill = "steelblue") +
+
+change_in_delay_length_plot <- ggplot(data = output_test_3, aes(x = reorder(org_code, delay_los_diff), y = delay_los_diff)) +
+  geom_bar(stat = "identity", fill = "firebrick2", color = "black", linewidth = 0.3) +
   labs(
     title = "Difference in Average Delay Length between Apr-May 2025 vs Apr-May 2024",
     x = "NHS Trust",
@@ -634,14 +552,6 @@ ggplot(data = output_test_3, aes(x = org_code, y = delay_los_diff)) +
   ) +
   theme(axis.text.x = element_blank())
 
-
-
-
->>>>>>> 9da536a2a3cbe604b805df47d2b29e3f27e2ff50
-
-
-
-
-
-
+change_in_delay_length_plot
+ggsave("change_in_delay_length.png", plot = change_in_delay_length_plot, width = 8, height = 6, dpi = 300)
 
