@@ -44,7 +44,7 @@ output <- full_join(output,May_25_redux, by=c("Region","org_code"))
 Apr_May_national <- output %>%
   filter(org_code == 'National') %>%
   mutate(total_discharge24 = sum(as.numeric(total_discharge_Apr_24), as.numeric(total_discharge_May_24))/2,
-         total_discharge25 = sum(as.numeric(total_discharge_Apr_25), as.numeric(total_discharge_May_25))/2)
+         total_discharge25 = sum(as.numeric(total_discharge_Apr_25), as.numeric(total_discharge_May_25)/2)
 
 
 output_test <- output %>% 
