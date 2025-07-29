@@ -466,7 +466,44 @@ colnames_Nov <- colnames_22
 colnames_Nov <- colnames_Nov[-c(1,2,7)]
 colnames(Nov_23) <- colnames_Nov
 
-# 5 Download England timeseries ##################################################
+# 5 Pull general and acute beds data #######################################
+
+beds_timeseries_url <- c('https://www.england.nhs.uk/statistics/wp-content/uploads/sites/2/2025/07/Beds-publication-Timeseries-March-2020-June-2025.xlsx')
+beds_timeseries <- read.xlsx(beds_timeseries_url, sheet = 'Timeseries all acute trusts')
+
+beds_timeseries <- beds_timeseries %>%
+  {
+    header_row_index <- which(.[[1]] == 'Month')
+    colnames(.) <- as.character(unlist(.[header_row_index, ]))
+    .[(header_row_index + 1):nrow(.), ]
+  }
+
+beds_timeseries <- beds_timeseries[-nrow(beds_timeseries), ]
+
+abbreviate_date <- function(x) {
+  paste0(substr(x, 1, 3), substr(x, nchar(x) - 1, nchar(x)))
+}
+
+beds_timeseries$Month <- sapply(beds_timeseries$Month, abbreviate_date)
+
+beds_timeseries <- beds_timeseries[, sapply(beds_timeseries, function(col) !all(is.na(col)))]
+colnames(beds_timeseries) <- c("Month","G&A beds available","G&A core beds available","G&A escalation beds available","G&A covid void beds",
+                               "G&A beds occupied","G&A occupancy rate (%)","G&A occupancy rate adjusted for covid void beds (%)",
+                               "Adult G&A beds available","Adult core beds available","Adult escalation beds available",
+                               "Adult G&A covid void beds","Adult G&A beds occupied","Adult G&A occupancy rate (%)",
+                               "Adult G&A occupancy rate adjusted for covid void beds (%)","Paediatric G&A beds available",
+                               "Paediatric core beds available","Paediatric escalation beds available","Paediatric G&A covid void beds",
+                               "Paediatric G&A beds occupied","Paediatric G&A occupancy rate (%)","Paediatric G&A occupancy rate adjusted for covid void beds (%)",
+                               "Adult critical care beds available","Adult critical care beds occupied","Adult critical care occupancy rate (%)",
+                               "Paediatric intensive care beds available","Paediatric intensive care beds occupied",
+                               "Paediatric intensive care occupancy rate (%)","Neonatal intensive care beds available",
+                               "Neonatal intensive care beds occupied","Neonatal intensive care occupancy rate (%)",
+                               "G&A beds occupied by patients with LOS of 7 or more days","G&A beds occupied by patients with LOS of 14 or more days",
+                               "G&A beds occupied by patients with LOS of 21 or more days",
+                               "G&A beds occupied by patients with LOS of 7 or more days (%)","G&A beds occupied by patients with LOS of 14 or more days (%)",
+                               "G&A beds occupied by patients with LOS of 21 or more days (%)")                                         
+
+# 6 Download England timeseries ##################################################
 
 England_FULL <- read.xlsx("https://www.england.nhs.uk/statistics/wp-content/uploads/sites/2/2025/07/Discharge-Ready-Date-Timeseries-webfile-Sept-2023-May-2025.xlsx", sheet = "Timeseries")
 England_FULL <- England_FULL %>%
@@ -500,10 +537,30 @@ rownames(England_FULL) <- NULL
 
 England_FULL$Month <- factor(England_FULL$Month, levels = England_FULL$Month)
 
+# 7 Bind beds and discharge data ##############################################
+
 # Full month list
 
 Timeframe <- England_FULL$Month
 Timeframe
+
+# Remove bed data that doesn't match discharges
+
+DDbeds_timeseries <- beds_timeseries %>%
+  filter(Month %in% Timeframe)
+
+# Calculate average bed days for patients with delayed discharge
+
+DDbeds_totalGA <- DDbeds_timeseries$`G&A beds available`
+England_FULL$totalGAbeds <- DDbeds_totalGA
+
+England_FULL <- England_FULL %>%
+  mutate(parsed_date = my(Month),  
+        DaysInMonth = days_in_month(parsed_date))
+
+England_FULL <- England_FULL %>%
+  mutate(`bed_delays` = round(`Total bed days lost to DD`/DaysInMonth),
+        `pct_bed_delays` = (bed_delays/as.numeric(totalGAbeds)))
 
 # Clean #######################################################################
 

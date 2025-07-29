@@ -430,15 +430,117 @@ DD_21_day <- ggplot(England_FULL, aes(x = Month, y = `Patients delayed but disch
 
 ggsave("DD_21+_day.png", plot = DD_21_day, width = 8, height = 6, dpi = 300)
 
+# Grouped delay lengths #######################################################
+
+England_FULL$Group1discharges <- rowSums(England_FULL[, c(
+    'Patients delayed but discharged within 1 day (%)',
+    'Patients delayed but discharged within 2-3 days (%)',
+    'Patients delayed but discharged within 4-6 days (%)')], na.rm = TRUE)
+
+England_FULL$Group2discharges <- (England_FULL$`Patients delayed but discharged within 7-13 days (%)`)
+
+England_FULL$Group3discharges <- rowSums(England_FULL[, c(
+  'Patients delayed but discharged within 14-20 days (%)',
+  'Patients delayed but discharged within 21 days or more (%)')], na.rm = TRUE)                                     
+
+England_FULL <- England_FULL %>% 
+  rename('Delayed discharges 0-6 days' = Group1discharges,
+         'Delayed discharges 7-13 days' = Group2discharges,
+         'Delayed discharges over 14 days' = Group3discharges)
+
+# Apr/May comparisons
+
+England_FULL_AprMay <- England_FULL %>%
+  filter(grepl('Apr|May', Month))
+
+# 0-6 days chart GROUP 1
+Group1_delay <- ggplot(AprMay, aes(x = Month, y = `Delayed discharges 0-6 days`, group = 1)) +
+  geom_bar()
+
+Group1_delay
+ggsave("Group1_delay.png", plot = Group1_delay, width = 8, height = 6, dpi = 300)
+
+# 14+ days chart GROUP 3
+Group3_delay <- ggplot(England_FULL, aes(x = Month, y = `Delayed discharges over 14 days`, group = 1)) +
+  geom_line(color = "blue", size = 1.2) +
+  geom_smooth(method = "lm", se = FALSE, 
+              color = "black", 
+              linetype = "longdash",
+              linewidth = 0.5) +
+  geom_point(color = "black", size = 1.5) +
+  labs(title = "Delayed patients discharged beyond two weeks, England, September 2023 - May 2025 ",
+       x = "Month",
+       y = "% of delayed patients") +
+  scale_y_continuous(
+    limits = c(0, 0.8),
+    breaks = seq(0, 0.8, 0.05)) +
+  theme_gray() +
+  theme(axis.text.x = element_text(size = 7)) +
+  theme(axis.text.x = element_text(size = 7.5)) +
+  theme(axis.title.x = element_text(margin = margin(t = 12)),
+        axis.title.y = element_text(margin = margin(t = 12)))
+
+Group3_delay
+ggsave("Group3_delay.png", plot = Group3_delay, width = 8, height = 6, dpi = 300)
+
+# 17 Delay composition stacks #################################################
+
+grouped_delays <- England_FULL %>%
+  select(Month, `Delayed discharges 0-6 days`, `Delayed discharges 7-13 days`, `Delayed discharges over 14 days`)
+  
+grouped_delays <- grouped_delays %>%
+  pivot_longer(
+    cols = starts_with('Delayed discharges'),
+    names_to = 'Delay_Category',
+    values_to = 'Value') %>%
+  group_by(Month) %>%
+  arrange((Value), .by_group = TRUE) %>%
+  mutate(Value = Value*100)
+
+delay_length_timeseries <- ggplot(grouped_delays, aes(x = Month, y = `Value`, fill =`Delay_Category`)) +
+  geom_bar(position="stack", stat="identity") +
+  geom_text(aes(label = paste0(round(Value, digits = 1), "%")), 
+            position = position_stack(vjust = 0.5),
+            color = "black",
+            size = 2.5) +
+  labs(title = "",
+       x = "Month",
+       y = "Percentage of patients delayed (%)") +
+  scale_y_continuous(
+    limits = c(0,100.1),
+    breaks = seq(0, 100.1, 5)) +
+  theme_gray() +
+  theme(legend.text = element_text(size = 8)) +
+  theme(axis.text.x = element_text(size = 7.5))
+
+delay_length_timeseries
+ggsave("delay_length_timeseries.png", plot = delay_length_timeseries, width = 8, height = 6, dpi = 300)
 
 
+# Total discharges
 
+Total_discharges <- ggplot(England_FULL, aes(x = Month, y = `Total # of patients discharged`, group = 1)) +
+  geom_line(color = "blue", linewidth = 1.2) +
+  geom_smooth(method = "lm", se = FALSE, 
+              color = "black", 
+              linetype = "longdash",
+              linewidth = 0.5) +
+  geom_point(color = "black", size = 1.5) +
+  labs(title = "Total number of patients discharged, England, April 2024 - May 2025 ",
+       x = "Month",
+       y = "Number of patients") +
+  scale_y_continuous(
+    limits = c(0, 400000),
+    breaks = seq(0, 400000, 50000)) +
+  theme_gray() +
+  theme(axis.text.x = element_text(size = 7)) +
+  theme(axis.text.x = element_text(size = 7.5)) +
+  theme(axis.title.x = element_text(margin = margin(t = 12)),
+        axis.title.y = element_text(margin = margin(t = 12)))
 
+ggsave("Total_discharges.png", plot = Total_discharges, width = 8, height = 6, dpi = 300)
 
-
-
-
-
+Total_discharges
 
 
 
