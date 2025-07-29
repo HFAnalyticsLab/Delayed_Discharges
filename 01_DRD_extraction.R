@@ -348,7 +348,7 @@ May_25 <- May_25[, sapply(May_25, function(col) !all(is.na(col)))]
 
 
 # Future months of data (uncheck as DRD updated)
-# June 25 #####################################################################
+# June 25
 #Jun_25 <- June2025
 #
 #Jun_25 <- Jun_25 %>%
@@ -360,7 +360,7 @@ May_25 <- May_25[, sapply(May_25, function(col) !all(is.na(col)))]
 #
 #Jun_25 <- Jun_25[, sapply(Jun_25, function(col) !all(is.na(col)))]
 #
-# July 25 ######################################################################
+# July 25
 #Jul_25 <- July2025
 #
 #Jul_25 <- Jul_25 %>%
@@ -372,7 +372,7 @@ May_25 <- May_25[, sapply(May_25, function(col) !all(is.na(col)))]
 #
 #Jul_25 <- Jul_25[, sapply(Jul_25, function(col) !all(is.na(col)))]
 #
-# August 25 ####################################################################
+# August 25
 #Aug_25 <- August2025
 #
 #Aug_25 <- Aug_25 %>%
@@ -384,7 +384,7 @@ May_25 <- May_25[, sapply(May_25, function(col) !all(is.na(col)))]
 #
 #Aug_25 <- Aug_25[, sapply(Aug_25, function(col) !all(is.na(col)))]
 #
-# September 25 #################################################################
+# September 25
 #Sep_25 <- September2025
 #
 #Sep_25 <- Sep_25 %>%
@@ -396,7 +396,7 @@ May_25 <- May_25[, sapply(May_25, function(col) !all(is.na(col)))]
 #
 #Sep_25 <- Sep_25[, sapply(Sep_25, function(col) !all(is.na(col)))]
 #
-# October 25 ###################################################################
+# October 25
 #Oct_25 <- October2025
 #
 #Oct_25 <- Oct_25 %>%
@@ -424,13 +424,9 @@ rm(list = c(paste0("NA", 1:8), "df", "April2024", "April2025", "August2024", "De
 #                  'Total bed days after DRD for patients discharged within 7-13 days','Total bed days after DRD for patients discharged within 14-20 days', 'Total bed days after DRD for patients discharged within 21 days or more',
 #                  'Average days from DRD to DoD (exc 0-day delays)')
 
-
-
 colnames_22 <- c('Region', 'ICB', 'org_code', 'Org Name', '# of providers with acceptable data', '% of providers with acceptable data', 'Data Source', 'no_delay_perc',
 'delay_perc','1_day_delay_perc', '2_3_day_delay_perc', '4_6_day_delay_perc','7_13_day_delay_perc', '14_20_day_delay_perc','21plus_day_delay_perc', 
 '1_day_delay_beddays', '2_3_day_delay_beddays', '4_6_day_delay_beddays','7_13_day_delay_beddays','14_20_day_delay_beddays', '21plus_day_delay_beddays','average_delay_los_minus_0_day_delay')
-
-
 
 colnames_39 <- c('Region', 'ICB', 'org_code', 'Org Name', '# of providers with acceptable data', '% of providers with acceptable data', 'Data Source', 'patients_discharged_volume', 'dd_bed_days', 
 'no_delay_perc', 'delay_perc',
@@ -444,7 +440,6 @@ colnames_39 <- c('Region', 'ICB', 'org_code', 'Org Name', '# of providers with a
 '1_day_delay_beddays', '2_3_day_delay_beddays', '4_6_day_delay_beddays','7_13_day_delay_beddays','14_20_day_delay_beddays', '21plus_day_delay_beddays',
 
 'average_delay_los_inc_0_day_delay','average_delay_los_minus_0_day_delay')
-
 
 # colnames_39 <- c('Region', 'ICB', 'Org Code', 'Org Name', '# of providers with acceptable data', '% of providers with acceptable data', 'Data Source', 'Total # of patients discharged', 'Total bed days lost to DD', 
 #                  'DoD is same as DRD (%)', 'DoD is 1+ days after DRD (%)',
@@ -490,7 +485,6 @@ colnames_Nov <- colnames_22
 colnames_Nov <- colnames_Nov[-c(1,2,7)]
 colnames(Nov_23) <- colnames_Nov
 
-<<<<<<< HEAD
 # 5 Pull general and acute beds data #######################################
 
 beds_timeseries_url <- c('https://www.england.nhs.uk/statistics/wp-content/uploads/sites/2/2025/07/Beds-publication-Timeseries-March-2020-June-2025.xlsx')
@@ -528,12 +522,69 @@ colnames(beds_timeseries) <- c("Month","G&A beds available","G&A core beds avail
                                "G&A beds occupied by patients with LOS of 7 or more days (%)","G&A beds occupied by patients with LOS of 14 or more days (%)",
                                "G&A beds occupied by patients with LOS of 21 or more days (%)")                                         
 
-# 6 Download England timeseries ##################################################
-=======
+# 6 England timeseries ##################################################
 
+England_FULL <- read.xlsx("https://www.england.nhs.uk/statistics/wp-content/uploads/sites/2/2025/07/Discharge-Ready-Date-Timeseries-webfile-Sept-2023-May-2025.xlsx", sheet = "Timeseries")
+England_FULL <- England_FULL %>%
+  {
+    header_row_index <- which(.[[1]] == "Month")
+    colnames(.) <- as.character(unlist(.[header_row_index, ]))
+    .[(header_row_index + 1):nrow(.), ]
+  }
+
+England_FULL <- England_FULL[, sapply(England_FULL, function(col) !all(is.na(col)))]
+
+colnames_Eng <- c('Month', '# of providers with acceptable data', '% of providers with acceptable data', 'Total # of patients discharged', 'Total bed days lost to DD', 
+                  'DoD is same as DRD (%)', 'DoD is 1+ days after DRD (%)','No delay between DoD & DRD (#)', '1 day delay between DoD & DRD (#)', '2-3 day delay between DoD & DRD (#)', '4-6 day delay between DoD & DRD (#)', '7-13 day delay between DoD & DRD (#)', '14-20 day delay between DoD & DRD (#)', '21+ day delay between DoD & DRD (#)',
+                  'No delay between DoD & DRD (%)', '1 day delay between DoD & DRD (%)', '2-3 day delay between DoD & DRD (%)', '4-6 day delay between DoD & DRD (%)', '7-13 day delay between DoD & DRD (%)', '14-20 day delay between DoD & DRD (%)', '21+ day delay between DoD & DRD (%)',
+                  'Patients delayed but discharged within 1 day (%)', 'Patients delayed but discharged within 2-3 days (%)', 'Patients delayed but discharged within 4-6 days (%)',
+                  'Patients delayed but discharged within 7-13 days (%)', 'Patients delayed but discharged within 14-20 days (%)','Patients delayed but discharged within 21 days or more (%)', 
+                  'Total bed days after DRD for patients discharged within 1 day', 'Total bed days after DRD for patients discharged within 2-3 days', 'Total bed days after DRD for patients discharged within 4-6 days', 
+                  'Total bed days after DRD for patients discharged within 7-13 days','Total bed days after DRD for patients discharged within 14-20 days', 'Total bed days after DRD for patients discharged within 21 days or more',
+                  'Average days from DRD to DoD (inc 0-day delays)','Average days from DRD to DoD (exc 0-day delays)')
+
+colnames(England_FULL) <- colnames_Eng
+
+Month_list <- c("Sep23","Oct23","Nov23","Dec23","Jan24","Feb24","Mar24","Apr24",
+                "May24","Jun24","Jul24","Aug24","Sep24","Oct24","Nov24","Dec24",
+                "Jan25","Feb25","Mar25","Apr25","May25")
+
+England_FULL$Month <- Month_list
+print(colnames_Eng)
+England_FULL[, -1] <- lapply(England_FULL[, -1], as.numeric)
+rownames(England_FULL) <- NULL
+
+England_FULL$Month <- factor(England_FULL$Month, levels = England_FULL$Month)
+
+# 7 Bind beds and England-level discharge data ##############################################
+
+# Full month list
+
+Timeframe <- England_FULL$Month
+Timeframe
+
+# Remove bed data that doesn't match discharges
+
+DDbeds_timeseries <- beds_timeseries %>%
+  filter(Month %in% Timeframe)
+
+# Calculate average bed days for patients with delayed discharge
+
+DDbeds_totalGA <- DDbeds_timeseries$`G&A beds available`
+England_FULL$totalGAbeds <- DDbeds_totalGA
+
+England_FULL <- England_FULL %>%
+  mutate(parsed_date = my(Month),  
+        DaysInMonth = days_in_month(parsed_date))
+
+England_FULL <- England_FULL %>%
+  mutate(`bed_delays` = round(`Total bed days lost to DD`/DaysInMonth),
+        `pct_bed_delays` = (bed_delays/as.numeric(totalGAbeds)))
+
+# 8 Combine all trust datasets #################################################
 
 # Create a new variable (month) for each dataset.
-Sep_23 <- Sep_23 %>% 
+  Sep_23 <- Sep_23 %>% 
   mutate(month = 'Sept-23')
 Oct_23 <- Oct_23 %>% 
   mutate(month = 'Oct-23')
@@ -578,81 +629,6 @@ Apr_25 <- Apr_25 %>%
 May_25 <- May_25 %>% 
   mutate(month = 'May-25')
 
-
-# 5 Download England timeseries ##################################################
->>>>>>> 9da536a2a3cbe604b805df47d2b29e3f27e2ff50
-
-England_FULL <- read.xlsx("https://www.england.nhs.uk/statistics/wp-content/uploads/sites/2/2025/07/Discharge-Ready-Date-Timeseries-webfile-Sept-2023-May-2025.xlsx", sheet = "Timeseries")
-England_FULL <- England_FULL %>%
-  {
-    header_row_index <- which(.[[1]] == "Month")
-    colnames(.) <- as.character(unlist(.[header_row_index, ]))
-    .[(header_row_index + 1):nrow(.), ]
-  }
-
-England_FULL <- England_FULL[, sapply(England_FULL, function(col) !all(is.na(col)))]
-
-colnames_Eng <- c('Month', '# of providers with acceptable data', '% of providers with acceptable data', 'Total # of patients discharged', 'Total bed days lost to DD', 
-                  'DoD is same as DRD (%)', 'DoD is 1+ days after DRD (%)','No delay between DoD & DRD (#)', '1 day delay between DoD & DRD (#)', '2-3 day delay between DoD & DRD (#)', '4-6 day delay between DoD & DRD (#)', '7-13 day delay between DoD & DRD (#)', '14-20 day delay between DoD & DRD (#)', '21+ day delay between DoD & DRD (#)',
-                  'No delay between DoD & DRD (%)', '1 day delay between DoD & DRD (%)', '2-3 day delay between DoD & DRD (%)', '4-6 day delay between DoD & DRD (%)', '7-13 day delay between DoD & DRD (%)', '14-20 day delay between DoD & DRD (%)', '21+ day delay between DoD & DRD (%)',
-                  'Patients delayed but discharged within 1 day (%)', 'Patients delayed but discharged within 2-3 days (%)', 'Patients delayed but discharged within 4-6 days (%)',
-                  'Patients delayed but discharged within 7-13 days (%)', 'Patients delayed but discharged within 14-20 days (%)','Patients delayed but discharged within 21 days or more (%)', 
-                  'Total bed days after DRD for patients discharged within 1 day', 'Total bed days after DRD for patients discharged within 2-3 days', 'Total bed days after DRD for patients discharged within 4-6 days', 
-                  'Total bed days after DRD for patients discharged within 7-13 days','Total bed days after DRD for patients discharged within 14-20 days', 'Total bed days after DRD for patients discharged within 21 days or more',
-                  'Average days from DRD to DoD (inc 0-day delays)','Average days from DRD to DoD (exc 0-day delays)')
-
-colnames(England_FULL) <- colnames_Eng
-
-Month_list <- c("Sep23","Oct23","Nov23","Dec23","Jan24","Feb24","Mar24","Apr24",
-                "May24","Jun24","Jul24","Aug24","Sep24","Oct24","Nov24","Dec24",
-                "Jan25","Feb25","Mar25","Apr25","May25")
-
-England_FULL$Month <- Month_list
-print(colnames_Eng)
-England_FULL[, -1] <- lapply(England_FULL[, -1], as.numeric)
-rownames(England_FULL) <- NULL
-
-England_FULL$Month <- factor(England_FULL$Month, levels = England_FULL$Month)
-
-# 7 Bind beds and discharge data ##############################################
-
-# Full month list
-
-Timeframe <- England_FULL$Month
-Timeframe
-
-# Remove bed data that doesn't match discharges
-
-DDbeds_timeseries <- beds_timeseries %>%
-  filter(Month %in% Timeframe)
-
-# Calculate average bed days for patients with delayed discharge
-
-DDbeds_totalGA <- DDbeds_timeseries$`G&A beds available`
-England_FULL$totalGAbeds <- DDbeds_totalGA
-
-England_FULL <- England_FULL %>%
-  mutate(parsed_date = my(Month),  
-        DaysInMonth = days_in_month(parsed_date))
-
-England_FULL <- England_FULL %>%
-  mutate(`bed_delays` = round(`Total bed days lost to DD`/DaysInMonth),
-        `pct_bed_delays` = (bed_delays/as.numeric(totalGAbeds)))
-
-# Clean #######################################################################
-
-rm(DRD_data_list)
-rm(colnames_22)
-rm(colnames_39)
-rm(colnames_Nov)
-rm(i)
-rm(na_indices)
-rm(colnames_Eng)
-
-
-
-# 6 Combine all datasets ##################################################
-
 #Bring together the Sept-23 to Mar-24 data files.
 delayed_discharges_sep23_mar24 <- rbind(Sep_23,Oct_23,Dec_23,Jan_24,Feb_24,Mar_24) %>% 
   select(-c(Region,ICB,`Data Source`)) %>% 
@@ -693,8 +669,8 @@ delayed_discharges_apr24_may25 <- rbind(Apr_24,
   select(-c(Region,ICB,`Data Source`))
 
 #Bring all the files together and select out the variables of interest.
-dd_file <- rbind(delayed_discharges_sep_mar,
-                 delayed_discharges_file) %>% 
+dd_file <- rbind(delayed_discharges_sep23_mar24,
+                 delayed_discharges_apr24_may25) %>% 
   select(month,org_code,patients_discharged_volume, dd_bed_days,no_delay_perc,delay_perc,
          no_delay_volume, `1_day_delay_volume`, `2_3_day_delay_volume`, `4_6_day_delay_volume`,
          `7_13_day_delay_volume`, `14_20_day_delay_volume`, `21plus_day_delay_volume`,
@@ -722,3 +698,15 @@ dd_file_acute_trusts <- left_join(dd_file,trust_codes,by='org_code') %>%
 #Create England level dataset.
 dd_file_national <- dd_file %>% 
   filter(org_code=='National')
+
+# Clean #######################################################################
+
+rm(DRD_data_list)
+rm(colnames_22)
+rm(colnames_39)
+rm(colnames_Nov)
+rm(i)
+rm(na_indices)
+rm(colnames_Eng)
+rm(delayed_discharges_apr24_may25)
+rm(delayed_discharges_sep23_mar24)
