@@ -2,24 +2,13 @@
 # 08/07/2025 - Discharge Ready Data (DRD) descriptive analysis
 # National level descriptives #################################################
 
+dd_file_national[dd_file_national == 0] <- NA
+dd_file_national[ , -c(1, 2)] <- lapply(dd_file_national[ , -c(1, 2)], as.numeric)
 dd_file_national$month <- factor(dd_file_national$month, 
                                  levels = unique(dd_file_national$month))
 
 # 1 % of discharges that are delayed ##################################
 
-# Total delayed column
-England_FULL$Total_delayed <- England_FULL$`1 day delay between DoD & DRD (#)`+ 
-  England_FULL$`2-3 day delay between DoD & DRD (#)`+ 
-  England_FULL$`4-6 day delay between DoD & DRD (#)`+
-  England_FULL$`7-13 day delay between DoD & DRD (#)`+
-  England_FULL$`14-20 day delay between DoD & DRD (#)`+
-  England_FULL$`21+ day delay between DoD & DRD (#)` 
-
-# Average bed days with delayed discharge
-England_FULL <- England_FULL %>%
-  mutate(Avg_DD_bed_days = sum())
-
-# % of discharges that are delayed
 delayed_discharges_plot <- ggplot(dd_file_national, aes(x = month, y = as.numeric(delay_perc), group = 1)) +
   geom_line(color = "firebrick1", linewidth = 1.2) +
   geom_smooth(method = "lm", se = FALSE, 
@@ -41,7 +30,7 @@ delayed_discharges_plot <- ggplot(dd_file_national, aes(x = month, y = as.numeri
 delayed_discharges_plot
 ggsave("delayed discharges.png", plot = delayed_discharges_plot, width = 8, height = 6, dpi = 300)
 
-# 2 Total discharges
+# 2 Total discharges ##########################################################
 dd_file_national$patients_discharged_volume[dd_file_national$patients_discharged_volume == 0] <- NA
 
 total_discharges_plot <- ggplot(dd_file_national, aes(x = month, y = as.numeric(`patients_discharged_volume`), group = 1)) +
@@ -65,58 +54,16 @@ total_discharges_plot <- ggplot(dd_file_national, aes(x = month, y = as.numeric(
 total_discharges_plot
 ggsave("total discharges.png", plot = total_discharges_plot, width = 8, height = 6, dpi = 300)
 
-# 2 DoD = DRD #################################################################
-
-no_delay <- ggplot(England_FULL, aes (x = Month, y = `DoD is same as DRD (%)`, group = 1)) +
-  geom_line(color = 'blue', size = 1.2) +
-  geom_smooth(method = 'lm', se = FALSE,
-              color = 'black',
-              linetype = 'longdash',
-              linewidth = 0.3) +
-  geom_point(color = "black", size = 1.5) +
-  labs (title = 'Percentage of successful discharges, England, September 2023 - May 2025',
-  x = 'Month',
-  y = 'DRD = DoD') +
-  scale_y_continuous(
-    limits = c(0, 1),
-    breaks = seq(0, 1, 0.05)) +
-  theme_gray() +
-  theme(axis.text.x = element_text(size = 7.5)) +
-  theme(axis.title.x = element_text(margin = margin(t = 12)),
-        axis.title.y = element_text(margin = margin(t = 12)))
-  
-ggsave("no_delay.png", plot = no_delay, width = 8, height = 6, dpi = 300) 
-
-no_delay_80 <- ggplot(England_FULL, aes (x = Month, y = `DoD is same as DRD (%)`, group = 1)) +
-  geom_line(color = 'blue', size = 1.2) +
-  geom_smooth(method = 'lm', se = FALSE,
-              color = 'black',
-              linetype = 'longdash',
-              linewidth = 0.3) +
-  geom_point(color = "black", size = 1.5) +
-  labs (title = 'Percentage of successful discharges, England, September 2023 - May 2025',
-        x = 'Month',
-        y = 'DRD = DoD') +
-  scale_y_continuous(
-    limits = c(0.8, 0.9),
-    breaks = seq(0.8, 0.9, 0.05)) +
-  theme_gray() +
-  theme(axis.text.x = element_text(size = 7.5)) +
-  theme(axis.title.x = element_text(margin = margin(t = 12)),
-        axis.title.y = element_text(margin = margin(t = 12)))
-
-ggsave("no_delay_80.png", plot = no_delay_80, width = 8, height = 6, dpi = 300) 
-
 # 3 Total bed days lost to delayed discharge ##################################
 
-total_bed_days_lost <- ggplot(England_FULL, aes (x = Month, y = `Total bed days lost to DD` , group = 1)) +
-  geom_line(color = 'blue', size = 1.2) +
+total_bed_days_lost <- ggplot(dd_file_national, aes (x = month, y = as.numeric(`dd_bed_days`) , group = 1)) +
+  geom_line(color = 'firebrick1', linewidth = 1.2) +
   geom_smooth(method = 'lm', se = FALSE,
               color = 'black',
               linetype = 'longdash',
               linewidth = 0.3) +
   geom_point(color = "black", size = 1.5) +
-  labs (title = 'Total bed days lost to delayed discharge, England, September 2023 - May 2025',
+  labs (title = 'Total bed days lost to delayed discharge, England, April 2024 - May 2025',
         x = 'Month',
         y = '# of bed days') +
   scale_y_continuous(
@@ -125,17 +72,18 @@ total_bed_days_lost <- ggplot(England_FULL, aes (x = Month, y = `Total bed days 
   theme_gray() +
   theme(axis.text.x = element_text(size = 7.5)) +
   theme(axis.title.x = element_text(margin = margin(t = 12)),
-        axis.title.y = element_text(margin = margin(t = 12)))
+        axis.title.y = element_text(margin = margin(r = 12)))
 
+total_bed_days_lost
 ggsave("total_bed_days_lost.png", plot = total_bed_days_lost, width = 8, height = 6, dpi = 300) 
 
 # 4 Average days from DRD to DoD (exc 0-day delays) ###########################
-Average_DRD_to_DoD <- ggplot(England_FULL, aes(x = Month, y = `Average days from DRD to DoD (exc 0-day delays)` , group = 1)) +
-  geom_line(color = "blue", size = 1.2) +
+Average_DRD_to_DoD <- ggplot(dd_file_national, aes(x = month, y = as.numeric(`average_delay_los_minus_0_day_delay`) , group = 1)) +
+  geom_line(color = "firebrick1", linewidth = 1.2) +
     geom_smooth(method = "lm", se = FALSE, 
               color = "black", 
               linetype = "longdash",
-              size = 0.5) +
+              linewidth = 0.5) +
   geom_point(color = "black", size = 1.5) +
       labs(title = "Average length of delay, England, October 2023 - May 2025",
        x = "Month",
@@ -147,32 +95,12 @@ Average_DRD_to_DoD <- ggplot(England_FULL, aes(x = Month, y = `Average days from
   theme(axis.text.x = element_text(size = 7)) +
   theme(axis.text.x = element_text(size = 7.5)) +
   theme(axis.title.x = element_text(margin = margin(t = 12)),
-        axis.title.y = element_text(margin = margin(t = 12)))
+        axis.title.y = element_text(margin = margin(r = 12)))
 
+Average_DRD_to_DoD
 ggsave("AverageDRD_to_DoD.png", plot = Average_DRD_to_DoD, width = 8, height = 6, dpi = 300)
 
-Average_DRD_to_DoD_5 <- ggplot(England_FULL, aes(x = Month, y = `Average days from DRD to DoD (exc 0-day delays)` , group = 1)) +
-  geom_line(color = "blue", size = 1.2) +
-  geom_smooth(method = "lm", se = FALSE, 
-              color = "black", 
-              linetype = "longdash",
-              size = 0.5) +
-  geom_point(color = "black", size = 1.5) +
-  labs(title = "Average length of delay, England, October 2023 - May 2025",
-       x = "Month",
-       y = "Average days from DRD to DoD (exc 0-day)") +
-  scale_y_continuous(
-    limits = c(5, 7),
-    breaks = seq(5, 7, 0.2)) +
-  theme_gray() +
-  theme(axis.text.x = element_text(size = 7)) +
-  theme(axis.text.x = element_text(size = 7.5)) +
-  theme(axis.title.x = element_text(margin = margin(t = 12)),
-        axis.title.y = element_text(margin = margin(t = 12)))
-
-ggsave("AverageDRD_to_DoD_5.png", plot = Average_DRD_to_DoD_5, width = 8, height = 6, dpi = 300)
-
-# 5 Discharge delays +1 day ###################################################
+## Discharge delays +1 day ###################################################
 delay_1_day <- ggplot(England_FULL, aes(x = Month, y = `1 day delay between DoD & DRD (%)` , group = 1)) +
   geom_line(color = "blue", size = 1.2) +
   geom_smooth(method = "lm", se = FALSE, 
@@ -194,7 +122,7 @@ delay_1_day <- ggplot(England_FULL, aes(x = Month, y = `1 day delay between DoD 
 
 ggsave("delay_1_day.png", plot = delay_1_day, width = 8, height = 6, dpi = 300)
 
-# 6 Discharge delays 2-3 days #################################################
+## Discharge delays 2-3 days #################################################
 delay_2_3_day <- ggplot(England_FULL, aes(x = Month, y = `2-3 day delay between DoD & DRD (%)` , group = 1)) +
   geom_line(color = "blue", size = 1.2) +
   geom_smooth(method = "lm", se = FALSE, 
@@ -216,7 +144,7 @@ delay_2_3_day <- ggplot(England_FULL, aes(x = Month, y = `2-3 day delay between 
 
 ggsave("delay_2_3_day.png", plot = delay_2_3_day, width = 8, height = 6, dpi = 300)
 
-# 7 Discharge delays 4-6 days  ################################################
+## Discharge delays 4-6 days  ################################################
 delay_4_6_day <- ggplot(England_FULL, aes(x = Month, y = `4-6 day delay between DoD & DRD (%)` , group = 1)) +
   geom_line(color = "blue", size = 1.2) +
   geom_smooth(method = "lm", se = FALSE, 
@@ -238,7 +166,7 @@ delay_4_6_day <- ggplot(England_FULL, aes(x = Month, y = `4-6 day delay between 
 
 ggsave("delay_4_6_day.png", plot = delay_4_6_day, width = 8, height = 6, dpi = 300)
 
-# 8 Discharge delays 7-13 days  ###############################################
+## Discharge delays 7-13 days  ###############################################
 delay_7_13_day <- ggplot(England_FULL, aes(x = Month, y = `7-13 day delay between DoD & DRD (%)` , group = 1)) +
   geom_line(color = "blue", size = 1.2) +
   geom_smooth(method = "lm", se = FALSE, 
@@ -260,7 +188,7 @@ delay_7_13_day <- ggplot(England_FULL, aes(x = Month, y = `7-13 day delay betwee
 
 ggsave("delay_7_13_day.png", plot = delay_7_13_day, width = 8, height = 6, dpi = 300)
 
-# 9 Discharge delays 14-20 days  ##############################################
+## Discharge delays 14-20 days  ##############################################
 delay_14_20_day <- ggplot(England_FULL, aes(x = Month, y = `14-20 day delay between DoD & DRD (%)` , group = 1)) +
   geom_line(color = "blue", size = 1.2) +
   geom_smooth(method = "lm", se = FALSE, 
@@ -282,7 +210,7 @@ delay_14_20_day <- ggplot(England_FULL, aes(x = Month, y = `14-20 day delay betw
 
 ggsave("delay_14_20_day.png", plot = delay_14_20_day, width = 8, height = 6, dpi = 300)
 
-# 10 Discharge delays 21+ days  ###############################################
+## Discharge delays 21+ days  ###############################################
 delay_21_day <- ggplot(England_FULL, aes(x = Month, y = `21+ day delay between DoD & DRD (%)` , group = 1)) +
   geom_line(color = "blue", size = 1.2) +
   geom_smooth(method = "lm", se = FALSE, 
@@ -304,7 +232,7 @@ delay_21_day <- ggplot(England_FULL, aes(x = Month, y = `21+ day delay between D
 
 ggsave("delay_21+_day.png", plot = delay_21_day, width = 8, height = 6, dpi = 300)
 
-# 11 Patients DD but within 1 day  ############################
+## Patients DD but within 1 day  ############################
 DD_1_day <- ggplot(England_FULL, aes(x = Month, y = `Patients delayed but discharged within 1 day (%)`, group = 1)) +
   geom_line(color = "blue", size = 1.2) +
   geom_smooth(method = "lm", se = FALSE, 
@@ -326,7 +254,7 @@ DD_1_day <- ggplot(England_FULL, aes(x = Month, y = `Patients delayed but discha
 
 ggsave("DD_1_day.png", plot = DD_1_day, width = 8, height = 6, dpi = 300)
 
-# 12 Patients DD but within 2-3 days  #########################
+## Patients DD but within 2-3 days  #########################
 DD_2_3_day <- ggplot(England_FULL, aes(x = Month, y = `Patients delayed but discharged within 2-3 days (%)`, group = 1)) +
   geom_line(color = "blue", size = 1.2) +
   geom_smooth(method = "lm", se = FALSE, 
@@ -348,7 +276,7 @@ DD_2_3_day <- ggplot(England_FULL, aes(x = Month, y = `Patients delayed but disc
 
 ggsave("DD_2_3_day.png", plot = DD_2_3_day, width = 8, height = 6, dpi = 300)
 
-# 13 Patients DD but within 4-6 days  #########################
+## Patients DD but within 4-6 days  #########################
 DD_4_6_day <- ggplot(England_FULL, aes(x = Month, y = `Patients delayed but discharged within 4-6 days (%)`, group = 1)) +
   geom_line(color = "blue", size = 1.2) +
   geom_smooth(method = "lm", se = FALSE, 
@@ -370,7 +298,7 @@ DD_4_6_day <- ggplot(England_FULL, aes(x = Month, y = `Patients delayed but disc
 
 ggsave("DD_4_6_day.png", plot = DD_4_6_day, width = 8, height = 6, dpi = 300)
 
-# 14 Patients DD but within 7-13 days  ########################
+## Patients DD but within 7-13 days  ########################
 DD_7_13_day <- ggplot(England_FULL, aes(x = Month, y = `Patients delayed but discharged within 7-13 days (%)`, group = 1)) +
   geom_line(color = "blue", size = 1.2) +
   geom_smooth(method = "lm", se = FALSE, 
@@ -392,7 +320,7 @@ DD_7_13_day <- ggplot(England_FULL, aes(x = Month, y = `Patients delayed but dis
 
 ggsave("DD_7_13_day.png", plot = DD_7_13_day, width = 8, height = 6, dpi = 300)
 
-# 15 Patients DD but within 14-20 days  #######################
+## Patients DD but within 14-20 days  #######################
 DD_14_20_day <- ggplot(England_FULL, aes(x = Month, y = `Patients delayed but discharged within 14-20 days (%)`, group = 1)) +
   geom_line(color = "blue", size = 1.2) +
   geom_smooth(method = "lm", se = FALSE, 
@@ -414,7 +342,7 @@ DD_14_20_day <- ggplot(England_FULL, aes(x = Month, y = `Patients delayed but di
 
 ggsave("DD_14_20_day.png", plot = DD_14_20_day, width = 8, height = 6, dpi = 300)
 
-# 16 Patients DD but within 21+ days  #########################
+## Patients DD but within 21+ days  #########################
 DD_21_day <- ggplot(England_FULL, aes(x = Month, y = `Patients delayed but discharged within 21 days or more (%)`, group = 1)) +
   geom_line(color = "blue", size = 1.2) +
   geom_smooth(method = "lm", se = FALSE, 
@@ -437,23 +365,71 @@ DD_21_day <- ggplot(England_FULL, aes(x = Month, y = `Patients delayed but disch
 ggsave("DD_21+_day.png", plot = DD_21_day, width = 8, height = 6, dpi = 300)
 
 <<<<<<< HEAD
-# Grouped delay lengths #######################################################
 
-England_FULL$Group1discharges <- rowSums(England_FULL[, c(
-    'Patients delayed but discharged within 1 day (%)',
-    'Patients delayed but discharged within 2-3 days (%)',
-    'Patients delayed but discharged within 4-6 days (%)')], na.rm = TRUE)
+# 5 Grouped delay lengths #######################################################
 
-England_FULL$Group2discharges <- (England_FULL$`Patients delayed but discharged within 7-13 days (%)`)
+dd_file_national$Group1discharges <- rowSums(dd_file_national[, c(
+    'delayed_perc_1_day',
+    'delayed_perc_2_3_days',
+    'delayed_perc_4_6_days')], na.rm = FALSE)
 
-England_FULL$Group3discharges <- rowSums(England_FULL[, c(
-  'Patients delayed but discharged within 14-20 days (%)',
-  'Patients delayed but discharged within 21 days or more (%)')], na.rm = TRUE)                                     
+dd_file_national$Group2discharges <- rowSums(dd_file_national[, c(
+  'delayed_perc_7_13_days')], na.rm = FALSE)
 
-England_FULL <- England_FULL %>% 
-  rename('Delayed discharges 0-6 days' = Group1discharges,
-         'Delayed discharges 7-13 days' = Group2discharges,
-         'Delayed discharges over 14 days' = Group3discharges)
+dd_file_national$Group3discharges <- rowSums(dd_file_national[, c(
+  'delayed_perc_14_20_days',
+  'delayed_perc_21plus_days')], na.rm = FALSE)                                     
+
+### Group 1 (1-6) ##############################################################
+### Group 2 (7-13) #############################################################
+group2delay <- ggplot(dd_file_national, aes(x = month, y = Group2discharges, group = 1)) +
+  geom_line(color = "firebrick1", linewidth = 1.2) +
+  geom_smooth(method = "loess", se = FALSE, 
+              color = "black", 
+              linetype = "longdash",
+              size = 0.5) +
+  geom_point(color = "black", size = 1.5) +
+  labs(title = "Delayed patients discharged within 7-13 days, England, September 2023 - May 2025 ",
+       x = "Month",
+       y = "% of delayed patients") +
+  scale_y_continuous(
+    limits = c(0, 0.8),
+    breaks = seq(0, 0.8, 0.05)) +
+  theme_gray() +
+  theme(axis.text.x = element_text(size = 7)) +
+  theme(axis.text.x = element_text(size = 7.5)) +
+  theme(axis.title.x = element_text(margin = margin(t = 12)),
+        axis.title.y = element_text(margin = margin(r = 12)))
+
+group2delay
+ggsave("group2delay.png", plot = group2delay, width = 8, height = 6, dpi = 300)
+
+
+### Group 3 (14+) ##############################################################
+Group3_delay <- ggplot(dd_file_national, aes(x = month, y = Group3discharges, group = 1)) +
+  geom_line(color = "firebrick1", linewidth = 1.2) +
+  geom_smooth(method = "lm", se = FALSE, 
+              color = "black", 
+              linetype = "longdash",
+              linewidth = 0.5) +
+  geom_point(color = "black", size = 1.5) +
+  labs(title = "Delayed patients discharged beyond two weeks, England, September 2023 - May 2025 ",
+       x = "Month",
+       y = "% of delayed patients") +
+  scale_y_continuous(
+    limits = c(0, 0.8),
+    breaks = seq(0, 0.8, 0.05)) +
+  theme_gray() +
+  theme(axis.text.x = element_text(size = 7)) +
+  theme(axis.text.x = element_text(size = 7.5)) +
+  theme(axis.title.x = element_text(margin = margin(t = 12)),
+        axis.title.y = element_text(margin = margin(r = 12)))
+
+Group3_delay
+ggsave("Group3_delay.png", plot = Group3_delay, width = 8, height = 6, dpi = 300)
+
+
+
 
 # Apr/May comparisons
 
@@ -490,21 +466,22 @@ Group3_delay <- ggplot(England_FULL, aes(x = Month, y = `Delayed discharges over
 Group3_delay
 ggsave("Group3_delay.png", plot = Group3_delay, width = 8, height = 6, dpi = 300)
 
+
 # 17 Delay composition stacks #################################################
 
-grouped_delays <- England_FULL %>%
-  select(Month, `Delayed discharges 0-6 days`, `Delayed discharges 7-13 days`, `Delayed discharges over 14 days`)
+grouped_delays <- dd_file_national %>%
+  select(month, `Group1discharges`, `Group2discharges`, `Group3discharges`)
   
 grouped_delays <- grouped_delays %>%
   pivot_longer(
-    cols = starts_with('Delayed discharges'),
+    cols = starts_with('Group'),
     names_to = 'Delay_Category',
     values_to = 'Value') %>%
-  group_by(Month) %>%
+  group_by(month) %>%
   arrange((Value), .by_group = TRUE) %>%
   mutate(Value = Value*100)
 
-delay_length_timeseries <- ggplot(grouped_delays, aes(x = Month, y = `Value`, fill =`Delay_Category`)) +
+delay_length_timeseries <- ggplot(grouped_delays, aes(x = month, y = `Value`, fill =`Delay_Category`)) +
   geom_bar(position="stack", stat="identity") +
   geom_text(aes(label = paste0(round(Value, digits = 1), "%")), 
             position = position_stack(vjust = 0.5),
@@ -522,8 +499,6 @@ delay_length_timeseries <- ggplot(grouped_delays, aes(x = Month, y = `Value`, fi
 
 delay_length_timeseries
 ggsave("delay_length_timeseries.png", plot = delay_length_timeseries, width = 8, height = 6, dpi = 300)
-
-
 
 # Trust-level tests ############################################################
 

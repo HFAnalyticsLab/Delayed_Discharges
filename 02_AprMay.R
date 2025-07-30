@@ -44,8 +44,7 @@ output <- full_join(output,May_25_redux, by=c("Region","org_code"))
 Apr_May_national <- output %>%
   filter(org_code == 'National') %>%
   mutate(total_discharge24 = sum(as.numeric(total_discharge_Apr_24), as.numeric(total_discharge_May_24))/2,
-         total_discharge25 = sum(as.numeric(total_discharge_Apr_25), as.numeric(total_discharge_May_25)/2)
-
+         total_discharge25 = sum(as.numeric(total_discharge_Apr_25), as.numeric(total_discharge_May_25)/2))
 
 output_test <- output %>% 
   group_by(Region,org_code) %>% 
@@ -60,9 +59,10 @@ output_test <- output %>%
          post_delays = as.numeric(delays_Apr_25) + as.numeric(delays_May_25),
          post_delayed_beddays = as.numeric(total_delay_beddays_Apr_25) + as.numeric(total_delay_beddays_May_25),
          post_proportion_delayed = post_delays / post_total_discharge,
-         post_delay_los = post_delayed_beddays / post_delays) %>% 
+         post_delay_los = post_delayed_beddays / post_delays,
+         change_in_total_discharge = (post_total_discharge - pre_total_discharge)/pre_total_discharge) %>%
   ungroup() %>% 
-  select(org_code,pre_proportion_delayed,pre_delay_los,post_proportion_delayed,post_delay_los) %>% 
+  select(org_code,change_in_total_discharge,pre_proportion_delayed,pre_delay_los,post_proportion_delayed,post_delay_los) %>% 
   filter(str_starts(org_code, "R")) %>% 
   mutate(proportion_delayed_diff = post_proportion_delayed - pre_proportion_delayed,
          delay_los_diff = post_delay_los - pre_delay_los)
