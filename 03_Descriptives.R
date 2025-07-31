@@ -552,3 +552,177 @@ change_in_delay_length_plot <- ggplot(data = output_test_3, aes(x = reorder(org_
 change_in_delay_length_plot
 ggsave("change_in_delay_length.png", plot = change_in_delay_length_plot, width = 8, height = 6, dpi = 300)
 
+
+
+
+#####
+#Figure 6.
+
+figure_6_data <- left_join(dd_file_acute_trusts_FINAL,hospital_beds,by=c('month','org_code')) %>% 
+  mutate(month = my(month),
+    days_in_month = days_in_month(month)) %>% 
+  filter(dd_bed_days > 0, #only select out trusts which have delayed discharges
+         !is.na(acute_beds)) %>%  #remove one trust which doesn't have some bed info for Nov/Dec due to merger
+  group_by(month) %>% 
+  summarise(dd_bed_days = sum(as.numeric(dd_bed_days)),
+            total_acute_beds = sum(acute_beds),
+            days_in_month = max(days_in_month)) %>% 
+  ungroup() %>% 
+  mutate(perc_bed_delays = (dd_bed_days/days_in_month)/total_acute_beds*100)
+
+
+ggplot(figure_6_data,aes(x=month,y=perc_bed_delays)) +
+  geom_line(size = 1) +
+  labs(
+    title = "Proportion of Beds with a Delayed Discharge",
+    y = "Percentage (%)"
+  ) +
+  theme_classic()
+
+  
+#####
+#Figure 9.
+
+figure_9_data <- left_join(dd_file_acute_trusts_FINAL,hospital_beds,by=c('month','org_code')) %>% 
+  filter(month %in% c('Apr-24','May-24','Apr-25','May-25')) %>% 
+  mutate(period = if_else(month %in% c('Apr-24','May-24'),'pre','post')) %>% 
+  group_by(period,org_code) %>% 
+  summarise(patients_discharged_volume = sum(as.numeric(patients_discharged_volume)),
+            no_delay_volume = sum(as.numeric(no_delay_volume))) %>% 
+  ungroup() %>% 
+  mutate(perc_delayed = (patients_discharged_volume - no_delay_volume)/patients_discharged_volume*100) %>% 
+  select(period,org_code,perc_delayed) %>% 
+  pivot_wider(
+    names_from = period,  
+    values_from = perc_delayed
+  ) %>% 
+  filter(if_all(everything(), ~ !is.nan(.))) %>% 
+  mutate(difference = post - pre)
+
+
+ggplot(data = figure_9_data, aes(x = reorder(org_code, difference), y = as.numeric(difference))) +
+  geom_bar(stat = "identity", fill = "firebrick2", color = "black", linewidth = 0.3) +
+  labs(
+    title = "Absolute Difference in % Admissions with Delay between Apr-May 2025 and Apr-May 2024",
+    x = "NHS Trust",
+    y = "Absolute Difference in % Admissions with Delay"
+  ) +
+  theme(axis.text.x = element_blank())
+
+
+
+#####
+#Figure 10.
+
+figure_10_data <- left_join(dd_file_acute_trusts_FINAL,hospital_beds,by=c('month','org_code')) %>% 
+  filter(month %in% c('Apr-24','May-24','Apr-25','May-25')) %>% 
+  mutate(period = if_else(month %in% c('Apr-24','May-24'),'pre','post')) %>% 
+  group_by(period,org_code) %>% 
+  summarise(patients_discharged_volume = sum(as.numeric(patients_discharged_volume)),
+            no_delay_volume = sum(as.numeric(no_delay_volume)),
+            dd_bed_days = sum(as.numeric(dd_bed_days))) %>% 
+  ungroup() %>% 
+  mutate(dd_los = dd_bed_days/(patients_discharged_volume - no_delay_volume)) %>% 
+  select(period,org_code,dd_los) %>% 
+  pivot_wider(
+    names_from = period,  
+    values_from = dd_los
+  ) %>% 
+  filter(if_all(everything(), ~ !is.nan(.))) %>% 
+  mutate(difference = post - pre)
+
+
+ggplot(data = figure_10_data, aes(x = reorder(org_code, difference), y = as.numeric(difference))) +
+  geom_bar(stat = "identity", fill = "firebrick2", color = "black", linewidth = 0.3) +
+  labs(
+    title = "Difference in Average Delay Length between Apr-May 2025 vs Apr-May 2024",
+    x = "NHS Trust",
+    y = "Difference in Delayed LoS (Days)"
+  ) +
+  theme(axis.text.x = element_blank())
+
+
+#####
+#Figure 11.
+
+figure_11_data <- left_join(dd_file_acute_trusts_FINAL,hospital_beds,by=c('month','org_code')) %>% 
+  filter(month %in% c('Apr-24','May-24','Apr-25','May-25')) %>% 
+  mutate(period = if_else(month %in% c('Apr-24','May-24'),'pre','post')) %>% 
+  mutate(month = my(month),
+         days_in_month = days_in_month(month)) %>%
+  filter(dd_bed_days > 0, #only select out trusts which have delayed discharges
+         !is.na(acute_beds)) %>%  #remove one trust which doesn't have some bed info for Nov/Dec due to merger
+  group_by(period,org_code) %>% 
+  summarise(dd_bed_days = sum(as.numeric(dd_bed_days)),
+            total_acute_beds = sum(acute_beds),
+            days_in_month = max(days_in_month)) %>% 
+  ungroup() %>% 
+  mutate(perc_bed_delays = (dd_bed_days/days_in_month)/total_acute_beds*100) %>% 
+  select(period,org_code,perc_bed_delays) %>% 
+  pivot_wider(
+    names_from = period,  
+    values_from = perc_bed_delays
+  ) %>% 
+  filter(if_all(everything(), ~ !is.nan(.))) %>% 
+  mutate(difference = post - pre) %>% 
+  filter(!is.na(difference))
+
+
+ggplot(data = figure_11_data, aes(x = reorder(org_code, difference), y = as.numeric(difference))) +
+  geom_bar(stat = "identity", fill = "firebrick2", color = "black", linewidth = 0.3) +
+  labs(
+    title = "Absolute Diff. in % of Bed Days used for DD between Apr-May 2025 vs Apr-May 2024",
+    x = "NHS Trust",
+    y = "Absolute Difference in % of Bed Days used for Delayed Discharges"
+  ) +
+  theme(axis.text.x = element_blank())
+
+
+
+
+figure_12_data <- figure_11_data %>% 
+  mutate(rank_pre = min_rank(pre),
+         rank_post = min_rank(post),
+         rank_change = min_rank(difference))
+
+
+test <- figure_12_data %>% 
+  filter(rank_change <= 10) %>%
+  pivot_longer(
+    cols = c(rank_pre, rank_post),
+    names_to = "period",
+    values_to = "rank"
+  ) %>%
+  mutate(
+    period = ifelse(period == "rank_pre", "Pre", "Post")
+  ) %>% 
+  mutate(
+    period = recode(period, rank_pre = "Pre", rank_post = "Post"),
+    period = factor(period, levels = c("Pre", "Post"))  # ensure correct order
+  ) %>% 
+  select(org_code,period,rank)
+
+ggplot(test, aes(x = period, y = rank, group = org_code)) +
+  geom_line(aes(color = org_code), size = 1.2) +
+  geom_point(size = 3) +
+  geom_text(aes(label = org_code), 
+            data = test %>% filter(period == "Pre"), 
+            hjust = 1.2, size = 3) +
+  geom_text(aes(label = org_code), 
+            data = test %>% filter(period == "Post"), 
+            hjust = -0.2, size = 3) +
+  scale_y_reverse(
+    breaks = seq(10, 110, by = 10) %>% c(1),
+    limits = c(110, 1)
+  ) +
+  scale_x_discrete(expand = expansion(add = c(0.5, 0.5))) +
+  labs(
+    title = "Top 10 Best Improved Trusts by % bed days used for delayed discharge",
+    x = NULL,
+    y = "Rank"
+  ) +
+  theme_minimal(base_size = 14) +
+  theme(
+    axis.text.x = element_text(face = "bold"),
+    legend.position = "none"
+  )
