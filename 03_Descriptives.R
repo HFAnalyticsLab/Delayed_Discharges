@@ -369,6 +369,7 @@ ggsave("DD_21+_day.png", plot = DD_21_day, width = 8, height = 6, dpi = 300)
 # 5 Grouped delay lengths #######################################################
 
 dd_file_national$Group1discharges <- rowSums(dd_file_national[, c(
+<<<<<<< HEAD
     '1_day_delay_perc',
     '2_3_day_delay_perc',
     '4_6_day_delay_perc')], na.rm = FALSE)
@@ -379,6 +380,18 @@ dd_file_national$Group2discharges <- rowSums(dd_file_national[, c(
 dd_file_national$Group3discharges <- rowSums(dd_file_national[, c(
   '14_20_day_delay_perc',
   '21plus_day_delay_perc')], na.rm = FALSE)                                     
+=======
+    'delayed_perc_1_day',
+    'delayed_perc_2_3_days',
+    'delayed_perc_4_6_days')], na.rm = FALSE)
+
+dd_file_national$Group2discharges <- rowSums(dd_file_national[, c(
+  'delayed_perc_7_13_days')], na.rm = FALSE)
+
+dd_file_national$Group3discharges <- rowSums(dd_file_national[, c(
+  'delayed_perc_14_20_days',
+  'delayed_perc_21plus_days')], na.rm = FALSE)                                     
+>>>>>>> 4635b80d183e155b38a554300be258d4e559a9f0
 
 ### Group 1 (1-6) ##############################################################
 ### Group 2 (7-13) #############################################################
@@ -406,7 +419,11 @@ ggsave("group2delay.png", plot = group2delay, width = 8, height = 6, dpi = 300)
 
 
 ### Group 3 (14+) ##############################################################
+<<<<<<< HEAD
 group3_delay <- ggplot(dd_file_national, aes(x = month, y = Group3discharges, group = 1)) +
+=======
+Group3_delay <- ggplot(dd_file_national, aes(x = month, y = Group3discharges, group = 1)) +
+>>>>>>> 4635b80d183e155b38a554300be258d4e559a9f0
   geom_line(color = "firebrick1", linewidth = 1.2) +
   geom_smooth(method = "lm", se = FALSE, 
               color = "black", 
@@ -425,8 +442,13 @@ group3_delay <- ggplot(dd_file_national, aes(x = month, y = Group3discharges, gr
   theme(axis.title.x = element_text(margin = margin(t = 12)),
         axis.title.y = element_text(margin = margin(r = 12)))
 
+<<<<<<< HEAD
 group3_delay
 ggsave("Group3_delay.png", plot = group3_delay, width = 8, height = 6, dpi = 300)
+=======
+Group3_delay
+ggsave("Group3_delay.png", plot = Group3_delay, width = 8, height = 6, dpi = 300)
+>>>>>>> 4635b80d183e155b38a554300be258d4e559a9f0
 
 
 

@@ -20,6 +20,8 @@ library (readxl)
 library (here)
 library (janitor)
 library (openxlsx)
+library (scales)
+library (colorspace)
 
 # Load functions
 
@@ -695,9 +697,26 @@ trust_codes <- read.csv('trust_codes.csv') %>%
 dd_file_acute_trusts <- left_join(dd_file,trust_codes,by='org_code') %>% 
   filter(Flag==1)
 
+
+#Select data from Apr-24 onwards.
+dd_file_acute_trusts_FINAL <- dd_file_acute_trusts %>% 
+  filter(!month %in% c('Sept-23','Oct-23','Nov-23','Dec-23','Jan-24','Feb-24','Mar-24'))
+
+
+#Create dataset for Apr/May.
+dd_file_apr_may <- dd_file_acute_trusts_FINAL %>% 
+  filter(month %in% c('Apr-24','May-24','Apr-25','May-25')) %>% 
+  mutate(time_period = if_else(month %in% c('Apr-24','May-24'),'pre','post'))
+
 #Create England level dataset.
-dd_file_national <- dd_file %>% 
-  filter(org_code=='National')
+dd_file_national_FINAL <- dd_file %>% 
+  filter(org_code=='National') %>% 
+  filter(!month %in% c('Sept-23','Oct-23','Nov-23','Dec-23','Jan-24','Feb-24','Mar-24'))
+
+#Create England level dataset for Apr/May
+dd_file_apr_may_national <- dd_file_national_FINAL %>%
+  filter(month %in% c('Apr-24','May-24','Apr-25','May-25')) %>% 
+  mutate(time_period = if_else(month %in% c('Apr-24','May-24'),'pre','post'))
 
 # Clean #######################################################################
 
