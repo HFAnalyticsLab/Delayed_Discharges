@@ -1,7 +1,6 @@
 
-# 30/07/2025 - Discharge Ready Data (DRD) REFORMED descriptive analysis
-
-# ALL APR 24 - MAY 25 | line charts
+# 30/07/2025 - Discharge Ready Data (DRD) National descriptive analysis
+# 05/08/2025 - Cleaned
 
 # National level descriptives #################################################
 
@@ -45,8 +44,16 @@ delayed_discharges_plot <- ggplot(dd_file_national_FINAL, aes(x = month, y = per
 delayed_discharges_plot
 ggsave("delayed discharges.png", plot = delayed_discharges_plot, width = 8, height = 6, dpi = 300)
 
+# 2 Proportion of beds occupied by delayed discharges #########################
+ggplot(figure_6_data,aes(x=month,y=perc_bed_delays)) +
+  geom_line(size = 1) +
+  labs(
+    title = "Proportion of Beds with a Delayed Discharge",
+    y = "Percentage (%)"
+  ) +
+  theme_classic()
 
-# 2 Total discharges ##########################################################
+# 3 Total discharges ##########################################################
 # plot total volume of patients discharged
 
 total_discharges_plot <- ggplot(dd_file_national_FINAL, aes(x = month , y = patients_discharged_volume, group = 1)) +
@@ -71,7 +78,7 @@ total_discharges_plot <- ggplot(dd_file_national_FINAL, aes(x = month , y = pati
 total_discharges_plot
 ggsave("total discharges.png", plot = total_discharges_plot, width = 8, height = 6, dpi = 300)
 
-# 3 Total bed days lost to delayed discharge ##################################
+# 4 Total bed days lost to delayed discharge ##################################
 # plot total volume of bed days lost to delayed discharge
 
 total_bed_days_lost_plot <- ggplot(dd_file_national_FINAL, aes (x = month, y = dd_bed_days, group = 1)) +
@@ -96,7 +103,7 @@ total_bed_days_lost_plot <- ggplot(dd_file_national_FINAL, aes (x = month, y = d
 total_bed_days_lost_plot
 ggsave("total_bed_days_lost.png", plot = total_bed_days_lost_plot, width = 8, height = 6, dpi = 300) 
 
-# 4 Average length of delay ###################################################
+# 5 Average length of delay ###################################################
 # plot average delay los exc 0 day delays
 
 average_length_delay_plot <- ggplot(dd_file_national_FINAL, aes(x = month, y = average_delay_los_minus_0_day_delay, group = 1)) +
@@ -122,8 +129,8 @@ average_length_delay_plot <- ggplot(dd_file_national_FINAL, aes(x = month, y = a
 average_length_delay_plot
 ggsave("AverageDRD_to_DoD.png", plot = average_length_delay_plot, width = 8, height = 6, dpi = 300)
 
-# 5 Composition of delays #####################################################
-## grouped monthly sums of delay volumes / total sum of delay volumes #########
+# 6 Composition of delays #####################################################
+## grouped monthly sums of delay volumes / total sum of delay volumes
 
 dd_file_national_FINAL <- dd_file_national_FINAL %>%
   group_by(month) %>%
@@ -186,7 +193,7 @@ delay_length_timeseries <- ggplot(grouped_delays, aes(x = month, y = `Value`, fi
 delay_length_timeseries
 ggsave("delay_length_stack.png", plot = delay_length_timeseries, width = 8, height = 6, dpi = 300)
 
-## same as above but pull out Apr/May 24 vs 25 ################################
+## same as above but pull out Apr/May 24 vs 25
 
 # Pull out Apr May
 dd_file_apr_may_national <- dd_file_national_FINAL %>%
@@ -215,6 +222,11 @@ grouped_delays_24_25 <- grouped_delays_24_25 %>%
   arrange((Value), .by_group = TRUE) %>%
   mutate(Value = Value*100)
 
+# Reverse stacking order
+grouped_delays_24_25$Delay_Category <- factor(
+  grouped_delays_24_25$Delay_Category,
+  levels = c("14+ days (%)", "7-13 days (%)", "0-6 days (%)"))
+
 delay_length_comp <- ggplot(grouped_delays_24_25, aes(x = month, y = `Value`, fill =`Delay_Category`)) +
   geom_bar(position="stack", stat="identity") +
   geom_text(aes(label = paste0(round(Value, digits = 1), "%")), 
@@ -222,7 +234,7 @@ delay_length_comp <- ggplot(grouped_delays_24_25, aes(x = month, y = `Value`, fi
             color = "white",
             size = 3,
             fontface = "bold") +
-  labs(title = "Breakdown of delayed patients by length of delay, England, April 2024 - May 2025",
+  labs(title = "Breakdown of delayed patients by length of delay, England, (April/May) 2024 vs 2025",
        fill = "Delay length",
        x = "Month",
        y = "Percentage of delayed patients") +
@@ -240,10 +252,4 @@ delay_length_comp <- ggplot(grouped_delays_24_25, aes(x = month, y = `Value`, fi
 
 delay_length_comp
 ggsave("delay_length_comp.png", plot = delay_length_comp, width = 8, height = 6, dpi = 300)
-
-
-
-
-
-
 
