@@ -422,6 +422,8 @@ dd_file_acute_trusts_FINAL <- dd_file_acute_trusts_FINAL %>%
 figure_13_data <- left_join(dd_file_acute_trusts_FINAL,hospital_beds,by=c('month','org_code')) %>% 
   filter(month %in% c('Apr-24','May-24','Jun-24','Apr-25','May-25','Jun-25')) %>% 
   mutate(period = if_else(month %in% c('Apr-24','May-24','Jun-24'),'pre','post')) %>% 
+  filter(month %in% c('Apr-24','May-24','Apr-25','May-25')) %>% 
+  mutate(period = if_else(month %in% c('Apr-24','May-24'),'pre','post')) %>% 
   mutate(month = my(month),
          days_in_month = days_in_month(month)) %>%
   filter(dd_bed_days > 0, #only select out trusts which have delayed discharges
