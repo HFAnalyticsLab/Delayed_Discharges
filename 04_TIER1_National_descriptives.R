@@ -45,14 +45,37 @@ delayed_discharges_plot
 ggsave("delayed discharges.png", plot = delayed_discharges_plot, width = 8, height = 6, dpi = 300)
 
 # 2 Proportion of beds occupied by delayed discharges #########################
-ggplot(figure_6_data,aes(x=month,y=perc_bed_delays)) +
-  geom_line(size = 1) +
-  labs(
-    title = "Proportion of Beds with a Delayed Discharge",
-    y = "Percentage (%)"
-  ) +
-  theme_classic()
+dd_bed_days_plot <- ggplot(figure_6_data, aes(x = month, y = perc_bed_delays, group = 1)) +
+  geom_line(color = "firebrick1", linewidth = 1.2) +
+  geom_smooth(method = "lm", se = FALSE, 
+              color = "black", 
+              linetype = "longdash",
+              linewidth = 0.5) +
+  geom_point(color = "black", size = 1.5) +
+  labs(title = "Proportion of beds with a delayed discharge, England, April 2024 - May 2025.",
+       x = "Month",
+       y = "Percentage (%)") +
+  scale_x_date(date_breaks = "1 month", date_labels = "%b %Y") +
+  scale_y_continuous(
+    limits = c(0, 11),        
+    breaks = seq(0, 11, 1),
+    labels = label_percent(scale = 1)) +
+  theme_gray() +
+  theme(axis.text.x = element_text(size = 6.5)) +
+  theme(axis.title.x = element_text(margin = margin(t = 12)),
+        axis.title.y = element_text(margin = margin(r = 12)))
 
+dd_bed_days_plot
+ggsave("delayed bed days.png", plot = dd_bed_days_plot, width = 8, height = 6, dpi = 300)
+
+## Number of beds occupied by patients fit for discharge, latest date ########
+
+latest_occupied <- figure_6_data %>%
+  filter(month == max(month, na.rm = TRUE)) %>%
+  select(perc_bed_delays) %>%
+
+latest_occupied
+  
 # 3 Total discharges ##########################################################
 # plot total volume of patients discharged
 
@@ -128,6 +151,18 @@ average_length_delay_plot <- ggplot(dd_file_national_FINAL, aes(x = month, y = a
 
 average_length_delay_plot
 ggsave("AverageDRD_to_DoD.png", plot = average_length_delay_plot, width = 8, height = 6, dpi = 300)
+
+# Calculate the change in average length of delay 
+
+dd_file_national_FINAL$delay_length_change <- c(NA, diff(dd_file_national_FINAL$average_delay_los_minus_0_day_delay))
+
+CAGR_dl <- (dd_file_national_FINAL$average_delay_los_minus_0_day_delay[dd_file_national_FINAL$month == 'May-25']/
+              dd_file_national_FINAL$average_delay_los_minus_0_day_delay[dd_file_national_FINAL$month == 'Apr-24']
+              ^(1/number_of_months))
+
+CAGR_dl
+
+number_of_months <- nrow(dd_file_national_FINAL)
 
 # 6 Composition of delays #####################################################
 ## grouped monthly sums of delay volumes / total sum of delay volumes
@@ -252,4 +287,24 @@ delay_length_comp <- ggplot(grouped_delays_24_25, aes(x = month, y = `Value`, fi
 
 delay_length_comp
 ggsave("delay_length_comp.png", plot = delay_length_comp, width = 8, height = 6, dpi = 300)
+
+# 7 Figure 1 National Picture 'not going in the right direction' ################
+
+figure_1_data <- dd_file_national_FINAL %>%
+  select(month, org_code, perc_patients_delayed, patients_discharged_volume)
+
+figure_1_data$perc_bed_delays <- figure_6_data$perc_bed_delays
+
+write_xlsx(figure_1_data, 'figure_1_data.xlsx')
+
+
+
+
+
+
+
+
+
+
+
 

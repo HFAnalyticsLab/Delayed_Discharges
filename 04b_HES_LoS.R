@@ -98,9 +98,9 @@ rm(LoS_data_22_23)
 rm(LoS_data_23_24)
 
 
+length(unique(dd_file_acute_trusts$org_code))
 
-
-
+length(unique(dd_file_acute_trusts_FINAL$org_code))
 
 
 

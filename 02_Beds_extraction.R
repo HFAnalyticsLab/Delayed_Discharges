@@ -376,13 +376,37 @@ figure_11_data <- left_join(dd_file_acute_trusts_FINAL,hospital_beds,by=c('month
   mutate(difference = post - pre) %>% 
   filter(!is.na(difference))
 
-# 6 Ranking trusts by the % of bed days used by delayed discharge DATA ##########
+# 6 Ranking trusts by the % of bed days used by delayed discharge DATA ########
 
 figure_12_data <- figure_11_data %>% 
   mutate(rank_pre = min_rank(pre),
          rank_post = min_rank(post),
          rank_change = min_rank(difference))
 
+# 7 Ranking trusts by the % of discharges that are delayed DATA ###############
+
+dd_file_acute_trusts_FINAL[dd_file_acute_trusts_FINAL == 0] <- NA
+dd_file_acute_trusts_FINAL[ , -c(1, 2)] <- lapply(dd_file_acute_trusts_FINAL[ , -c(1, 2)], as.numeric)
+
+dd_file_acute_trusts_FINAL <- dd_file_acute_trusts_FINAL %>%
+  group_by(org_code) %>%
+  mutate(total_delay_volume = rowSums(across(c(
+    '1_day_delay_volume',
+    '2_3_day_delay_volume',
+    '4_6_day_delay_volume',
+    '7_13_day_delay_volume',
+    '14_20_day_delay_volume',
+    '21plus_day_delay_volume'), ~ .x), na.rm = FALSE),
+    perc_patients_delayed = ((total_delay_volume/patients_discharged_volume) *100))
+
+figure_13_data <- left_join(dd_file_acute_trusts_FINAL,hospital_beds,by=c('month','org_code')) %>% 
+  filter(month %in% c('Apr-24','May-24','Apr-25','May-25')) %>% 
+  mutate(period = if_else(month %in% c('Apr-24','May-24'),'pre','post')) %>% 
+  mutate(month = my(month),
+         days_in_month = days_in_month(month)) %>%
+  filter(dd_bed_days > 0, #only select out trusts which have delayed discharges
+         !is.na(acute_beds)) #remove one trust which doesn't have some bed info for Nov/Dec due to merger
+  
 # Clean #######################################################################
 
 rm(url)
