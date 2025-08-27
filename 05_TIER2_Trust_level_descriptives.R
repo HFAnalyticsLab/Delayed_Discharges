@@ -99,7 +99,46 @@ bed_days_ranking_plot <- ggplot(test, aes(x = period, y = rank, group = org_code
 bed_days_ranking_plot
 ggsave("ranking bed days.png", plot = bed_days_ranking_plot, width = 8, height = 6, dpi = 300)
 
-# 5 Ranking trusts by the % of discharges that are delayed #####################
+# 5 Most improved trusts selection ###############################################
+
+bed_days_ranking_quant_plot <- ggplot(data = figure_12_data, aes(x = reorder(org_code, difference), y = as.numeric(difference))) +
+  geom_bar(stat = "identity", fill = "firebrick2", width = 0.5, color = "black", linewidth = 0.3) +
+  geom_vline(aes(xintercept=quantile
+                 (rank_change, 0.09)),
+                  color=I("blue"),
+                  linetype="solid",
+                  linewidth= 1,
+                  show.legend = T) +
+  labs(
+    title = "Absolute Diff. in % of Bed Days used for DD between Apr-June 2024 vs Apr-June 2025",
+    x = "NHS Trust",
+    y = "Absolute Difference in % of Bed Days used for Delayed Discharges") +
+  scale_y_continuous(
+    limits = c(-10, 14),        
+    breaks = seq(-10, 14, 2),
+    labels = label_percent(scale = 1)) +
+  theme(axis.text.x = element_blank())
+
+bed_days_ranking_quant_plot
+ggsave("most improved trusts selection.png", plot = bed_days_ranking_quant_plot, width = 8, height = 6, dpi = 300)
+
+# Greater than 3% reduction (6 trusts)
+greater_than_3p_reduction <- figure_12_data %>%
+  select(org_code,difference) %>%
+  filter(difference <= -3)
+
+# Greater than 2.5% reduction (10 trusts)
+greater_than_2.5p_reduction <- figure_12_data %>%
+  select(org_code,difference) %>%
+  filter(difference <= -2.5)
+
+# Greater than 2% reduction (14 trusts)
+greater_than_2p_reduction <- figure_12_data %>%
+  select(org_code,difference) %>%
+  filter(difference <= -2)
+
+
+# 6 Ranking trusts by the % of discharges that are delayed #####################
 
 test2 <- figure_13_data %>% 
   filter(rank_change <= 10) %>%
