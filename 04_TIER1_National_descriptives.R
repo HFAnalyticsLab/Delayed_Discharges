@@ -72,7 +72,7 @@ ggsave("delayed bed days.png", plot = dd_bed_days_plot, width = 8, height = 6, d
 
 latest_occupied <- figure_6_data %>%
   filter(month == max(month, na.rm = TRUE)) %>%
-  select(perc_bed_delays) %>%
+  select(perc_bed_delays) 
 
 latest_occupied
   

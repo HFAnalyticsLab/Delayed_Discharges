@@ -20,12 +20,14 @@ apr_24_beds <- read_excel(temp_file, sheet = 2,skip=14) %>%
   rename(Region = 1,
          org_code = 2,
          acute_beds = `G&A beds available`,
-         adult_acute_beds = `Adult G&A beds available`) %>% 
+         adult_acute_beds = `Adult G&A beds available`,
+         occupied_beds = `G&A beds occupied`,
+         occupancy_rate = `G&A occupancy rate`) %>% 
   mutate(org_code = str_trim(org_code, side = "left")) %>% 
   left_join(trust_codes,by='org_code') %>% 
   filter(Flag==1) %>%
   mutate(month = 'Apr-24') %>% 
-  select(month,org_code,acute_beds,adult_acute_beds)
+  select(month,org_code,acute_beds,adult_acute_beds,occupied_beds,occupancy_rate)
 
 
 # MAY 24 
@@ -41,11 +43,13 @@ may_24_beds <- read_excel(temp_file, sheet = 2,skip=14) %>%
   rename(Region = 1,
          org_code = 3,
          acute_beds = `G&A beds available`,
-         adult_acute_beds = `Adult G&A beds available`) %>% 
+         adult_acute_beds = `Adult G&A beds available`,
+         occupied_beds = `G&A beds occupied`,
+         occupancy_rate = `G&A occupancy rate`) %>% 
   left_join(trust_codes,by='org_code') %>% 
   filter(Flag==1) %>%
   mutate(month = 'May-24') %>% 
-  select(month,org_code,acute_beds,adult_acute_beds)
+  select(month,org_code,acute_beds,adult_acute_beds,occupied_beds,occupancy_rate)
 
 
 # JUNE 24 
@@ -61,11 +65,13 @@ jun_24_beds <- read_excel(temp_file, sheet = 2,skip=14) %>%
   rename(Region = 1,
          org_code = 3,
          acute_beds = `G&A beds available`,
-         adult_acute_beds = `Adult G&A beds available`) %>% 
+         adult_acute_beds = `Adult G&A beds available`,
+         occupied_beds = `G&A beds occupied`,
+         occupancy_rate = `G&A occupancy rate`) %>% 
   left_join(trust_codes,by='org_code') %>% 
   filter(Flag==1) %>%
   mutate(month = 'Jun-24') %>% 
-  select(month,org_code,acute_beds,adult_acute_beds)
+  select(month,org_code,acute_beds,adult_acute_beds,occupied_beds,occupancy_rate)
 
 
 # JULY 24 
@@ -81,11 +87,13 @@ jul_24_beds <- read_excel(temp_file, sheet = 2,skip=14) %>%
   rename(Region = 1,
          org_code = 3,
          acute_beds = `G&A beds available`,
-         adult_acute_beds = `Adult G&A beds available`) %>% 
+         adult_acute_beds = `Adult G&A beds available`,
+         occupied_beds = `G&A beds occupied`,
+         occupancy_rate = `G&A occupancy rate`) %>% 
   left_join(trust_codes,by='org_code') %>% 
   filter(Flag==1) %>%
   mutate(month = 'Jul-24') %>% 
-  select(month,org_code,acute_beds,adult_acute_beds)
+  select(month,org_code,acute_beds,adult_acute_beds,occupied_beds,occupancy_rate)
 
 
 # AUGUST 24 
@@ -101,11 +109,13 @@ aug_24_beds <- read_excel(temp_file, sheet = 2,skip=14) %>%
   rename(Region = 1,
          org_code = 3,
          acute_beds = `G&A beds available`,
-         adult_acute_beds = `Adult G&A beds available`) %>% 
+         adult_acute_beds = `Adult G&A beds available`,
+         occupied_beds = `G&A beds occupied`,
+         occupancy_rate = `G&A occupancy rate`) %>% 
   left_join(trust_codes,by='org_code') %>% 
   filter(Flag==1) %>%
   mutate(month = 'Aug-24') %>% 
-  select(month,org_code,acute_beds,adult_acute_beds)
+  select(month,org_code,acute_beds,adult_acute_beds,occupied_beds,occupancy_rate)
 
 
 # SEPTEMBER 24 
@@ -121,11 +131,13 @@ sep_24_beds <- read_excel(temp_file, sheet = 2,skip=14) %>%
   rename(Region = 1,
          org_code = 3,
          acute_beds = `G&A beds available`,
-         adult_acute_beds = `Adult G&A beds available`) %>% 
+         adult_acute_beds = `Adult G&A beds available`,
+         occupied_beds = `G&A beds occupied`,
+         occupancy_rate = `G&A occupancy rate`) %>% 
   left_join(trust_codes,by='org_code') %>% 
   filter(Flag==1) %>%
   mutate(month = 'Sept-24') %>% 
-  select(month,org_code,acute_beds,adult_acute_beds)
+  select(month,org_code,acute_beds,adult_acute_beds,occupied_beds,occupancy_rate)
 
 
 # OCTOBER 24 
@@ -141,11 +153,13 @@ oct_24_beds <- read_excel(temp_file, sheet = 2,skip=14) %>%
   rename(Region = 1,
          org_code = 3,
          acute_beds = `G&A beds available`,
-         adult_acute_beds = `Adult G&A beds available`) %>% 
+         adult_acute_beds = `Adult G&A beds available`,
+         occupied_beds = `G&A beds occupied`,
+         occupancy_rate = `G&A occupancy rate`) %>% 
   left_join(trust_codes,by='org_code') %>% 
   filter(Flag==1) %>%
   mutate(month = 'Oct-24') %>% 
-  select(month,org_code,acute_beds,adult_acute_beds)
+  select(month,org_code,acute_beds,adult_acute_beds,occupied_beds,occupancy_rate)
 
 
 # NOVEMBER 24 
@@ -161,11 +175,13 @@ nov_24_beds <- read_excel(temp_file, sheet = 2,skip=14) %>%
   rename(Region = 1,
          org_code = 3,
          acute_beds = `G&A beds available`,
-         adult_acute_beds = `Adult G&A beds available`) %>% 
+         adult_acute_beds = `Adult G&A beds available`,
+         occupied_beds = `G&A beds occupied`,
+         occupancy_rate = `G&A occupancy rate`) %>% 
   left_join(trust_codes,by='org_code') %>% 
   filter(Flag==1) %>%
   mutate(month = 'Nov-24') %>% 
-  select(month,org_code,acute_beds,adult_acute_beds)
+  select(month,org_code,acute_beds,adult_acute_beds,occupied_beds,occupancy_rate)
 
 
 # DECEMBER 24 
@@ -181,11 +197,13 @@ dec_24_beds <- read_excel(temp_file, sheet = 2,skip=14) %>%
   rename(Region = 1,
          org_code = 3,
          acute_beds = `G&A beds available`,
-         adult_acute_beds = `Adult G&A beds available`) %>% 
+         adult_acute_beds = `Adult G&A beds available`,
+         occupied_beds = `G&A beds occupied`,
+         occupancy_rate = `G&A occupancy rate`) %>% 
   left_join(trust_codes,by='org_code') %>% 
   filter(Flag==1) %>%
   mutate(month = 'Dec-24') %>% 
-  select(month,org_code,acute_beds,adult_acute_beds)
+  select(month,org_code,acute_beds,adult_acute_beds,occupied_beds,occupancy_rate)
 
 
 # JANUARY 25 
@@ -201,11 +219,13 @@ jan_25_beds <- read_excel(temp_file, sheet = 2,skip=14) %>%
   rename(Region = 1,
          org_code = 3,
          acute_beds = `G&A beds available`,
-         adult_acute_beds = `Adult G&A beds available`) %>% 
+         adult_acute_beds = `Adult G&A beds available`,
+         occupied_beds = `G&A beds occupied`,
+         occupancy_rate = `G&A occupancy rate`) %>% 
   left_join(trust_codes,by='org_code') %>% 
   filter(Flag==1) %>%
   mutate(month = 'Jan-25') %>% 
-  select(month,org_code,acute_beds,adult_acute_beds)
+  select(month,org_code,acute_beds,adult_acute_beds,occupied_beds,occupancy_rate)
 
 
 # FEBRUARY 25 
@@ -221,11 +241,13 @@ feb_25_beds <- read_excel(temp_file, sheet = 2,skip=14) %>%
   rename(Region = 1,
          org_code = 3,
          acute_beds = `G&A beds available`,
-         adult_acute_beds = `Adult G&A beds available`) %>% 
+         adult_acute_beds = `Adult G&A beds available`,
+         occupied_beds = `G&A beds occupied`,
+         occupancy_rate = `G&A occupancy rate`) %>% 
   left_join(trust_codes,by='org_code') %>% 
   filter(Flag==1) %>%
   mutate(month = 'Feb-25') %>% 
-  select(month,org_code,acute_beds,adult_acute_beds)
+  select(month,org_code,acute_beds,adult_acute_beds,occupied_beds,occupancy_rate)
 
 
 # MARCH 25 
@@ -241,11 +263,13 @@ mar_25_beds <- read_excel(temp_file, sheet = 2,skip=14) %>%
   rename(Region = 1,
          org_code = 3,
          acute_beds = `G&A beds available`,
-         adult_acute_beds = `Adult G&A beds available`) %>% 
+         adult_acute_beds = `Adult G&A beds available`,
+         occupied_beds = `G&A beds occupied`,
+         occupancy_rate = `G&A occupancy rate`) %>% 
   left_join(trust_codes,by='org_code') %>% 
   filter(Flag==1) %>%
   mutate(month = 'Mar-25') %>% 
-  select(month,org_code,acute_beds,adult_acute_beds)
+  select(month,org_code,acute_beds,adult_acute_beds,occupied_beds,occupancy_rate)
 
 
 # APRIL 25 
@@ -261,11 +285,13 @@ apr_25_beds <- read_excel(temp_file, sheet = 2,skip=14) %>%
   rename(Region = 1,
          org_code = 3,
          acute_beds = `G&A beds available`,
-         adult_acute_beds = `Adult G&A beds available`) %>% 
+         adult_acute_beds = `Adult G&A beds available`,
+         occupied_beds = `G&A beds occupied`,
+         occupancy_rate = `G&A occupancy rate`) %>% 
   left_join(trust_codes,by='org_code') %>% 
   filter(Flag==1) %>%
   mutate(month = 'Apr-25') %>% 
-  select(month,org_code,acute_beds,adult_acute_beds)
+  select(month,org_code,acute_beds,adult_acute_beds,occupied_beds,occupancy_rate)
 
 
 # MAY 25 
@@ -281,11 +307,13 @@ may_25_beds <- read_excel(temp_file, sheet = 2,skip=14) %>%
   rename(Region = 1,
          org_code = 3,
          acute_beds = `G&A beds available`,
-         adult_acute_beds = `Adult G&A beds available`) %>% 
+         adult_acute_beds = `Adult G&A beds available`,
+         occupied_beds = `G&A beds occupied`,
+         occupancy_rate = `G&A occupancy rate`) %>% 
   left_join(trust_codes,by='org_code') %>% 
   filter(Flag==1) %>%
   mutate(month = 'May-25') %>% 
-  select(month,org_code,acute_beds,adult_acute_beds)
+  select(month,org_code,acute_beds,adult_acute_beds,occupied_beds,occupancy_rate)
 
 # JUN 25
 
@@ -300,11 +328,15 @@ jun_25_beds <- read_excel(temp_file, sheet = 2,skip=14) %>%
   rename(Region = 1,
          org_code = 3,
          acute_beds = `G&A beds available`,
-         adult_acute_beds = `Adult G&A beds available`) %>% 
+         adult_acute_beds = `Adult G&A beds available`,
+         occupied_beds = `G&A beds occupied`,
+         occupancy_rate = `G&A occupancy rate`) %>% 
   left_join(trust_codes,by='org_code') %>% 
   filter(Flag==1) %>%
   mutate(month = 'Jun-25') %>% 
-  select(month,org_code,acute_beds,adult_acute_beds)
+  select(month,org_code,acute_beds,adult_acute_beds,occupied_beds,occupancy_rate)
+
+# Bind bed data ###############################################################
 
 hospital_beds <- rbind(apr_24_beds,
                        may_24_beds,

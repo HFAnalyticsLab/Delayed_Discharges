@@ -57,7 +57,7 @@ ggsave("variation bed days.png", plot = variation_bed_days_plot, width = 8, heig
 # 4 Ranking trusts by the % of bed days used by delayed discharge ############
 
 test <- figure_12_data %>% 
-  filter(rank_change <= 10) %>%
+  filter(difference <= -2.5) %>%
   pivot_longer(
     cols = c(rank_pre, rank_post),
     names_to = "period",
@@ -85,9 +85,11 @@ bed_days_ranking_plot <- ggplot(test, aes(x = period, y = rank, group = org_code
     breaks = seq(10, 110, by = 10) %>% c(1),
     limits = c(110, 1)
   ) +
-  scale_x_discrete(expand = expansion(add = c(0.5, 0.5))) +
+  scale_x_discrete(
+    labels = c ("Pre"="Apr-Jun 2024", "Post"="Apr-Jun 2025"),
+    expand = expansion(add = c(0.5, 0.5))) +
   labs(
-    title = "Top 10 most improved trusts by % bed days used for delayed discharge",
+    title = "Top 10 most improved trusts by % bed days used for delayed discharge, Apr-Jun 2024 vs Apr-Jun 2025",
     x = NULL,
     y = "Rank"
   ) +
@@ -97,9 +99,11 @@ bed_days_ranking_plot <- ggplot(test, aes(x = period, y = rank, group = org_code
     legend.position = "none")
 
 bed_days_ranking_plot
-ggsave("ranking bed days.png", plot = bed_days_ranking_plot, width = 8, height = 6, dpi = 300)
+ggsave("ranking bed daysJun.png", plot = bed_days_ranking_plot, width = 10, height = 6, dpi = 300)
 
 # 5 Most improved trusts selection ###############################################
+
+seq(10, 110, by = 10) %>% c(1)
 
 bed_days_ranking_quant_plot <- ggplot(data = figure_12_data, aes(x = reorder(org_code, difference), y = as.numeric(difference))) +
   geom_bar(stat = "identity", fill = "firebrick2", width = 0.5, color = "black", linewidth = 0.3) +
@@ -179,4 +183,5 @@ bed_days_ranking_plot <- ggplot(figure, aes(x = period, y = rank, group = org_co
   theme_gray() +
   theme(axis.text.x = element_text(face = "bold"),
         legend.position = "none")
+
 
