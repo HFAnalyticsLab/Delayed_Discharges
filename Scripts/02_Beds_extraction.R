@@ -460,7 +460,7 @@ figure_13_data <- left_join(dd_file_acute_trusts_FINAL,hospital_beds,by=c('month
          days_in_month = days_in_month(month)) %>%
   filter(dd_bed_days > 0, #only select out trusts which have delayed discharges
          !is.na(acute_beds)) #remove one trust which doesn't have some bed info for Nov/Dec due to merger
-  
+
 # Clean #######################################################################
 
 rm(url)
