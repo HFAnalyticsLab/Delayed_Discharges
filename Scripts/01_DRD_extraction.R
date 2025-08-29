@@ -566,7 +566,7 @@ England_FULL <- England_FULL %>%
 # 8 Combine all trust DRD datasets ############################################
 
 # Create a new variable (month) for each dataset.
-  Sep_23 <- Sep_23 %>% 
+Sep_23 <- Sep_23 %>% 
   mutate(month = 'Sept-23')
 Oct_23 <- Oct_23 %>% 
   mutate(month = 'Oct-23')

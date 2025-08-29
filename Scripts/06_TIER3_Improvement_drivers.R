@@ -8,7 +8,7 @@ greater_than_2.5p_reduction <- figure_12_data %>%
   select(org_code,difference) %>%
   filter(difference <= -2.5)
 
-best_trusts <- c(greater_than_2.5p_reduction$org_code)
+best_trusts <- as.data.frame(best_trusts <- c(greater_than_2.5p_reduction$org_code))
 
 # 1 Bed occupancy #############################################################
 

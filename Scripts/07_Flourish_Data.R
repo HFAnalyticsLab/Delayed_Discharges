@@ -3,7 +3,7 @@
 
 # 07 Flourish data #############################################################
 
-# 7 Figure 1 National Picture 'not going in the right direction' ###############
+# Figure 1 National Picture 'not going in the right direction' ###############
 
 figure_1_data <- dd_file_national_FINAL %>%
   select(month, org_code, perc_patients_delayed, patients_discharged_volume)
@@ -12,8 +12,15 @@ figure_1_data$perc_bed_delays <- figure_6_data$perc_bed_delays
 
 write_xlsx(figure_1_data, 'figure_1_data.xlsx')
 
+# Trust names
+
+
+
+
+
 # Flourish data ################################################################
 
+write_xlsx(best_trusts, 'best_trusts.xlsx')
 write_xlsx(figure_1_data, 'figure_1_data.xlsx')
 write_xlsx(figure_3.1_data, 'figure_3.1_data.xlsx')
 write_xlsx(figure_3.2_data, 'figure_3.2_data.xlsx')
