@@ -3,6 +3,25 @@
 
 # Trust-level descriptives ####################################################
 
+# Number of trusts reporting data for all periods
+
+cols_to_check <- c("patients_discharged_volume", "average_delay_los_minus_0_day_delay")  
+
+trust_completeness <- dd_file_acute_trusts_FINAL %>%
+  group_by(org_code, month) %>%
+  summarise(
+    row_has_data = any(rowSums(!is.na(across(all_of(cols_to_check)))) > 0),
+    .groups = "drop"
+  ) %>%
+  group_by(org_code) %>%
+  summarise(
+    months_with_data = sum(row_has_data),
+    total_months     = n_distinct(dd_file_acute_trusts_FINAL$month),
+    complete         = months_with_data == total_months
+  )
+
+sum(trust_completeness$complete == TRUE)
+
 # 1 Variation by trust in change of the % of discharges delayed ###############
 
 variation_delayed_plot <- ggplot(data = figure_9_data, aes(x = reorder(org_code, difference), y = as.numeric(difference))) +
