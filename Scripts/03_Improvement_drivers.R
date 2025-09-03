@@ -1,8 +1,20 @@
-#Staffing and Delayed Discharge Pathways.
 
+# 03/09/2025 - Improvement drivers
 
+# Rate of bed occupancy ########################################################
+figure_4_data <- hospital_beds %>%
+  filter(org_code %in% best_trusts) %>%
+  mutate(month = my(month)) %>%
+  group_by(org_code)
 
-#Staffing#######################################################################
+# Delay length ################################################################
+figure_7_data <- dd_file_acute_trusts_FINAL %>%
+  filter(org_code %in% best_trusts) %>%
+  select(month,org_code,average_delay_los_minus_0_day_delay) %>%
+  mutate(month = my(month)) %>%
+  group_by(org_code)
+
+# Staffing #####################################################################
 
 # APRIL 24 
 
@@ -124,7 +136,7 @@ apr_25_staffing <- read_excel(temp_file, sheet = 4,skip=5) %>%
 
 # MAY 25 
 
-url <- ""
+url <- "https://files.digital.nhs.uk/00/BB260E/NHS%20Workforce%20Statistics%2C%20May%202025%20England%20and%20Organisation.xlsx"
 temp_file <- tempfile(fileext = ".xlsx")
 
 # Download the file
@@ -142,15 +154,28 @@ may_25_staffing <- read_excel(temp_file, sheet = 4,skip=5) %>%
   select(month,org_code,doctors,nurses)
 
 
+# JUN 25 
+#
+#url <- ""
+#temp_file <- tempfile(fileext = ".xlsx")
+#
+# Download the file
+#download.file(url, destfile = temp_file, mode = "wb")
+#
+# Read the Excel sheet
+#may_25_staffing <- read_excel(temp_file, sheet = 4,skip=5) %>% 
+#  rename(org_code = `Organisation code`,
+#         doctors = `HCHS Doctors`,
+#         nurses = `Nurses & health visitors`) %>% 
+#  mutate(org_code = str_trim(org_code, side = "left")) %>% 
+#  left_join(trust_codes,by='org_code') %>% 
+#  filter(Flag==1) %>%
+#  mutate(month = 'May-25') %>% 
+#  select(month,org_code,doctors,nurses)
 
 
 
-
-
-
-
-
-#Pathway Data####################################################################
+# Pathway Data ################################################################
 
 
 
@@ -351,22 +376,98 @@ july_25_pathway <- read_excel(temp_file, sheet = 6, skip=4) %>%
 
 
 # AUGUST 25 
-
-url <- ""
-temp_file <- tempfile(fileext = ".xlsx")
-
+#
+#url <- ""
+#temp_file <- tempfile(fileext = ".xlsx")
+#
 # Download the file
-download.file(url, destfile = temp_file, mode = "wb")
-
+#download.file(url, destfile = temp_file, mode = "wb")
+#
 # Read the Excel sheet
-august_25_pathway <- read_excel(temp_file, sheet = 6, skip=4) %>% 
-  rename(org_code = `...2`) %>% 
-  left_join(trust_codes,by='org_code') %>% 
-  filter(Flag==1) %>% 
-  mutate(across(-org_code, ~ as.numeric(ifelse(grepl("^-?[0-9.]+$", .x), .x, 0)))) %>% 
-  mutate(pathway_zero = `Pathway 0 Total`,
-         pathway_one = `Pathway 1 Total`,
-         pathway_two = `Pathway 2 Total`,
-         pathway_three = `Pathway 3 Total`) %>% 
-  mutate(month = 'Aug-25') %>% 
-  select(month,org_code,pathway_zero,pathway_one,pathway_two,pathway_three)
+#august_25_pathway <- read_excel(temp_file, sheet = 6, skip=4) %>% 
+#  rename(org_code = `...2`) %>% 
+#  left_join(trust_codes,by='org_code') %>% 
+#  filter(Flag==1) %>% 
+#  mutate(across(-org_code, ~ as.numeric(ifelse(grepl("^-?[0-9.]+$", .x), .x, 0)))) %>% 
+#  mutate(pathway_zero = `Pathway 0 Total`,
+#         pathway_one = `Pathway 1 Total`,
+#         pathway_two = `Pathway 2 Total`,
+#         pathway_three = `Pathway 3 Total`) %>% 
+#  mutate(month = 'Aug-25') %>% 
+#  select(month,org_code,pathway_zero,pathway_one,pathway_two,pathway_three)
+
+# Join datasets and export ####################################################
+
+# Staffing - Apr May 24 vs 25 - as June 25 dataset unavailable
+
+figure_5_data <- apr_24_staffing %>%
+  rbind(may_24_staffing, apr_25_staffing, may_25_staffing) %>%
+  filter(org_code %in% best_trusts) %>%
+  group_by(org_code) %>%
+  summarize(
+    Pre_doctors = mean(doctors[month %in% c("Apr-24", "May-24")]),
+    Pre_nurses = mean(nurses[month %in% c("Apr-24", "May-24")]),
+    Post_doctors = mean(doctors[month %in% c("Apr-25", "May-25")]),
+    Post_nurses = mean(nurses[month %in% c("Apr-25", "May-25")]))
+
+# Discharge destination - Apr May June 24 vs 25 - August dataset unavailable
+
+figure_6_data <- apr_24_pathway %>%
+  rbind(may_24_pathway, june_24_pathway, april_25_pathway, may_25_pathway, june_25_pathway ) %>%
+  filter(org_code %in% best_trusts) %>%
+  group_by(org_code) %>%
+  summarize(
+  pre_pathway_1 = mean(pathway_one[month %in% c("Apr-24", "May-24", "Jun-24")], na.rm = TRUE),
+  pre_pathway_2 = mean(pathway_two[month %in% c("Apr-24", "May-24", "Jun-24")], na.rm = TRUE),
+  pre_pathway_3 = mean(pathway_three[month %in% c("Apr-24", "May-24", "Jun-24")], na.rm = TRUE),
+  
+  post_pathway_1 = mean(pathway_one[month %in% c("Apr-25", "May-25", "Jun-25")], na.rm = TRUE),
+  post_pathway_2 = mean(pathway_two[month %in% c("Apr-25", "May-25", "Jun-25")], na.rm = TRUE),
+  post_pathway_3 = mean(pathway_three[month %in% c("Apr-25", "May-25", "Jun-25")], na.rm = TRUE))
+
+# Clean #######################################################################
+
+rm(apr_24_pathway)
+rm(apr_24_staffing)
+rm(apr_25_staffing)
+rm(april_25_pathway)
+rm(august_24_pathway)
+rm(august_24_staffing)
+rm(july_24_pathway)
+rm(july_24_staffing)
+rm(july_25_pathway)
+rm(Jun_24_redux)
+rm(Jun_25_redux)
+rm(june_24_pathway)
+rm(june_24_staffing)
+rm(june_25_pathway)
+rm(may_24_pathway)
+rm(may_24_staffing)
+rm(may_25_pathway)
+rm(may_25_staffing)
+rm(url)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

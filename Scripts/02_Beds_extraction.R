@@ -355,7 +355,7 @@ hospital_beds <- rbind(apr_24_beds,
                        jun_25_beds)
 
 # 2 Proportion of beds used for DD data #######################################
-figure_6_data <- left_join(dd_file_acute_trusts_FINAL,hospital_beds,by=c('month','org_code')) %>% 
+figure_1b_data <- left_join(dd_file_acute_trusts_FINAL,hospital_beds,by=c('month','org_code')) %>% 
   mutate(month = my(month),
          days_in_month = days_in_month(month)) %>% 
   filter(dd_bed_days > 0, # only select out trusts which have delayed discharges
@@ -367,9 +367,15 @@ figure_6_data <- left_join(dd_file_acute_trusts_FINAL,hospital_beds,by=c('month'
   ungroup() %>% 
   mutate(perc_bed_delays = (dd_bed_days/days_in_month)/total_acute_beds*100)
 
+# Figure 1 data
+figure_1_data <- dd_file_national_FINAL %>%
+  select(month, org_code, perc_patients_delayed, patients_discharged_volume)
+
+figure_1_data$perc_bed_delays <- figure_1b_data$perc_bed_delays
+
 # 3 Variation by trust in change of the % of discharges delayed DATA ##########
 
-figure_9_data <- left_join(dd_file_acute_trusts_FINAL,hospital_beds,by=c('month','org_code')) %>% 
+figure_2b_data <- left_join(dd_file_acute_trusts_FINAL,hospital_beds,by=c('month','org_code')) %>% 
   filter(month %in% c('Apr-24','May-24','Jun-24','Apr-25','May-25','Jun-25')) %>% 
   mutate(period = if_else(month %in% c('Apr-24','May-24','Jun-24'),'pre','post')) %>% 
   group_by(period,org_code) %>% 
@@ -387,7 +393,7 @@ figure_9_data <- left_join(dd_file_acute_trusts_FINAL,hospital_beds,by=c('month'
 
 # 4 Variation by trust in change in average delay length DATA #################
 
-figure_10_data <- left_join(dd_file_acute_trusts_FINAL,hospital_beds,by=c('month','org_code')) %>% 
+figure_2c_data <- left_join(dd_file_acute_trusts_FINAL,hospital_beds,by=c('month','org_code')) %>% 
   filter(month %in% c('Apr-24','May-24','Jun-24','Apr-25','May-25','Jun-25')) %>% 
   mutate(period = if_else(month %in% c('Apr-24','May-24','Jun-24'),'pre','post')) %>% 
   group_by(period,org_code) %>% 
@@ -406,7 +412,7 @@ figure_10_data <- left_join(dd_file_acute_trusts_FINAL,hospital_beds,by=c('month
 
 # 5 Variation by trust in change in the % of bed days used by delayed discharge DATA #####
 
-figure_11_data <- left_join(dd_file_acute_trusts_FINAL,hospital_beds,by=c('month','org_code')) %>% 
+figure_2_data <- left_join(dd_file_acute_trusts_FINAL,hospital_beds,by=c('month','org_code')) %>% 
   filter(month %in% c('Apr-24','May-24','Jun-24','Apr-25','May-25','Jun-25')) %>% 
   mutate(period = if_else(month %in% c('Apr-24','May-24','Jun-24'),'pre','post')) %>% 
   mutate(month = my(month),
@@ -430,7 +436,7 @@ figure_11_data <- left_join(dd_file_acute_trusts_FINAL,hospital_beds,by=c('month
 
 # 6 Ranking trusts by the % of bed days used by delayed discharge DATA ########
 
-figure_12_data <- figure_11_data %>% 
+figure_3_data <- figure_2_data %>% 
   mutate(rank_pre = min_rank(pre),
          rank_post = min_rank(post),
          rank_change = min_rank(difference))
@@ -451,7 +457,7 @@ dd_file_acute_trusts_FINAL <- dd_file_acute_trusts_FINAL %>%
     '21plus_day_delay_volume'), ~ .x), na.rm = FALSE),
     perc_patients_delayed = ((total_delay_volume/patients_discharged_volume) *100))
 
-figure_13_data <- left_join(dd_file_acute_trusts_FINAL,hospital_beds,by=c('month','org_code')) %>% 
+figure_3b_data <- left_join(dd_file_acute_trusts_FINAL,hospital_beds,by=c('month','org_code')) %>% 
   filter(month %in% c('Apr-24','May-24','Jun-24','Apr-25','May-25','Jun-25')) %>% 
   mutate(period = if_else(month %in% c('Apr-24','May-24','Jun-24'),'pre','post')) %>% 
   filter(month %in% c('Apr-24','May-24','Apr-25','May-25')) %>% 
@@ -461,9 +467,24 @@ figure_13_data <- left_join(dd_file_acute_trusts_FINAL,hospital_beds,by=c('month
   filter(dd_bed_days > 0, #only select out trusts which have delayed discharges
          !is.na(acute_beds)) #remove one trust which doesn't have some bed info for Nov/Dec due to merger
 
+# Figure 1 data
+figure_1_data <- dd_file_national_FINAL %>%
+  select(month, org_code, perc_patients_delayed, patients_discharged_volume)
+
+figure_1_data$perc_bed_delays <- figure_1b_data$perc_bed_delays
+
+# Greater than 2.5% reduction (10 trusts)
+greater_than_2.5p_reduction <- figure_3_data %>%
+  select(org_code,difference) %>%
+  filter(difference <= -2.5)
+
+best_trusts <- (best_trusts <- c(greater_than_2.5p_reduction$org_code))
+best_trusts <- as.data.frame(best_trusts <- c(greater_than_2.5p_reduction$org_code))
+
 # Clean #######################################################################
 
 rm(url)
+rm(figure_1b_data)
 
 rm(apr_24_beds)
 rm(may_24_beds)

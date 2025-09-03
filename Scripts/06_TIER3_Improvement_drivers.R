@@ -3,23 +3,9 @@
 
 # Drivers of DD improvement ###################################################
 
-# Greater than 2.5% reduction (10 trusts)
-greater_than_2.5p_reduction <- figure_12_data %>%
-  select(org_code,difference) %>%
-  filter(difference <= -2.5)
-
-best_trusts <- as.data.frame(best_trusts <- c(greater_than_2.5p_reduction$org_code))
-
 # 1 Bed occupancy #############################################################
 
-# Pull out best performing trusts 
-
-figure_3.1_data <- hospital_beds %>%
-  filter(org_code %in% best_trusts) %>%
-  mutate(month = my(month)) %>%
-  group_by(org_code)
-  
-bed_occupancy_plot <- ggplot(figure_3.1_data, aes(x = month, y = occupancy_rate, group = org_code, color = org_code)) +
+bed_occupancy_plot <- ggplot(figure_4_data, aes(x = month, y = occupancy_rate, group = org_code, color = org_code)) +
   geom_line(linewidth = 1.2) +
   geom_point(color = "black", size = 1.0) +
   labs(title = "Rates of bed occupancy amongst best performing trusts April 2024 - June 2025.",
@@ -43,13 +29,7 @@ ggsave("bed_occupancy_plot.png", plot = bed_occupancy_plot, width = 8, height = 
 
 # 2 Delay length by trust
 
-figure_3.2_data <- dd_file_acute_trusts_FINAL %>%
-  filter(org_code %in% best_trusts) %>%
-  select(month,org_code,average_delay_los_minus_0_day_delay) %>%
-  mutate(month = my(month)) %>%
-  group_by(org_code)
-
-average_trust_delay_plot <- ggplot(figure_3.2_data, aes(x = month, y = average_delay_los_minus_0_day_delay, group = org_code, color = org_code)) +
+average_trust_delay_plot <- ggplot(figure_7_data, aes(x = month, y = average_delay_los_minus_0_day_delay, group = org_code, color = org_code)) +
   geom_line(linewidth = 1.2) +
   geom_point(color = "black", size = 1.0) +
   stat_summary(

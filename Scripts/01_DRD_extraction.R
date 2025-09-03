@@ -24,6 +24,7 @@ library (openxlsx)
 library (scales)
 library (colorspace)
 library (writexl)
+library (zoo)
 
 # Load functions
 
@@ -790,6 +791,102 @@ output_test_3 <- output_test %>%
   mutate(across(everything(), ~ ifelse(is.nan(.), 0, .))) %>% 
   filter(delay_los_diff != 0)
 
+### 11 Other cleaning for flourish export ########################################
+
+# Convert dataset to numerics
+dd_file_national_FINAL[dd_file_national_FINAL == 0] <- NA
+dd_file_national_FINAL[ , -c(1, 2)] <- lapply(dd_file_national_FINAL[ , -c(1, 2)], as.numeric)
+dd_file_national_FINAL$month <- factor(dd_file_national_FINAL$month, 
+                                       levels = unique(dd_file_national_FINAL$month))
+
+
+
+# Figure 1 (percentage of discharges that are delayed)
+# Sum of 1-21+ day delay volumes/total patients discharged
+dd_file_national_FINAL$`total_delay_volume` <- rowSums(dd_file_national_FINAL[, c(
+  '1_day_delay_volume',
+  '2_3_day_delay_volume',
+  '4_6_day_delay_volume',
+  '7_13_day_delay_volume',
+  '14_20_day_delay_volume',
+  '21plus_day_delay_volume')], na.rm = FALSE)
+
+# Percentage of patients that are delayed
+dd_file_national_FINAL$`perc_patients_delayed` <- (dd_file_national_FINAL$total_delay_volume/dd_file_national_FINAL$patients_discharged_volume) *100
+
+
+
+# Grouped delays
+# Monthly sums of delay volumes / total sum of delay volumes
+dd_file_national_FINAL <- dd_file_national_FINAL %>%
+  group_by(month) %>%
+  mutate(total_delayed = rowSums(across(c(`1_day_delay_volume`, `2_3_day_delay_volume`,`4_6_day_delay_volume`, `7_13_day_delay_volume`, `14_20_day_delay_volume`, `21plus_day_delay_volume`))),
+         group1 = rowSums(across(c(`1_day_delay_volume`, `2_3_day_delay_volume`,`4_6_day_delay_volume`))),
+         group2 = rowSums(across(c(`7_13_day_delay_volume`))),
+         group3 = rowSums(across(c(`14_20_day_delay_volume`, `21plus_day_delay_volume`))))
+
+dd_file_national_FINAL <- dd_file_national_FINAL %>%
+  group_by(month) %>%
+  mutate(`group1(%)` = group1/total_delayed,
+         `group2(%)` = group2/total_delayed,
+         `group3(%)` = group3/total_delayed)
+
+dd_file_national_FINAL <- dd_file_national_FINAL %>%
+  rename('0-6 days (%)' = `group1(%)`,
+         '7-13 days (%)' = `group2(%)`,
+         '14+ days (%)' = `group3(%)`)
+
+# Pull out groups and pivot
+grouped_delays <- dd_file_national_FINAL %>%
+  select(month, `0-6 days (%)`, `7-13 days (%)`, `14+ days (%)`)
+
+grouped_delays <- grouped_delays %>%
+  pivot_longer(
+    cols = c(`0-6 days (%)`, `7-13 days (%)`, `14+ days (%)`),
+    names_to = 'Delay_Category',
+    values_to = 'Value') %>%
+  group_by(month) %>%
+  arrange((Value), .by_group = TRUE) %>%
+  mutate(Value = Value*100)
+
+grouped_delays <- grouped_delays %>%
+  mutate(Delay_Category = factor(Delay_Category, levels = c('14+ days (%)','7-13 days (%)','0-6 days (%)')))
+
+# Pull out Apr May 
+dd_file_apr_may_national <- dd_file_national_FINAL %>%
+  filter(month %in% c('Apr-24','May-24','Apr-25','May-25')) %>% 
+  mutate(time_period = if_else(month %in% c('Apr-24','May-24'),'pre','post'))
+
+# Convert to numerics
+dd_file_apr_may_national[ , -c(1, 2)] <- lapply(dd_file_apr_may_national[ , -c(1, 2)], as.numeric)
+
+AprMay2024 <- colMeans(dd_file_apr_may_national[1:2, -(1:3)])
+AprMay2025 <- colMeans(dd_file_apr_may_national[3:4, -(1:3)])
+
+dd_file_apr_may_avg <- rbind(AprMay2024, AprMay2025)
+dd_file_apr_may_avg <- as.data.frame(dd_file_apr_may_avg)
+dd_file_apr_may_avg$month <- c("AprMay2024","AprMay2025")
+
+# Pivot the delay composition
+grouped_delays_24_25 <- dd_file_apr_may_avg %>%
+  select(month, `0-6 days (%)`, `7-13 days (%)`, `14+ days (%)`)
+
+grouped_delays_24_25 <- grouped_delays_24_25 %>%
+  pivot_longer(
+    cols = c(`0-6 days (%)`, `7-13 days (%)`, `14+ days (%)`),
+    names_to = 'Delay_Category',
+    values_to = 'Value') %>%
+  group_by(month) %>%
+  arrange((Value), .by_group = TRUE) %>%
+  mutate(Value = Value*100)
+
+# Reverse stacking order
+grouped_delays_24_25$Delay_Category <- factor(
+  grouped_delays_24_25$Delay_Category,
+  levels = c("14+ days (%)", "7-13 days (%)", "0-6 days (%)"))
+
+
+
 # Clean #######################################################################
 
 rm(DRD_data_list)
@@ -807,6 +904,10 @@ rm(Apr_25_redux)
 rm(May_24_redux)
 rm(May_25_redux)
 rm(Apr_May_national)
+rm(AprMay2024)
+rm(AprMay2025)
+rm(beds_timeseries_url)
+rm(temp_file)
 
 rm(Sep_23)
 rm(Oct_23)
