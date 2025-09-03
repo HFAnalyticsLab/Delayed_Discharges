@@ -4,15 +4,21 @@
 # Rate of bed occupancy ########################################################
 figure_4_data <- hospital_beds %>%
   filter(org_code %in% best_trusts) %>%
-  mutate(month = my(month)) %>%
-  group_by(org_code)
+  group_by(org_code) %>%
+  summarize(
+    Pre_occupancy = mean(occupancy_rate[month %in% c("Apr-24", "May-24","Jun-24")]),
+    Post_occupancy = mean(occupancy_rate[month %in% c("Apr-25", "May-25","Jun-25")]))
+
 
 # Delay length ################################################################
 figure_7_data <- dd_file_acute_trusts_FINAL %>%
   filter(org_code %in% best_trusts) %>%
   select(month,org_code,average_delay_los_minus_0_day_delay) %>%
-  mutate(month = my(month)) %>%
-  group_by(org_code)
+  group_by(org_code) %>%
+  summarize(
+    Pre_delay = mean(average_delay_los_minus_0_day_delay[month %in% c("Apr-24", "May-24","Jun-24")]),
+    Post_delay = mean(average_delay_los_minus_0_day_delay[month %in% c("Apr-25", "May-25","Jun-25")]))
+
 
 # Staffing #####################################################################
 
