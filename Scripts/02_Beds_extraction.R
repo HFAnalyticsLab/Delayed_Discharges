@@ -434,6 +434,17 @@ figure_2_data <- left_join(dd_file_acute_trusts_FINAL,hospital_beds,by=c('month'
   mutate(difference = post - pre) %>% 
   filter(!is.na(difference))
 
+figure_2_data <- figure_2_data %>%
+  ungroup() %>%
+  mutate(pre_median = median(pre),
+         post_median = median(post),
+         median_difference = median(difference),
+           
+         pre_mean = mean(pre),
+         post_mean = mean(post),
+         mean_difference = mean(difference))
+
+
 # 6 Ranking trusts by the % of bed days used by delayed discharge DATA ########
 
 figure_3_data <- figure_2_data %>% 
