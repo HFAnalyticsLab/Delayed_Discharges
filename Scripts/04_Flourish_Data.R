@@ -30,9 +30,6 @@ addWorksheet(DD_Flourish_Data, "Figure 3")
 writeData(DD_Flourish_Data, "Figure 3", figure_3_data)
 
 # Rate of bed occupancy
-figure_4_data <- figure_4_data %>%
-  filter(org_code %in% best_trusts) %>%
-
 addWorksheet(DD_Flourish_Data, "Figure 4")
 writeData(DD_Flourish_Data, "Figure 4", figure_4_data)
 
