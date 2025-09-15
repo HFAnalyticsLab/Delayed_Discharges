@@ -444,6 +444,18 @@ figure_2_data <- figure_2_data %>%
          post_mean = mean(post),
          mean_difference = mean(difference))
 
+# Count number of improving trusts vs 
+Trust_change <- figure_2_data %>%
+  mutate(change_type = case_when(
+    difference > 0 ~ "Positive",
+    difference < 0 ~ "Negative",
+    TRUE ~ "Zero")) %>%
+  count(change_type)
+
+Trust_change <- Trust_change %>%
+  mutate(Total = sum(n),
+         pct_of_trusts = (n/Total))
+  
 
 # 6 Ranking trusts by the % of bed days used by delayed discharge DATA ########
 
@@ -512,4 +524,6 @@ rm(mar_25_beds)
 rm(apr_25_beds)
 rm(may_25_beds)
 rm(jun_25_beds)
+
+
 

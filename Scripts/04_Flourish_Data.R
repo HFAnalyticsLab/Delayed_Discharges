@@ -4,11 +4,37 @@
 # 07 Flourish data #############################################################
 
 # Number of beds occupied by patients fit for discharge, latest date ###########
-latest_occupied <- figure_1_data %>%
-  slice_tail(n = 1 ) %>%
-  select(perc_bed_delays) 
+latest_occupied <- hospital_beds %>%
+  filter(month == 'Jun-25')%>%
+  mutate(total_acute_beds = sum(acute_beds)) 
 
+latest_beds <- latest_occupied$total_acute_beds[nrow(latest_occupied)]
+latest_delayed <- dd_file_national_FINAL$total_delay_volume[nrow(dd_file_national_FINAL)]
 
+current_DD_occupied_beds <- latest_delayed/latest_beds
+
+over_occupied_trusts <- hospital_beds %>%
+  mutate(flag = hospital_beds$occupancy_rate >= 0.85) %>%
+  count(flag)
+
+over_occupied_trusts <- over_occupied_trusts %>%
+  mutate(Total = sum(n),
+         pct_of_trusts = (n/Total))
+
+# Number of trusts in the analysis
+trust_count <- unique(figure_2_data$org_code)
+
+colMeans(!is.na (dd_file_acute_trusts_FINAL) & dd_file_acute_trusts_FINAL != "", na.rm = FALSE)
+
+full_trusts_data <- dd_file_acute_trusts_FINAL %>%
+  group_by(org_code) %>%
+  filter(!any(is.na(patients_discharged_volume))) %>%
+  ungroup()
+
+colMeans(!is.na (full_trusts_data) & full_trusts_data != "", na.rm = FALSE)
+
+# Number of trusts with full data
+full_trust_count <- unique(full_trusts_data$org_code)
 
 # Flourish data ################################################################
 
@@ -46,5 +72,18 @@ addWorksheet(DD_Flourish_Data, "Figure 7")
 writeData(DD_Flourish_Data, "Figure 7", figure_7_data)
 
 saveWorkbook(DD_Flourish_Data, "DD_Flourish_Data.xlsx", overwrite = TRUE)
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
