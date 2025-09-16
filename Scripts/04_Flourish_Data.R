@@ -36,6 +36,20 @@ colMeans(!is.na (full_trusts_data) & full_trusts_data != "", na.rm = FALSE)
 # Number of trusts with full data
 full_trust_count <- unique(full_trusts_data$org_code)
 
+# Hospital bed rankings
+
+hospital_bed_change <- hospital_beds %>%
+  filter(org_code %in% best_trusts) %>%
+  group_by(org_code) %>%
+  summarize(
+    Pre_beds = mean(acute_beds[month %in% c("Apr-24", "May-24","Jun-24")]),
+    Post_beds = mean(acute_beds[month %in% c("Apr-25", "May-25","Jun-25")]),
+    difference = (Post_beds-Pre_beds),
+    pct_difference = ((Post_beds-Pre_beds)/Pre_beds))
+  
+
+
+
 # Flourish data ################################################################
 
 DD_Flourish_Data <- createWorkbook()
@@ -59,6 +73,9 @@ writeData(DD_Flourish_Data, "Figure 3", figure_3_data)
 addWorksheet(DD_Flourish_Data, "Figure 4")
 writeData(DD_Flourish_Data, "Figure 4", figure_4_data)
 
+addWorksheet(DD_Flourish_Data, "Figure 4b")
+writeData(DD_Flourish_Data, "Figure 4b", hospital_bed_change)
+
 # Staffing levels
 addWorksheet(DD_Flourish_Data, "Figure 5")
 writeData(DD_Flourish_Data, "Figure 5", figure_5_data)
@@ -71,6 +88,14 @@ writeData(DD_Flourish_Data, "Figure 6", figure_6_data)
 addWorksheet(DD_Flourish_Data, "Figure 7")
 writeData(DD_Flourish_Data, "Figure 7", figure_7_data)
 
+# Delay length national
+national_delay_length <- dd_file_national_FINAL %>%
+  select(month, org_code, average_delay_los_minus_0_day_delay)
+
+addWorksheet(DD_Flourish_Data, "Figure 7b")
+writeData(DD_Flourish_Data, "Figure 7b", national_delay_length)
+
+# Save Florish Data
 saveWorkbook(DD_Flourish_Data, "DD_Flourish_Data.xlsx", overwrite = TRUE)
 
 

@@ -41,8 +41,8 @@ best_trust_delay <- dd_file_acute_trusts_FINAL %>%
 # Mean of means
 overall_means <- best_trust_delay %>%
   summarize(
-    avgbest_Pre_occupancy = mean(Pre_delay, na.rm = TRUE),
-    avgbest_Post_occupancy = mean(Post_delay, na.rm = TRUE))
+    avgbest_Pre_delay = mean(Pre_delay, na.rm = TRUE),
+    avgbest_Post_delay = mean(Post_delay, na.rm = TRUE))
 
 # Median delay length for ALL trusts
 all_trusts_delay <- dd_file_acute_trusts_FINAL %>%
