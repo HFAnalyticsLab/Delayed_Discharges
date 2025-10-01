@@ -5,7 +5,7 @@
 
 # Number of beds occupied by patients fit for discharge, latest date ###########
 latest_occupied <- hospital_beds %>%
-  filter(month == 'Jun-25')%>%
+  filter(month == 'Jul-25')%>%
   mutate(total_acute_beds = sum(acute_beds)) 
 
 latest_beds <- latest_occupied$total_acute_beds[nrow(latest_occupied)]
@@ -42,8 +42,8 @@ hospital_bed_change <- hospital_beds %>%
   filter(org_code %in% best_trusts) %>%
   group_by(org_code) %>%
   summarize(
-    Pre_beds = mean(acute_beds[month %in% c("Apr-24", "May-24","Jun-24")]),
-    Post_beds = mean(acute_beds[month %in% c("Apr-25", "May-25","Jun-25")]),
+    Pre_beds = mean(acute_beds[month %in% c("May-24","Jun-24","Jul-24")]),
+    Post_beds = mean(acute_beds[month %in% c("May-25","Jun-25","Jul-25")]),
     difference = (Post_beds-Pre_beds),
     pct_difference = ((Post_beds-Pre_beds)/Pre_beds))
   
@@ -95,12 +95,11 @@ national_delay_length <- dd_file_national_FINAL %>%
 addWorksheet(DD_Flourish_Data, "Figure 7b")
 writeData(DD_Flourish_Data, "Figure 7b", national_delay_length)
 
-# Save Florish Data
+# Save Flourish Data
 saveWorkbook(DD_Flourish_Data, "DD_Flourish_Data.xlsx", overwrite = TRUE)
 
 
-
-
+# CLEAN #######################################################################
 
 
 
