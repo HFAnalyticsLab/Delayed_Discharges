@@ -409,9 +409,10 @@ figure_1b_data <- left_join(dd_file_acute_trusts_FINAL,hospital_beds,by=c('month
   group_by(month) %>% 
   summarise(dd_bed_days = sum(as.numeric(dd_bed_days)),
             total_acute_beds = sum(acute_beds),
+            total_adult_beds = sum(adult_acute_beds),
             days_in_month = max(days_in_month)) %>% 
   ungroup() %>% 
-  mutate(perc_bed_delays = (dd_bed_days/days_in_month)/total_acute_beds*100)
+  mutate(perc_bed_delays = (dd_bed_days/days_in_month)/total_adult_beds*100)
 
 # Figure 1 data
 figure_1_data <- dd_file_national_FINAL %>%
@@ -548,10 +549,34 @@ greater_than_2.5p_reduction <- figure_3_data %>%
 best_trusts_frame <- as.data.frame(best_trusts <- c(greater_than_2.5p_reduction$org_code))
 best_trusts <- (best_trusts <- c(greater_than_2.5p_reduction$org_code))
 
+# Hospital bed rankings
+hospital_bed_change <- hospital_beds %>%
+  filter(org_code %in% best_trusts) %>%
+  group_by(org_code) %>%
+  summarize(
+    Pre_beds = mean(acute_beds[month %in% c("Jun-24","Jul-24","Aug-24")]),
+    Post_beds = mean(acute_beds[month %in% c("Jun-25","Jul-25","Aug-25")]),
+    difference = (Post_beds-Pre_beds),
+    pct_difference = ((Post_beds-Pre_beds)/Pre_beds))
+
+# Mean of means
+overall_means <- hospital_bed_change %>%
+  summarize(
+    avgbest_Pre_beds = mean(Pre_beds, na.rm = TRUE),
+    avgbest_Post_beds = mean(Post_beds, na.rm = TRUE))
+
+# Median beds for ALL trusts
+all_trusts_beds <- hospital_beds %>%
+  summarize(
+    All_Median_Pre_beds = median(acute_beds[month %in% c("Jun-24","Jul-24","Aug-24")], na.rm = TRUE),
+    All_Median_Post_beds = median(acute_beds[month %in% c("Jun-25","Jul-25","Aug-25")], na.rm = TRUE))
+
+figure_4b_data <- bind_cols(hospital_bed_change, all_trusts_beds, overall_means)
+
+
 # Clean #######################################################################
 
 rm(url)
-rm(figure_1b_data)
 
 rm(apr_24_beds)
 rm(may_24_beds)

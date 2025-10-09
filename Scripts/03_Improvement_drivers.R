@@ -8,8 +8,8 @@ best_trust_occupancy <- hospital_beds %>%
   filter(org_code %in% best_trusts) %>%
   group_by(org_code) %>%
   summarize(
-    Pre_occupancy = mean(occupancy_rate[month %in% c("May-24","Jun-24","Jul-24")]),
-    Post_occupancy = mean(occupancy_rate[month %in% c("May-25","Jun-25","Jul-25")]))
+    Pre_occupancy = mean(occupancy_rate[month %in% c("Jun-24","Jul-24","Aug-24")]),
+    Post_occupancy = mean(occupancy_rate[month %in% c("Jun-25","Jul-25","Aug-25")]))
 
 # Mean of means
 overall_means <- best_trust_occupancy %>%
@@ -20,8 +20,8 @@ overall_means <- best_trust_occupancy %>%
 # Median occupancy for ALL trusts
 all_trusts_occupancy <- hospital_beds %>%
   summarize(
-    Median_Pre_occupancy = median(occupancy_rate[month %in% c("May-24","Jun-24","Jul-24")], na.rm = TRUE),
-    Median_Post_occupancy = median(occupancy_rate[month %in% c("May-25","Jun-25","Jul-25")], na.rm = TRUE))
+    All_Median_Pre_occupancy = median(occupancy_rate[month %in% c("Jun-24","Jul-24","Aug-24")], na.rm = TRUE),
+    All_Median_Post_occupancy = median(occupancy_rate[month %in% c("Jun-25","Jul-25","Aug-25")], na.rm = TRUE))
 
 figure_4_data <- bind_cols(best_trust_occupancy, all_trusts_occupancy, overall_means)
 
@@ -48,8 +48,8 @@ overall_means <- best_trust_delay %>%
 all_trusts_delay <- dd_file_acute_trusts_FINAL %>%
   ungroup() %>%
   summarize(
-    Median_Pre_delay = median(average_delay_los_minus_0_day_delay[month %in% c("May-24","Jun-24","Jul-24")], na.rm = TRUE),
-    Median_Post_delay = median(average_delay_los_minus_0_day_delay[month %in% c("May-25","Jun-25","Jul-25")], na.rm = TRUE))
+    All_Median_Pre_delay = median(average_delay_los_minus_0_day_delay[month %in% c("May-24","Jun-24","Jul-24")], na.rm = TRUE),
+    All_Median_Post_delay = median(average_delay_los_minus_0_day_delay[month %in% c("May-25","Jun-25","Jul-25")], na.rm = TRUE))
 
 figure_7_data <- bind_cols(best_trust_delay, all_trusts_delay, overall_means)
 
@@ -447,10 +447,10 @@ all_trust_staffing <- may_24_staffing %>%
 all_trusts_staff_medians <- all_trust_staffing %>%
   ungroup() %>%
   summarize(
-    Median_Pre_nurses = median(nurses[month %in% c("May-24", "Jun-24")], na.rm = TRUE),
-    Median_Post_nurses = median(nurses[month %in% c("May-25", "Jun-25")], na.rm = TRUE),
-    Median_Pre_doctors = median(doctors[month %in% c("May-24", "Jun-24")], na.rm = TRUE),
-    Median_Post_doctors = median(doctors[month %in% c("May-25", "Jun-25")], na.rm = TRUE))
+    All_Median_Pre_nurses = median(nurses[month %in% c("May-24", "Jun-24")], na.rm = TRUE),
+    All_Median_Post_nurses = median(nurses[month %in% c("May-25", "Jun-25")], na.rm = TRUE),
+    All_Median_Pre_doctors = median(doctors[month %in% c("May-24", "Jun-24")], na.rm = TRUE),
+    All_Median_Post_doctors = median(doctors[month %in% c("May-25", "Jun-25")], na.rm = TRUE))
 
 best_trust_staff <- all_trust_staffing %>%
   filter(org_code %in% best_trusts) %>%
@@ -477,14 +477,14 @@ all_trusts_destination <- may_24_pathway %>%
 all_trusts_destination_medians <- all_trusts_destination %>%
   ungroup() %>%
   summarize(
-    Median_Pre_Pathway_1 = median(pathway_one[month %in% c("May-24", "Jun-24","Jul-24")], na.rm = TRUE),
-    Median_Post_Pathway_1 = median(pathway_one[month %in% c("May-25", "Jun-25", "Jul-25")], na.rm = TRUE),
+    All_Median_Pre_Pathway_1 = median(pathway_one[month %in% c("May-24", "Jun-24","Jul-24")], na.rm = TRUE),
+    All_Median_Post_Pathway_1 = median(pathway_one[month %in% c("May-25", "Jun-25", "Jul-25")], na.rm = TRUE),
     
-    Median_Pre_Pathway_2 = median(pathway_two[month %in% c("May-24", "Jun-24","Jul-24")], na.rm = TRUE),
-    Median_Post_Pathway_2 = median(pathway_two[month %in% c("May-25", "Jun-25", "Jul-25")], na.rm = TRUE),
+    All_Median_Pre_Pathway_2 = median(pathway_two[month %in% c("May-24", "Jun-24","Jul-24")], na.rm = TRUE),
+    All_Median_Post_Pathway_2 = median(pathway_two[month %in% c("May-25", "Jun-25", "Jul-25")], na.rm = TRUE),
     
-    Median_Pre_Pathway_3 = median(pathway_three[month %in% c("May-24", "Jun-24","Jul-24")], na.rm = TRUE),
-    Median_Post_Pathway_3 = median(pathway_three[month %in% c("May-25", "Jun-25", "Jul-25")], na.rm = TRUE))
+    All_Median_Pre_Pathway_3 = median(pathway_three[month %in% c("May-24", "Jun-24","Jul-24")], na.rm = TRUE),
+    All_Median_Post_Pathway_3 = median(pathway_three[month %in% c("May-25", "Jun-25", "Jul-25")], na.rm = TRUE))
     
 best_trusts_destination <- all_trusts_destination %>%
   filter(org_code %in% best_trusts) %>%
@@ -513,6 +513,8 @@ figure_6_data <- bind_cols(best_trusts_destination, all_trusts_destination_media
   
 # Clean #######################################################################
 
+rm(all_trusts_destination_medians)
+rm(all_trusts_staff_medians)
 rm(apr_24_pathway)
 rm(apr_24_staffing)
 rm(apr_25_staffing)
@@ -525,19 +527,13 @@ rm(july_25_pathway)
 rm(Jun_24_redux)
 rm(Jun_25_redux)
 rm(june_24_pathway)
-rm(june_24_staffing)
+rm(jun_24_staffing)
 rm(june_25_pathway)
 rm(may_24_pathway)
 rm(may_24_staffing)
 rm(may_25_pathway)
 rm(may_25_staffing)
 rm(jun_25_staffing)
-rm(all_trust_staffing)
-rm(all_trusts_delay)
-rm(all_trusts_destination)
-rm(all_trusts_destination_medians)
-rm(all_trusts_occupancy)
-rm(all_trusts_staff_medians)
 rm(url)
 
 

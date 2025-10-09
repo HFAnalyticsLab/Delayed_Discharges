@@ -5,7 +5,7 @@
 
 # Number of beds occupied by patients fit for discharge, latest date ###########
 latest_occupied <- hospital_beds %>%
-  filter(month == 'Jul-25')%>%
+  filter(month == 'Aug-25')%>%
   mutate(total_acute_beds = sum(acute_beds)) 
 
 latest_beds <- latest_occupied$total_acute_beds[nrow(latest_occupied)]
@@ -36,19 +36,21 @@ colMeans(!is.na (full_trusts_data) & full_trusts_data != "", na.rm = FALSE)
 # Number of trusts with full data
 full_trust_count <- unique(full_trusts_data$org_code)
 
-# Hospital bed rankings
+# Consistency of most improved trusts ##########################################
 
-hospital_bed_change <- hospital_beds %>%
-  filter(org_code %in% best_trusts) %>%
-  group_by(org_code) %>%
-  summarize(
-    Pre_beds = mean(acute_beds[month %in% c("May-24","Jun-24","Jul-24")]),
-    Post_beds = mean(acute_beds[month %in% c("May-25","Jun-25","Jul-25")]),
-    difference = (Post_beds-Pre_beds),
-    pct_difference = ((Post_beds-Pre_beds)/Pre_beds))
-  
-
-
+most_improved_timeseries <- left_join(dd_file_acute_trusts_FINAL,hospital_beds,by=c('month','org_code')) %>% 
+  mutate(month = my(month),
+         days_in_month = days_in_month(month)) %>% 
+  filter(dd_bed_days > 0, # only select out trusts which have delayed discharges
+         !is.na(acute_beds),# remove one trust which doesn't have some bed info for Nov/Dec due to merger
+         org_code %in% best_trusts) %>% 
+         group_by(month) %>% 
+  summarise(dd_bed_days = sum(as.numeric(dd_bed_days)),
+            total_acute_beds = sum(acute_beds),
+            total_adult_beds = sum(adult_acute_beds),
+            days_in_month = max(days_in_month)) %>% 
+  ungroup() %>% 
+  mutate(best_trusts_perc_bed_delays = (dd_bed_days/days_in_month)/total_adult_beds*100)
 
 # Flourish data ################################################################
 
@@ -74,7 +76,7 @@ addWorksheet(DD_Flourish_Data, "Figure 4")
 writeData(DD_Flourish_Data, "Figure 4", figure_4_data)
 
 addWorksheet(DD_Flourish_Data, "Figure 4b")
-writeData(DD_Flourish_Data, "Figure 4b", hospital_bed_change)
+writeData(DD_Flourish_Data, "Figure 4b", figure_4b_data)
 
 # Staffing levels
 addWorksheet(DD_Flourish_Data, "Figure 5")
@@ -94,6 +96,14 @@ national_delay_length <- dd_file_national_FINAL %>%
 
 addWorksheet(DD_Flourish_Data, "Figure 7b")
 writeData(DD_Flourish_Data, "Figure 7b", national_delay_length)
+
+# Most improved consistency
+addWorksheet(DD_Flourish_Data, "Most Improved Consistency")
+writeData(DD_Flourish_Data, "Most Improved Consistency", most_improved_timeseries)
+
+# All trusts staffing
+addWorksheet(DD_Flourish_Data, "All trusts staffing")
+writeData(DD_Flourish_Data, "All trusts staffing", all_trust_staffing)
 
 # Save Flourish Data
 saveWorkbook(DD_Flourish_Data, "DD_Flourish_Data.xlsx", overwrite = TRUE)
