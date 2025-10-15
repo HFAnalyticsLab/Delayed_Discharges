@@ -13,8 +13,8 @@ latest_delayed <- dd_file_national_FINAL$total_delay_volume[nrow(dd_file_nationa
 
 current_DD_occupied_beds <- latest_delayed/latest_beds
 
-over_occupied_trusts <- hospital_beds %>%
-  mutate(flag = hospital_beds$occupancy_rate >= 0.85) %>%
+over_occupied_trusts <- latest_occupied %>%
+  mutate(flag = latest_occupied$occupancy_rate >= 0.92) %>%
   count(flag)
 
 over_occupied_trusts <- over_occupied_trusts %>%

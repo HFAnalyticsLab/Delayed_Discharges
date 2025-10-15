@@ -887,7 +887,7 @@ grouped_delays_24_25$Delay_Category <- factor(
   grouped_delays_24_25$Delay_Category,
   levels = c("14+ days (%)", "7-13 days (%)", "0-6 days (%)"))
 
-
+full_trusts <- unique(dd_file_acute_trusts_FINAL$org_code)
 
 # Clean #######################################################################
 
