@@ -8,8 +8,8 @@ best_trust_occupancy <- hospital_beds %>%
   filter(org_code %in% best_trusts) %>%
   group_by(org_code) %>%
   summarize(
-    Pre_occupancy = mean(occupancy_rate[month %in% c("Jun-24","Jul-24","Aug-24")]),
-    Post_occupancy = mean(occupancy_rate[month %in% c("Jun-25","Jul-25","Aug-25")]))
+    Pre_occupancy = mean(occupancy_rate[month %in% c("Jul-24","Aug-24","Sep-24")]),
+    Post_occupancy = mean(occupancy_rate[month %in% c("Jul-25","Aug-25","Sep-25")]))
 
 # Mean of means
 overall_means <- best_trust_occupancy %>%
@@ -20,8 +20,8 @@ overall_means <- best_trust_occupancy %>%
 # Median occupancy for ALL trusts
 all_trusts_occupancy <- hospital_beds %>%
   summarize(
-    All_Median_Pre_occupancy = median(occupancy_rate[month %in% c("Jun-24","Jul-24","Aug-24")], na.rm = TRUE),
-    All_Median_Post_occupancy = median(occupancy_rate[month %in% c("Jun-25","Jul-25","Aug-25")], na.rm = TRUE))
+    All_Median_Pre_occupancy = median(occupancy_rate[month %in% c("Jul-24","Aug-24","Sep-24")], na.rm = TRUE),
+    All_Median_Post_occupancy = median(occupancy_rate[month %in% c("Jul-25","Aug-25","Sep-25")], na.rm = TRUE))
 
 figure_4_data <- bind_cols(best_trust_occupancy, all_trusts_occupancy, overall_means)
 
@@ -35,8 +35,8 @@ best_trust_delay <- dd_file_acute_trusts_FINAL %>%
   select(month,org_code,average_delay_los_minus_0_day_delay) %>%
   group_by(org_code) %>%
   summarize(
-    Pre_delay = mean(average_delay_los_minus_0_day_delay[month %in% c("May-24","Jun-24","Jul-24")]),
-    Post_delay = mean(average_delay_los_minus_0_day_delay[month %in% c("May-25","Jun-25","Jul-25")]))
+    Pre_delay = mean(average_delay_los_minus_0_day_delay[month %in% c("Jun-24","Jul-24","Aug-24")]),
+    Post_delay = mean(average_delay_los_minus_0_day_delay[month %in% c("Jun-25","Jul-25","Aug-25")]))
 
 # Mean of means
 overall_means <- best_trust_delay %>%
@@ -48,8 +48,8 @@ overall_means <- best_trust_delay %>%
 all_trusts_delay <- dd_file_acute_trusts_FINAL %>%
   ungroup() %>%
   summarize(
-    All_Median_Pre_delay = median(average_delay_los_minus_0_day_delay[month %in% c("May-24","Jun-24","Jul-24")], na.rm = TRUE),
-    All_Median_Post_delay = median(average_delay_los_minus_0_day_delay[month %in% c("May-25","Jun-25","Jul-25")], na.rm = TRUE))
+    All_Median_Pre_delay = median(average_delay_los_minus_0_day_delay[month %in% c("Jun-24","Jul-24","Aug-24")], na.rm = TRUE),
+    All_Median_Post_delay = median(average_delay_los_minus_0_day_delay[month %in% c("Jun-25","Jul-25","Aug-25")], na.rm = TRUE))
 
 figure_7_data <- bind_cols(best_trust_delay, all_trusts_delay, overall_means)
 
@@ -57,7 +57,6 @@ figure_7_data <- bind_cols(best_trust_delay, all_trusts_delay, overall_means)
 # Staffing #####################################################################
 
 # APRIL 24 
-
 url <- "https://files.digital.nhs.uk/A9/97B711/NHS%20Workforce%20Statistics%2C%20April%202024%20England%20and%20Organisation.xlsx"
 temp_file <- tempfile(fileext = ".xlsx")
 
@@ -76,7 +75,6 @@ apr_24_staffing <- read_excel(temp_file, sheet = 4,skip=5) %>%
   select(month,org_code,doctors,nurses)
 
 # MAY 24 
-
 url <- "https://files.digital.nhs.uk/BF/3AEE39/NHS%20Workforce%20Statistics%2C%20May%202024%20England%20and%20Organisation.xlsx"
 temp_file <- tempfile(fileext = ".xlsx")
 
@@ -94,9 +92,7 @@ may_24_staffing <- read_excel(temp_file, sheet = 4,skip=5) %>%
   mutate(month = 'May-24') %>% 
   select(month,org_code,doctors,nurses)
 
-
 # JUNE 24 
-
 url <- "https://files.digital.nhs.uk/73/FFEA9E/NHS%20Workforce%20Statistics%2C%20June%202024%20England%20and%20Organisation.xlsx"
 temp_file <- tempfile(fileext = ".xlsx")
 
@@ -115,7 +111,6 @@ jun_24_staffing <- read_excel(temp_file, sheet = 4,skip=5) %>%
   select(month,org_code,doctors,nurses)
 
 # JULY 24 
-
 url <- "https://files.digital.nhs.uk/61/0281D4/NHS%20Workforce%20Statistics%2C%20July%202024%20England%20and%20Organisation.xlsx"
 temp_file <- tempfile(fileext = ".xlsx")
 
@@ -134,7 +129,6 @@ july_24_staffing <- read_excel(temp_file, sheet = 4,skip=5) %>%
   select(month,org_code,doctors,nurses)
 
 # AUGUST 24 
-
 url <- "https://files.digital.nhs.uk/8C/709E19/NHS%20Workforce%20Statistics%2C%20August%202024%20England%20and%20Organisation.xlsx"
 temp_file <- tempfile(fileext = ".xlsx")
 
@@ -152,10 +146,7 @@ august_24_staffing <- read_excel(temp_file, sheet = 4,skip=5) %>%
   mutate(month = 'Aug-24') %>% 
   select(month,org_code,doctors,nurses)
 
-
-
 # APRIL 25 
-
 url <- "https://files.digital.nhs.uk/C4/0B7A35/NHS%20Workforce%20Statistics%2C%20April%202025%20England%20and%20Organisation.xlsx"
 temp_file <- tempfile(fileext = ".xlsx")
 
@@ -173,9 +164,7 @@ apr_25_staffing <- read_excel(temp_file, sheet = 4,skip=5) %>%
   mutate(month = 'Apr-25') %>% 
   select(month,org_code,doctors,nurses)
 
-
 # MAY 25 
-
 url <- "https://files.digital.nhs.uk/00/BB260E/NHS%20Workforce%20Statistics%2C%20May%202025%20England%20and%20Organisation.xlsx"
 temp_file <- tempfile(fileext = ".xlsx")
 
@@ -193,9 +182,7 @@ may_25_staffing <- read_excel(temp_file, sheet = 4,skip=5) %>%
   mutate(month = 'May-25') %>% 
   select(month,org_code,doctors,nurses)
 
-
 # JUN 25 
-
 url <- "https://files.digital.nhs.uk/DB/25526E/NHS%20Workforce%20Statistics%2C%20June%202025%20England%20and%20Organisation.xlsx"
 temp_file <- tempfile(fileext = ".xlsx")
 
@@ -210,17 +197,32 @@ jun_25_staffing <- read_excel(temp_file, sheet = 4,skip=5) %>%
   mutate(org_code = str_trim(org_code, side = "left")) %>% 
   left_join(trust_codes,by='org_code') %>% 
   filter(Flag==1) %>%
-  mutate(month = 'May-25') %>% 
+  mutate(month = 'Jun-25') %>% 
+  select(month,org_code,doctors,nurses)
+
+# JUL 25 
+url <- "https://files.digital.nhs.uk/68/4F6A1E/NHS%20Workforce%20Statistics%2C%20July%202025%20England%20and%20Organisation.xlsx"
+temp_file <- tempfile(fileext = ".xlsx")
+
+# Download the file
+download.file(url, destfile = temp_file, mode = "wb")
+
+# Read the Excel sheet
+jul_25_staffing <- read_excel(temp_file, sheet = 4,skip=5) %>% 
+  rename(org_code = `Organisation code`,
+         doctors = `HCHS Doctors`,
+         nurses = `Nurses & health visitors`) %>% 
+  mutate(org_code = str_trim(org_code, side = "left")) %>% 
+  left_join(trust_codes,by='org_code') %>% 
+  filter(Flag==1) %>%
+  mutate(month = 'Jul-25') %>% 
   select(month,org_code,doctors,nurses)
 
 
 
 # Pathway Data ################################################################
 
-
-
 # APRIL 24 
-
 url <- "https://www.england.nhs.uk/statistics/wp-content/uploads/sites/2/2024/05/Daily-discharge-sitrep-monthly-data-webfile-April2024.xlsx"
 temp_file <- tempfile(fileext = ".xlsx")
 
@@ -240,9 +242,7 @@ apr_24_pathway <- read_excel(temp_file, sheet = 6, skip=4) %>%
   mutate(month = 'Apr-24') %>% 
   select(month,org_code,pathway_zero,pathway_one,pathway_two,pathway_three)
 
-
 # MAY 24 
-
 url <- "https://www.england.nhs.uk/statistics/wp-content/uploads/sites/2/2024/07/Daily-discharge-sitrep-monthly-data-webfile-May2024-revised.xlsx"
 temp_file <- tempfile(fileext = ".xlsx")
 
@@ -262,9 +262,7 @@ may_24_pathway <- read_excel(temp_file, sheet = 6, skip=4) %>%
   mutate(month = 'May-24') %>% 
   select(month,org_code,pathway_zero,pathway_one,pathway_two,pathway_three)
 
-
 # JUNE 24 
-
 url <- "https://www.england.nhs.uk/statistics/wp-content/uploads/sites/2/2024/08/Daily-discharge-sitrep-monthly-data-webfile-June2024-revised.xlsx"
 temp_file <- tempfile(fileext = ".xlsx")
 
@@ -285,7 +283,6 @@ june_24_pathway <- read_excel(temp_file, sheet = 6, skip=4) %>%
   select(month,org_code,pathway_zero,pathway_one,pathway_two,pathway_three)
 
 # JULY 25 
-
 url <- "https://www.england.nhs.uk/statistics/wp-content/uploads/sites/2/2024/08/Daily-discharge-sitrep-monthly-data-webfile-July2024.xlsx"
 temp_file <- tempfile(fileext = ".xlsx")
 
@@ -306,7 +303,6 @@ july_24_pathway <- read_excel(temp_file, sheet = 6, skip=4) %>%
   select(month,org_code,pathway_zero,pathway_one,pathway_two,pathway_three)
 
 # AUGUST 24 
-
 url <- "https://www.england.nhs.uk/statistics/wp-content/uploads/sites/2/2024/10/Daily-discharge-sitrep-monthly-data-webfile-August2024-revised.xlsx"
 temp_file <- tempfile(fileext = ".xlsx")
 
@@ -326,9 +322,7 @@ august_24_pathway <- read_excel(temp_file, sheet = 6, skip=4) %>%
   mutate(month = 'Aug-24') %>% 
   select(month,org_code,pathway_zero,pathway_one,pathway_two,pathway_three)
 
-
 # APRIL 25 
-
 url <- "https://www.england.nhs.uk/statistics/wp-content/uploads/sites/2/2025/05/Daily-discharge-sitrep-monthly-data-webfile-April2025.xlsx"
 temp_file <- tempfile(fileext = ".xlsx")
 
@@ -348,9 +342,7 @@ april_25_pathway <- read_excel(temp_file, sheet = 'Table 4', skip=4) %>%
   mutate(month = 'Apr-25') %>% 
   select(month,org_code,pathway_zero,pathway_one,pathway_two,pathway_three)
 
-
 # MAY 25 
-
 url <- "https://www.england.nhs.uk/statistics/wp-content/uploads/sites/2/2025/06/Daily-discharge-sitrep-monthly-data-webfile-May2025.xlsx"
 temp_file <- tempfile(fileext = ".xlsx")
 
@@ -370,9 +362,7 @@ may_25_pathway <- read_excel(temp_file, sheet = 6, skip=4) %>%
   mutate(month = 'May-25') %>% 
   select(month,org_code,pathway_zero,pathway_one,pathway_two,pathway_three)
 
-
 # JUNE 25 
-
 url <- "https://www.england.nhs.uk/statistics/wp-content/uploads/sites/2/2025/07/Daily-discharge-sitrep-monthly-data-webfile-June2025.xlsx"
 temp_file <- tempfile(fileext = ".xlsx")
 
@@ -392,9 +382,7 @@ june_25_pathway <- read_excel(temp_file, sheet = 6, skip=4) %>%
   mutate(month = 'Jun-25') %>% 
   select(month,org_code,pathway_zero,pathway_one,pathway_two,pathway_three)
 
-
 # JULY 25 
-
 url <- "https://www.england.nhs.uk/statistics/wp-content/uploads/sites/2/2025/08/Daily-discharge-sitrep-monthly-data-webfile-July2025.xlsx"
 temp_file <- tempfile(fileext = ".xlsx")
 
@@ -414,52 +402,71 @@ july_25_pathway <- read_excel(temp_file, sheet = 6, skip=4) %>%
   mutate(month = 'July-25') %>% 
   select(month,org_code,pathway_zero,pathway_one,pathway_two,pathway_three)
 
-
 # AUGUST 25 
-#
-#url <- ""
-#temp_file <- tempfile(fileext = ".xlsx")
-#
+url <- "https://www.england.nhs.uk/statistics/wp-content/uploads/sites/2/2025/09/Daily-discharge-sitrep-monthly-data-webfile-August2025.xlsx"
+temp_file <- tempfile(fileext = ".xlsx")
+
 # Download the file
-#download.file(url, destfile = temp_file, mode = "wb")
-#
+download.file(url, destfile = temp_file, mode = "wb")
+
 # Read the Excel sheet
-#august_25_pathway <- read_excel(temp_file, sheet = 6, skip=4) %>% 
-#  rename(org_code = `...2`) %>% 
-#  left_join(trust_codes,by='org_code') %>% 
-#  filter(Flag==1) %>% 
-#  mutate(across(-org_code, ~ as.numeric(ifelse(grepl("^-?[0-9.]+$", .x), .x, 0)))) %>% 
-#  mutate(pathway_zero = `Pathway 0 Total`,
-#         pathway_one = `Pathway 1 Total`,
-#         pathway_two = `Pathway 2 Total`,
-#         pathway_three = `Pathway 3 Total`) %>% 
-#  mutate(month = 'Aug-25') %>% 
-#  select(month,org_code,pathway_zero,pathway_one,pathway_two,pathway_three)
+august_25_pathway <- read_excel(temp_file, sheet = 6, skip=4) %>% 
+  rename(org_code = `...2`) %>% 
+  left_join(trust_codes,by='org_code') %>% 
+  filter(Flag==1) %>% 
+  mutate(across(-org_code, ~ as.numeric(ifelse(grepl("^-?[0-9.]+$", .x), .x, 0)))) %>% 
+  mutate(pathway_zero = `Pathway 0 Total`,
+         pathway_one = `Pathway 1 Total`,
+         pathway_two = `Pathway 2 Total`,
+         pathway_three = `Pathway 3 Total`) %>% 
+  mutate(month = 'Aug-25') %>% 
+  select(month,org_code,pathway_zero,pathway_one,pathway_two,pathway_three)
+
+# SEP 25 (provisional)
+url <- "https://www.england.nhs.uk/statistics/wp-content/uploads/sites/2/2025/10/Daily-discharge-sitrep-monthly-data-webfile-September2025v1.xlsx"
+temp_file <- tempfile(fileext = ".xlsx")
+
+# Download the file
+download.file(url, destfile = temp_file, mode = "wb")
+
+# Read the Excel sheet
+september_25_pathway <- read_excel(temp_file, sheet = 6, skip=4) %>% 
+  rename(org_code = `...2`) %>% 
+  left_join(trust_codes,by='org_code') %>% 
+  filter(Flag==1) %>% 
+  mutate(across(-org_code, ~ as.numeric(ifelse(grepl("^-?[0-9.]+$", .x), .x, 0)))) %>% 
+  mutate(pathway_zero = `Pathway 0 Total`,
+         pathway_one = `Pathway 1 Total`,
+         pathway_two = `Pathway 2 Total`,
+         pathway_three = `Pathway 3 Total`) %>% 
+  mutate(month = 'Sep-25') %>% 
+  select(month,org_code,pathway_zero,pathway_one,pathway_two,pathway_three)
+
 
 # Join datasets and export ####################################################
 
-# Staffing - May-Jun 24 vs 25 - 
+# Staffing - May-Jul 24 vs May-Jul 25  
 
 all_trust_staffing <- may_24_staffing %>%
-  rbind(jun_24_staffing, may_25_staffing, jun_25_staffing) %>%
+  rbind(jun_24_staffing, jul_25_staffing, may_25_staffing, jun_25_staffing, jul_25_staffing) %>%
   group_by(org_code)
   
 all_trusts_staff_medians <- all_trust_staffing %>%
   ungroup() %>%
   summarize(
-    All_Median_Pre_nurses = median(nurses[month %in% c("May-24", "Jun-24")], na.rm = TRUE),
-    All_Median_Post_nurses = median(nurses[month %in% c("May-25", "Jun-25")], na.rm = TRUE),
-    All_Median_Pre_doctors = median(doctors[month %in% c("May-24", "Jun-24")], na.rm = TRUE),
-    All_Median_Post_doctors = median(doctors[month %in% c("May-25", "Jun-25")], na.rm = TRUE))
+    All_Median_Pre_nurses = median(nurses[month %in% c("May-24", "Jun-24", "Jul-24")], na.rm = TRUE),
+    All_Median_Pre_doctors = median(doctors[month %in% c("May-24", "Jun-24", "Jul-24")], na.rm = TRUE),
+    All_Median_Post_nurses = median(nurses[month %in% c("May-25", "Jun-25", "Jul-25")], na.rm = TRUE),
+        All_Median_Post_doctors = median(doctors[month %in% c("May-25", "Jun-25", "Jul-25")], na.rm = TRUE))
 
 best_trust_staff <- all_trust_staffing %>%
   filter(org_code %in% best_trusts) %>%
   group_by(org_code) %>%
   summarize(
-    Pre_doctors = mean(doctors[month %in% c("May-24","Jun-24")]),
-    Pre_nurses = mean(nurses[month %in% c("May-24","Jun-24")]),
-    Post_doctors = mean(doctors[month %in% c("May-25","Jun-25")]),
-    Post_nurses = mean(nurses[month %in% c("May-25","Jun-25")]))
+    Pre_doctors = mean(doctors[month %in% c("May-24","Jun-24", "Jul-24")]),
+    Pre_nurses = mean(nurses[month %in% c("May-24","Jun-24", "Jul-24")]),
+    Post_doctors = mean(doctors[month %in% c("May-25","Jun-25", "Jul-25")]),
+    Post_nurses = mean(nurses[month %in% c("May-25","Jun-25", "Jul-25")]))
 
 overall_means <- best_trust_staff %>%
   summarize(
@@ -470,33 +477,33 @@ overall_means <- best_trust_staff %>%
 
 figure_5_data <- bind_cols(best_trust_staff, all_trusts_staff_medians, overall_means)
 
-# Discharge destination - May-Jul 24 vs 25
-all_trusts_destination <- may_24_pathway %>%
-  rbind(june_24_pathway, july_24_pathway, may_25_pathway, june_25_pathway, july_25_pathway)
+# Discharge destination - Jun-Aug 24 vs 25
+all_trusts_destination <- june_24_pathway %>%
+  rbind(july_24_pathway, august_24_pathway, june_25_pathway, july_25_pathway, august_25_pathway)
 
 all_trusts_destination_medians <- all_trusts_destination %>%
   ungroup() %>%
   summarize(
-    All_Median_Pre_Pathway_1 = median(pathway_one[month %in% c("May-24", "Jun-24","Jul-24")], na.rm = TRUE),
-    All_Median_Post_Pathway_1 = median(pathway_one[month %in% c("May-25", "Jun-25", "Jul-25")], na.rm = TRUE),
+    All_Median_Pre_Pathway_1 = median(pathway_one[month %in% c("Jun-24", "Jul-24","Aug-24")], na.rm = TRUE),
+    All_Median_Post_Pathway_1 = median(pathway_one[month %in% c("Jun-25", "Jul-25", "Aug-25")], na.rm = TRUE),
     
-    All_Median_Pre_Pathway_2 = median(pathway_two[month %in% c("May-24", "Jun-24","Jul-24")], na.rm = TRUE),
-    All_Median_Post_Pathway_2 = median(pathway_two[month %in% c("May-25", "Jun-25", "Jul-25")], na.rm = TRUE),
+    All_Median_Pre_Pathway_2 = median(pathway_two[month %in% c("Jun-24", "Jul-24","Aug-24")], na.rm = TRUE),
+    All_Median_Post_Pathway_2 = median(pathway_two[month %in% c("Jun-25", "Jul-25", "Aug-25")], na.rm = TRUE),
     
-    All_Median_Pre_Pathway_3 = median(pathway_three[month %in% c("May-24", "Jun-24","Jul-24")], na.rm = TRUE),
-    All_Median_Post_Pathway_3 = median(pathway_three[month %in% c("May-25", "Jun-25", "Jul-25")], na.rm = TRUE))
+    All_Median_Pre_Pathway_3 = median(pathway_three[month %in% c("Jun-24", "Jul-24","Aug-24")], na.rm = TRUE),
+    All_Median_Post_Pathway_3 = median(pathway_three[month %in% c("Jun-25", "Jul-25", "Aug-25")], na.rm = TRUE))
     
 best_trusts_destination <- all_trusts_destination %>%
   filter(org_code %in% best_trusts) %>%
   group_by(org_code) %>%
   summarize(
-  pre_pathway_1 = mean(pathway_one[month %in% c("May-24", "Jun-24","Jul-24")], na.rm = TRUE),
-  pre_pathway_2 = mean(pathway_two[month %in% c("May-24", "Jun-24","Jul-24")], na.rm = TRUE),
-  pre_pathway_3 = mean(pathway_three[month %in% c("May-24", "Jun-24","Jul-24")], na.rm = TRUE),
+  pre_pathway_1 = mean(pathway_one[month %in% c("Jun-24", "Jul-24","Aug-24")], na.rm = TRUE),
+  pre_pathway_2 = mean(pathway_two[month %in% c("Jun-24", "Jul-24","Aug-24")], na.rm = TRUE),
+  pre_pathway_3 = mean(pathway_three[month %in% c("Jun-24", "Jul-24","Aug-24")], na.rm = TRUE),
   
-  post_pathway_1 = mean(pathway_one[month %in% c("May-25", "Jun-25", "Jul-25")], na.rm = TRUE),
-  post_pathway_2 = mean(pathway_two[month %in% c("May-25", "Jun-25", "Jul-25")], na.rm = TRUE),
-  post_pathway_3 = mean(pathway_three[month %in% c("May-25", "Jun-25", "Jul-25")], na.rm = TRUE))
+  post_pathway_1 = mean(pathway_one[month %in% c("Jun-25", "Jul-25", "Aug-25")], na.rm = TRUE),
+  post_pathway_2 = mean(pathway_two[month %in% c("Jun-25", "Jul-25", "Aug-25")], na.rm = TRUE),
+  post_pathway_3 = mean(pathway_three[month %in% c("Jun-25", "Jul-25", "Aug-25")], na.rm = TRUE))
 
 overall_means <- best_trusts_destination %>%
     summarize(
@@ -524,8 +531,9 @@ rm(august_24_staffing)
 rm(july_24_pathway)
 rm(july_24_staffing)
 rm(july_25_pathway)
-rm(Jun_24_redux)
-rm(Jun_25_redux)
+rm(august_25_pathway)
+rm(september_25_pathway)
+rm(jul_25_staffing)
 rm(june_24_pathway)
 rm(jun_24_staffing)
 rm(june_25_pathway)

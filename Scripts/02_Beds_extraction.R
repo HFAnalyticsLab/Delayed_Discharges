@@ -378,6 +378,26 @@ aug_25_beds <- read_excel(temp_file, sheet = 2,skip=14) %>%
   mutate(month = 'Aug-25') %>% 
   select(month,org_code,acute_beds,adult_acute_beds,occupied_beds,occupancy_rate)
 
+# SEP 25 (provisional)
+
+url <- "https://www.england.nhs.uk/statistics/wp-content/uploads/sites/2/2025/10/202509-September-2025-beds-sitrep-data-provisionalversion-v1.1.xlsx"
+temp_file <- tempfile(fileext = ".xlsx")
+
+# Download the file
+download.file(url, destfile = temp_file, mode = "wb")
+
+# Read the Excel sheet
+sep_25_beds <- read_excel(temp_file, sheet = 2,skip=14) %>% 
+  rename(Region = 1,
+         org_code = 3,
+         acute_beds = `G&A beds available`,
+         adult_acute_beds = `Adult G&A beds available`,
+         occupied_beds = `G&A beds occupied`,
+         occupancy_rate = `G&A occupancy rate`) %>% 
+  left_join(trust_codes,by='org_code') %>% 
+  filter(Flag==1) %>%
+  mutate(month = 'Sep-25') %>% 
+  select(month,org_code,acute_beds,adult_acute_beds,occupied_beds,occupancy_rate)
 
 
 # Bind bed data ###############################################################
@@ -398,7 +418,8 @@ hospital_beds <- rbind(apr_24_beds,
                        may_25_beds,
                        jun_25_beds,
                        jul_25_beds,
-                       aug_25_beds)
+                       aug_25_beds,
+                       sep_25_beds)
 
 # 2 Proportion of beds used for DD data #######################################
 figure_1b_data <- left_join(dd_file_acute_trusts_FINAL,hospital_beds,by=c('month','org_code')) %>% 
@@ -423,8 +444,8 @@ figure_1_data$perc_bed_delays <- figure_1b_data$perc_bed_delays
 # 3 Variation by trust in change of the % of discharges delayed DATA ##########
 
 figure_2b_data <- left_join(dd_file_acute_trusts_FINAL,hospital_beds,by=c('month','org_code')) %>% 
-  filter(month %in% c('May-24','Jun-24','Jul-24','May-25','Jun-25','Jul-25')) %>% 
-  mutate(period = if_else(month %in% c('May-24','Jun-24','Jul-24'),'pre','post')) %>% 
+  filter(month %in% c('Jun-24','Jul-24','Aug-24','Jun-25','Jul-25','Aug-25')) %>% 
+  mutate(period = if_else(month %in% c('Jun-24','Jul-24','Aug-24'),'pre','post')) %>% 
   group_by(period,org_code) %>% 
   summarise(patients_discharged_volume = sum(as.numeric(patients_discharged_volume)),
             no_delay_volume = sum(as.numeric(no_delay_volume))) %>% 
@@ -441,8 +462,8 @@ figure_2b_data <- left_join(dd_file_acute_trusts_FINAL,hospital_beds,by=c('month
 # 4 Variation by trust in change in average delay length DATA #################
 
 figure_2c_data <- left_join(dd_file_acute_trusts_FINAL,hospital_beds,by=c('month','org_code')) %>% 
-  filter(month %in% c('May-24','Jun-24','Jul-24','May-25','Jun-25','Jul-25')) %>% 
-  mutate(period = if_else(month %in% c('May-24','Jun-24','Jul-24'),'pre','post')) %>% 
+  filter(month %in% c('Jun-24','Jul-24','Aug-24','Jun-25','Jul-25','Aug-25')) %>% 
+  mutate(period = if_else(month %in% c('Jun-24','Jul-24','Aug-24'),'pre','post')) %>% 
   group_by(period,org_code) %>% 
   summarise(patients_discharged_volume = sum(as.numeric(patients_discharged_volume)),
             no_delay_volume = sum(as.numeric(no_delay_volume)),
@@ -460,8 +481,8 @@ figure_2c_data <- left_join(dd_file_acute_trusts_FINAL,hospital_beds,by=c('month
 # 5 Variation by trust in change in the % of bed days used by delayed discharge DATA #####
 
 figure_2_data <- left_join(dd_file_acute_trusts_FINAL,hospital_beds,by=c('month','org_code')) %>% 
-  filter(month %in% c('May-24','Jun-24','Jul-24','May-25','Jun-25','Jul-25')) %>% 
-  mutate(period = if_else(month %in% c('May-24','Jun-24','Jul-24'),'pre','post')) %>% 
+  filter(month %in% c('Jun-24','Jul-24','Aug-24','Jun-25','Jul-25','Aug-25')) %>% 
+  mutate(period = if_else(month %in% c('Jun-24','Jul-24','Aug-24'),'pre','post')) %>% 
   mutate(month = my(month),
          days_in_month = days_in_month(month)) %>%
   filter(dd_bed_days > 0, #only select out trusts which have delayed discharges
@@ -528,8 +549,8 @@ dd_file_acute_trusts_FINAL <- dd_file_acute_trusts_FINAL %>%
     perc_patients_delayed = ((total_delay_volume/patients_discharged_volume) *100))
 
 figure_3b_data <- left_join(dd_file_acute_trusts_FINAL,hospital_beds,by=c('month','org_code')) %>% 
-  filter(month %in% c('May-24','Jun-24','Jul-24','May-25','Jun-25','Jul-25')) %>% 
-  mutate(period = if_else(month %in% c('May-24','Jun-24','Jul-24'),'pre','post')) %>% 
+  filter(month %in% c('Jun-24','Jul-24','Aug-24','Jun-25','Jul-25','Aug-25')) %>% 
+  mutate(period = if_else(month %in% c('Jun-24','Jul-24','Aug-24'),'pre','post')) %>% 
   mutate(month = my(month),
          days_in_month = days_in_month(month)) %>%
   filter(dd_bed_days > 0, #only select out trusts which have delayed discharges
@@ -577,7 +598,6 @@ figure_4b_data <- bind_cols(hospital_bed_change, all_trusts_beds, overall_means)
 # Clean #######################################################################
 
 rm(url)
-
 rm(apr_24_beds)
 rm(may_24_beds)
 rm(jun_24_beds)
@@ -595,5 +615,6 @@ rm(may_25_beds)
 rm(jun_25_beds)
 rm(jul_25_beds)
 rm(aug_25_beds)
+rm(sep_25_beds)
 rm(greater_than_2.5p_reduction)
 

@@ -377,17 +377,17 @@ Jul_25 <- Jul_25 %>%
 Jul_25 <- Jul_25[, sapply(Jul_25, function(col) !all(is.na(col)))]
 
 # August 25
-#Aug_25 <- August2025
-#
-#Aug_25 <- Aug_25 %>%
-#  {
-#    header_row_index <- which(.[[1]] == "Region")
-#    colnames(.) <- as.character(unlist(.[header_row_index, ]))
-#    .[(header_row_index + 1):nrow(.), ]
-#  }
-#
-#Aug_25 <- Aug_25[, sapply(Aug_25, function(col) !all(is.na(col)))]
-#
+Aug_25 <- August2025
+
+Aug_25 <- Aug_25 %>%
+  {
+    header_row_index <- which(.[[1]] == "Region")
+    colnames(.) <- as.character(unlist(.[header_row_index, ]))
+    .[(header_row_index + 1):nrow(.), ]
+  }
+
+Aug_25 <- Aug_25[, sapply(Aug_25, function(col) !all(is.na(col)))]
+
 # September 25
 #Sep_25 <- September2025
 #
@@ -416,7 +416,8 @@ Jul_25 <- Jul_25[, sapply(Jul_25, function(col) !all(is.na(col)))]
 
 rm(list = c(paste0("NA", 1:8), "df", "April2024", "April2025", "August2024", "December2024", 
             "February2025", "January2025", "July2024", "June2024", "June2025", "March2025", 
-            "May2024", "May2025", "November2023", "November2024", "October2024", "September2024", "July2025"))
+            "May2024", "May2025", "November2023", "November2024", "October2024", "September2024", 
+            "July2025", "August2025"))
 
 
 # 4 Adjust column names ########################################################
@@ -463,6 +464,7 @@ colnames(Apr_25) <- colnames_39
 colnames(May_25) <- colnames_39
 colnames(Jun_25) <- colnames_39
 colnames(Jul_25) <- colnames_39
+colnames(Aug_25) <- colnames_39
 
 # November 2023
 colnames_Nov <- colnames_22
@@ -508,7 +510,7 @@ colnames(beds_timeseries) <- c("Month","G&A beds available","G&A core beds avail
 
 # 6 England DRD timeseries ##################################################
 
-England_FULL <- read.xlsx("https://www.england.nhs.uk/statistics/wp-content/uploads/sites/2/2025/08/Discharge-Ready-Date-Timeseries-webfile-Sept-2023-June-2025.xlsx", sheet = "Timeseries")
+England_FULL <- read.xlsx("https://www.england.nhs.uk/statistics/wp-content/uploads/sites/2/2025/10/Discharge-Ready-Date-Timeseries-webfile-Sept-2023-August-2025.xlsx", sheet = "Timeseries")
 England_FULL <- England_FULL %>%
   {
     header_row_index <- which(.[[1]] == "Month")
@@ -531,7 +533,7 @@ colnames(England_FULL) <- colnames_Eng
 
 Month_list <- c("Sep23","Oct23","Nov23","Dec23","Jan24","Feb24","Mar24","Apr24",
                 "May24","Jun24","Jul24","Aug24","Sep24","Oct24","Nov24","Dec24",
-                "Jan25","Feb25","Mar25","Apr25","May25","Jun25")
+                "Jan25","Feb25","Mar25","Apr25","May25","Jun25","Jul25","Aug25")
 
 England_FULL$Month <- Month_list
 print(colnames_Eng)
@@ -621,7 +623,9 @@ names(Jul_25) <- make.unique(names(Jul_25))
 Jul_25 <- Jul_25 %>%
   mutate(month = 'Jul-25')
 
-
+names(Aug_25) <- make.unique(names(Aug_25))
+Aug_25 <- Jul_25 %>%
+  mutate(month = 'Aug-25')
 
 # Bring together the Sept-23 to Mar-24 data files.
 delayed_discharges_sep23_mar24 <- rbind(Sep_23,Oct_23,Dec_23,Jan_24,Feb_24,Mar_24) %>% 
@@ -645,8 +649,8 @@ delayed_discharges_sep23_mar24 <- rbind(Sep_23,Oct_23,Dec_23,Jan_24,Feb_24,Mar_2
          delayed_perc_21plus_days = 0,
          average_delay_los_inc_0_day_delay = 0)
 
-# Bring together the Apr-24 to May-25 data files.
-delayed_discharges_apr24_jul25 <- rbind(Apr_24,
+# Bring together the Apr-24 to Aug-25 data files.
+delayed_discharges_apr24_aug25 <- rbind(Apr_24,
                                  May_24,
                                  Jun_24,
                                  Jul_24,
@@ -661,12 +665,13 @@ delayed_discharges_apr24_jul25 <- rbind(Apr_24,
                                  Apr_25,
                                  May_25,
                                  Jun_25,
-                                 Jul_25) %>% 
+                                 Jul_25,
+                                 Aug_25) %>% 
   select(-c(Region,ICB,`Data Source`))
 
 # Bring all the files together and select out the variables of interest.
 dd_file <- rbind(delayed_discharges_sep23_mar24,
-                 delayed_discharges_apr24_jul25) %>% 
+                 delayed_discharges_apr24_aug25) %>% 
   select(month,org_code,patients_discharged_volume, dd_bed_days,no_delay_perc,delay_perc,
          no_delay_volume, `1_day_delay_volume`, `2_3_day_delay_volume`, `4_6_day_delay_volume`,
          `7_13_day_delay_volume`, `14_20_day_delay_volume`, `21plus_day_delay_volume`,
@@ -694,10 +699,10 @@ dd_file_acute_trusts <- left_join(dd_file,trust_codes,by='org_code') %>%
 dd_file_acute_trusts_FINAL <- dd_file_acute_trusts %>% 
   filter(!month %in% c('Sept-23','Oct-23','Nov-23','Dec-23','Jan-24','Feb-24','Mar-24'))
 
-# Create dataset for Apr/May.
-dd_file_May_Jun_Jul <- dd_file_acute_trusts_FINAL %>% 
-  filter(month %in% c('May-24','Jun-24','Jul-24','May-25','Jun-25','Jul-25')) %>% 
-  mutate(time_period = if_else(month %in% c('May-24','Jun-24','Jul-24'),'pre','post'))
+# Create dataset for Jun-Aug.
+dd_file_Jun_Jul_Aug <- dd_file_acute_trusts_FINAL %>% 
+  filter(month %in% c('Jun-24','Jul-24','Aug-24','Jun-25','Jul-25','Aug-25')) %>% 
+  mutate(time_period = if_else(month %in% c('Jun-24','Jul-24','Aug-24'),'pre','post'))
 
 # Create England level dataset.
 dd_file_national_FINAL <- dd_file %>% 
@@ -706,7 +711,7 @@ dd_file_national_FINAL <- dd_file %>%
 
 
 
-# 9 May-Jul 24 ############################################################
+# 9 Jun-Aug 24 ############################################################
 
 Jul_24_redux <- Jul_24 %>%
   rename(total_discharge_Jul_24 = `patients_discharged_volume`,
@@ -715,12 +720,12 @@ Jul_24_redux <- Jul_24 %>%
   mutate(delays_Jul_24 = as.numeric(total_discharge_Jul_24) - as.numeric(no_delay_Jul_24)) %>% 
   select(Region,org_code,total_discharge_Jul_24,no_delay_Jul_24,delays_Jul_24,total_delay_beddays_Jul_24)
 
-May_24_redux <- May_24 %>%
-  rename(total_discharge_May_24 = `patients_discharged_volume`,
-         no_delay_May_24 = `no_delay_volume`,
-         total_delay_beddays_May_24 = `dd_bed_days`) %>%
-  mutate(delays_May_24 = as.numeric(total_discharge_May_24) - as.numeric(no_delay_May_24)) %>% 
-  select(Region,org_code,total_discharge_May_24,no_delay_May_24,delays_May_24,total_delay_beddays_May_24)
+Aug_24_redux <- Aug_24 %>%
+  rename(total_discharge_Aug_24 = `patients_discharged_volume`,
+         no_delay_Aug_24 = `no_delay_volume`,
+         total_delay_beddays_Aug_24 = `dd_bed_days`) %>%
+  mutate(delays_Aug_24 = as.numeric(total_discharge_Aug_24) - as.numeric(no_delay_Aug_24)) %>% 
+  select(Region,org_code,total_discharge_Aug_24,no_delay_Aug_24,delays_Aug_24,total_delay_beddays_Aug_24)
 
 Jun_24_redux <- Jun_24 %>%
   rename(total_discharge_Jun_24 = `patients_discharged_volume`,
@@ -728,6 +733,7 @@ Jun_24_redux <- Jun_24 %>%
          total_delay_beddays_Jun_24 = `dd_bed_days`) %>%
   mutate(delays_Jun_24 = as.numeric(total_discharge_Jun_24) - as.numeric(no_delay_Jun_24)) %>% 
   select(Region,org_code,total_discharge_Jun_24,no_delay_Jun_24,delays_Jun_24,total_delay_beddays_Jun_24)
+
 
 # 10 May-Jul 25 ###########################################################
 
@@ -738,12 +744,12 @@ Jul_25_redux <- Jul_25 %>%
   mutate(delays_Jul_25 = as.numeric(total_discharge_Jul_25) - as.numeric(no_delay_Jul_25)) %>% 
   select(Region,org_code,total_discharge_Jul_25,no_delay_Jul_25,delays_Jul_25,total_delay_beddays_Jul_25)
 
-May_25_redux <- May_25 %>%
-  rename(total_discharge_May_25 = `patients_discharged_volume`,
-         no_delay_May_25 = `no_delay_volume`,
-         total_delay_beddays_May_25 = `dd_bed_days`) %>%
-  mutate(delays_May_25 = as.numeric(total_discharge_May_25) - as.numeric(no_delay_May_25)) %>% 
-  select(Region,org_code,total_discharge_May_25,no_delay_May_25,delays_May_25,total_delay_beddays_May_25)
+Aug_25_redux <- Aug_25 %>%
+  rename(total_discharge_Aug_25 = `patients_discharged_volume`,
+         no_delay_Aug_25 = `no_delay_volume`,
+         total_delay_beddays_Aug_25 = `dd_bed_days`) %>%
+  mutate(delays_Aug_25 = as.numeric(total_discharge_Aug_25) - as.numeric(no_delay_Aug_25)) %>% 
+  select(Region,org_code,total_discharge_Aug_25,no_delay_Aug_25,delays_Aug_25,total_delay_beddays_Aug_25)
 
 Jun_25_redux <- Jun_25 %>%
 rename(total_discharge_Jun_25 = `patients_discharged_volume`,
@@ -752,32 +758,32 @@ rename(total_discharge_Jun_25 = `patients_discharged_volume`,
   mutate(delays_Jun_25 = as.numeric(total_discharge_Jun_25) - as.numeric(no_delay_Jun_25)) %>% 
   select(Region,org_code,total_discharge_Jun_25,no_delay_Jun_25,delays_Jun_25,total_delay_beddays_Jun_25)
 
-output <- full_join(May_24_redux, Jun_24_redux, by=c("Region","org_code"))
-output <- full_join(output,Jul_24_redux, by=c("Region","org_code"))
-output <- full_join(output,May_25_redux, by=c("Region","org_code"))
+output <- full_join(Jun_24_redux, Jul_24_redux, by=c("Region","org_code"))
+output <- full_join(output,Aug_24_redux, by=c("Region","org_code"))
 output <- full_join(output,Jun_25_redux, by=c("Region","org_code"))
 output <- full_join(output,Jul_25_redux, by=c("Region","org_code"))
+output <- full_join(output,Aug_25_redux, by=c("Region","org_code"))
 
 # National filter
 
-May_Jun_Jul_national <- output %>%
+Jun_Jul_Aug_national <- output %>%
   filter(org_code == 'National') %>%
-  mutate(total_discharge24 = sum(as.numeric(c(total_discharge_Jul_24, total_discharge_May_24, total_discharge_Jun_24)))/3,
-         total_discharge25 = sum(as.numeric(c(total_discharge_Jul_25, total_discharge_May_25, total_discharge_Jun_25)))/3)
+  mutate(total_discharge24 = sum(as.numeric(c(total_discharge_Jul_24, total_discharge_Aug_24, total_discharge_Jun_24)))/3,
+         total_discharge25 = sum(as.numeric(c(total_discharge_Jul_25, total_discharge_Aug_25, total_discharge_Jun_25)))/3)
 
 output_test <- output %>% 
   group_by(Region,org_code) %>% 
-  mutate(pre_total_discharge = as.numeric(total_discharge_Jul_24) + as.numeric(total_discharge_May_24) + as.numeric(total_discharge_Jun_24),
-         pre_no_delay = as.numeric(no_delay_Jul_24) + as.numeric(no_delay_May_24) + as.numeric(no_delay_Jun_24),
-         pre_delays = as.numeric(delays_Jul_24) + as.numeric(delays_May_24) + as.numeric(delays_Jun_24),
-         pre_delayed_beddays = as.numeric(total_delay_beddays_Jul_24) + as.numeric(total_delay_beddays_May_24) + as.numeric(total_delay_beddays_Jun_24),
+  mutate(pre_total_discharge = as.numeric(total_discharge_Jul_24) + as.numeric(total_discharge_Aug_24) + as.numeric(total_discharge_Jun_24),
+         pre_no_delay = as.numeric(no_delay_Jul_24) + as.numeric(no_delay_Aug_24) + as.numeric(no_delay_Jun_24),
+         pre_delays = as.numeric(delays_Jul_24) + as.numeric(delays_Aug_24) + as.numeric(delays_Jun_24),
+         pre_delayed_beddays = as.numeric(total_delay_beddays_Jul_24) + as.numeric(total_delay_beddays_Aug_24) + as.numeric(total_delay_beddays_Jun_24),
          pre_proportion_delayed = pre_delays / pre_total_discharge,
          pre_delay_los = pre_delayed_beddays / pre_delays,
          
-         post_total_discharge = as.numeric(total_discharge_Jul_25) + as.numeric(total_discharge_May_25) + as.numeric(total_discharge_Jun_25),
-         post_no_delay = as.numeric(no_delay_Jul_25) + as.numeric(no_delay_May_25) + as.numeric(no_delay_Jun_25),
-         post_delays = as.numeric(delays_Jul_25) + as.numeric(delays_May_25) + as.numeric(delays_Jun_25),
-         post_delayed_beddays = as.numeric(total_delay_beddays_Jul_25) + as.numeric(total_delay_beddays_May_25) + as.numeric(total_delay_beddays_Jun_25),
+         post_total_discharge = as.numeric(total_discharge_Jul_25) + as.numeric(total_discharge_Aug_25) + as.numeric(total_discharge_Jun_25),
+         post_no_delay = as.numeric(no_delay_Jul_25) + as.numeric(no_delay_Aug_25) + as.numeric(no_delay_Jun_25),
+         post_delays = as.numeric(delays_Jul_25) + as.numeric(delays_Aug_25) + as.numeric(delays_Jun_25),
+         post_delayed_beddays = as.numeric(total_delay_beddays_Jul_25) + as.numeric(total_delay_beddays_Aug_25) + as.numeric(total_delay_beddays_Jun_25),
          post_proportion_delayed = post_delays / post_total_discharge,
          post_delay_los = post_delayed_beddays / post_delays,
          change_in_total_discharge = (post_total_discharge - pre_total_discharge)/pre_total_discharge) %>%
@@ -855,22 +861,22 @@ grouped_delays <- grouped_delays %>%
   mutate(Delay_Category = factor(Delay_Category, levels = c('14+ days (%)','7-13 days (%)','0-6 days (%)')))
 
 # Pull out May-Jul 
-dd_file_May_Jun_Jul_national <- dd_file_national_FINAL %>%
-  filter(month %in% c('May-24','Jun-24','Jul-24','May-25','Jun-25','Jul-25' )) %>% 
-  mutate(time_period = if_else(month %in% c('May-24','Jun-24','Jul-24'),'pre','post'))
+dd_file_Jun_Jul_Aug_national <- dd_file_national_FINAL %>%
+  filter(month %in% c('Jun-24','Jul-24','Aug-24','Jun-25','Jul-25','Aug-25' )) %>% 
+  mutate(time_period = if_else(month %in% c('Jun-24','Jul-24','Aug-24'),'pre','post'))
 
 # Convert to numerics
-dd_file_May_Jun_Jul_national[ , -c(1, 2)] <- lapply(dd_file_May_Jun_Jul_national[ , -c(1, 2)], as.numeric)
+dd_file_Jun_Jul_Aug_national[ , -c(1, 2)] <- lapply(dd_file_Jun_Jul_Aug_national[ , -c(1, 2)], as.numeric)
 
-May_Jul2024 <- colMeans(dd_file_May_Jun_Jul_national[1:3, -(1:2)])
-May_Jul2025 <- colMeans(dd_file_May_Jun_Jul_national[4:6, -(1:2)])
+Jun_Aug2024 <- colMeans(dd_file_Jun_Jul_Aug_national[1:3, -(1:2)])
+Jun_Aug2025 <- colMeans(dd_file_Jun_Jul_Aug_national[4:6, -(1:2)])
 
-dd_file_May_Jun_Jul_avg <- rbind(May_Jul2024, May_Jul2025)
-dd_file_May_Jun_Jul_avg <- as.data.frame(dd_file_May_Jun_Jul_avg)
-dd_file_May_Jun_Jul_avg$month <- c("MayJunJul2024","MayJunJul2025")
+dd_file_Jun_Jul_Aug_avg <- rbind(Jun_Aug2024, Jun_Aug2025)
+dd_file_Jun_Jul_Aug_avg <- as.data.frame(dd_file_Jun_Jul_Aug_avg)
+dd_file_Jun_Jul_Aug_avg$month <- c("JunJulAug2024","JunJulAug2025")
 
 # Pivot the delay composition
-grouped_delays_24_25 <- dd_file_May_Jun_Jul_avg %>%
+grouped_delays_24_25 <- dd_file_Jun_Jul_Aug_avg %>%
   select(month, `0-6 days (%)`, `7-13 days (%)`, `14+ days (%)`)
 
 grouped_delays_24_25 <- grouped_delays_24_25 %>%
@@ -898,23 +904,23 @@ rm(colnames_Nov)
 rm(i)
 rm(na_indices)
 rm(colnames_Eng)
-rm(delayed_discharges_apr24_jul25)
+rm(delayed_discharges_apr24_aug25)
 rm(delayed_discharges_sep23_mar24)
 rm(DDbeds_totalGA)
-rm(May_24_redux)
+rm(Aug_24_redux)
 rm(Jun_24_redux)
 rm(Jul_24_redux)
-rm(May_25_redux)
+rm(Aug_25_redux)
 rm(Jun_25_redux)
 rm(Jul_25_redux)
 rm(beds_timeseries_url)
 rm(temp_file)
-rm(May_Jul2024)
-rm(May_Jul2025)
+rm(Jun_Aug2024)
+rm(Jun_Aug2025)
 rm(names_vec)
 rm(grouped_delays)
 rm(grouped_delays_24_25)
-rm(May_Jun_Jul_national)
+rm(Jun_Jul_Aug_national)
 
 rm(Sep_23)
 rm(Oct_23)
@@ -939,3 +945,5 @@ rm(Apr_25)
 rm(May_25)
 rm(Jun_25)
 rm(Jul_25)
+rm(Aug_25)
+
