@@ -35,7 +35,7 @@ source('https://raw.githubusercontent.com/zeyadissa/open_health_data/main/src/fu
 DRD_url <- ('https://www.england.nhs.uk/statistics/statistical-work-areas/discharge-delays/discharge-ready-date/')
 
 # Zeyad's function captures 12 files
-
+## QA JH I'm getting 18 - was there an update to the source?
 DRDlinks <- GetLinks(DRD_url, 'Discharge-Ready-Date-monthly-data-webfile')
 print(DRDlinks)
 
@@ -865,7 +865,7 @@ dd_file_Jun_Jul_Aug_national <- dd_file_national_FINAL %>%
   filter(month %in% c('Jun-24','Jul-24','Aug-24','Jun-25','Jul-25','Aug-25' )) %>% 
   mutate(time_period = if_else(month %in% c('Jun-24','Jul-24','Aug-24'),'pre','post'))
 
-# Convert to numerics
+# Convert to numerics   ## QA JH you are losing your time_period values by doing this
 dd_file_Jun_Jul_Aug_national[ , -c(1, 2)] <- lapply(dd_file_Jun_Jul_Aug_national[ , -c(1, 2)], as.numeric)
 
 Jun_Aug2024 <- colMeans(dd_file_Jun_Jul_Aug_national[1:3, -(1:2)])
