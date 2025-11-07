@@ -25,7 +25,7 @@ apr_24_beds <- read_excel(temp_file, sheet = 2,skip=14) %>%
          occupancy_rate = `G&A occupancy rate`) %>% 
   mutate(org_code = str_trim(org_code, side = "left")) %>% 
   left_join(trust_codes,by='org_code') %>% 
-  filter(Flag==1) %>%
+  filter(Flag==1) %>% ## QA JH all flags are 1 is that correct?
   mutate(month = 'Apr-24') %>% 
   select(month,org_code,acute_beds,adult_acute_beds,occupied_beds,occupancy_rate)
 
@@ -533,7 +533,7 @@ figure_3_data <- figure_2_data %>%
          rank_change = min_rank(difference))
 
 # 7 Ranking trusts by the % of discharges that are delayed DATA ###############
-
+## QA JH introducing NA here
 dd_file_acute_trusts_FINAL[dd_file_acute_trusts_FINAL == 0] <- NA
 dd_file_acute_trusts_FINAL[ , -c(1, 2)] <- lapply(dd_file_acute_trusts_FINAL[ , -c(1, 2)], as.numeric)
 
