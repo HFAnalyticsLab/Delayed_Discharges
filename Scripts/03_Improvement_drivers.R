@@ -9,24 +9,34 @@ best_trust_occupancy <- hospital_beds %>%
   group_by(org_code) %>%
   summarize(
     Pre_occupancy = mean(occupancy_rate[month %in% c("Jul-24","Aug-24","Sep-24")]),
-    Post_occupancy = mean(occupancy_rate[month %in% c("Jul-25","Aug-25","Sep-25")]))
+    Post_occupancy = mean(occupancy_rate[month %in% c("Jul-25","Aug-25","Sep-25")]),
+    Pre_beds = mean(acute_beds[month %in% c("Jul-24","Aug-24","Sep-24")]),
+    Post_beds = mean(acute_beds[month %in% c("Jul-25","Aug-25","Sep-25")]))
 
 # Mean of means
 overall_means <- best_trust_occupancy %>%
   summarize(
     avgbest_Pre_occupancy = mean(Pre_occupancy, na.rm = TRUE),
-    avgbest_Post_occupancy = mean(Post_occupancy, na.rm = TRUE))
+    avgbest_Post_occupancy = mean(Post_occupancy, na.rm = TRUE),
+    avgbest_Pre_beds = mean(Pre_beds, na.rm = TRUE),
+    avgbest_Post_beds = mean(Post_beds, na.rm = TRUE))
 
 # Median occupancy for ALL trusts
 all_trusts_occupancy <- hospital_beds %>%
   summarize(
     All_Median_Pre_occupancy = median(occupancy_rate[month %in% c("Jul-24","Aug-24","Sep-24")], na.rm = TRUE),
-    All_Median_Post_occupancy = median(occupancy_rate[month %in% c("Jul-25","Aug-25","Sep-25")], na.rm = TRUE))
+    All_Median_Post_occupancy = median(occupancy_rate[month %in% c("Jul-25","Aug-25","Sep-25")], na.rm = TRUE),
+    All_Median_Pre_beds = median(acute_beds[month %in% c("Jul-24","Aug-24","Sep-24")], na.rm = TRUE),
+    All_Median_Post_beds = median(acute_beds[month %in% c("Jul-25","Aug-25","Sep-25")], na.rm = TRUE))
 
 figure_4_data <- bind_cols(best_trust_occupancy, all_trusts_occupancy, overall_means)
 
-
-
+figure_4_data <- figure_4_data %>%
+  mutate(occupancy_change_best_trusts =  (Post_occupancy-Pre_occupancy),
+         occupancy_change_all_trusts = (All_Median_Post_occupancy-All_Median_Pre_occupancy),
+         beds_change_best_trusts = (Post_beds-Pre_beds)/Pre_beds,
+         beds_change_all_trusts = (All_Median_Post_beds-All_Median_Pre_beds)/All_Median_Pre_beds)
+         
 # Delay length ################################################################
 
 # Mean delay length for best trusts
@@ -476,6 +486,12 @@ overall_means <- best_trust_staff %>%
     avgbest_Post_doctors = mean(Post_doctors, na.rm = TRUE))
 
 figure_5_data <- bind_cols(best_trust_staff, all_trusts_staff_medians, overall_means)
+
+figure_5_data <- figure_5_data %>%
+  mutate(doc_change_best_trusts =  (Post_doctors-Pre_doctors)/Pre_doctors,
+         nurse_change_best_trusts = (Post_nurses-Pre_nurses)/Pre_nurses,
+         doc_change_all_trusts = (All_Median_Post_doctors-All_Median_Pre_doctors)/All_Median_Pre_doctors,
+         nurse_change_all_trusts = (All_Median_Post_nurses-All_Median_Pre_nurses)/All_Median_Pre_nurses)
 
 # Discharge destination - Jun-Aug 24 vs 25
 all_trusts_destination <- june_24_pathway %>%

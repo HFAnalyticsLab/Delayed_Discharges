@@ -37,20 +37,35 @@ colMeans(!is.na (full_trusts_data) & full_trusts_data != "", na.rm = FALSE)
 full_trust_count <- unique(full_trusts_data$org_code)
 
 # Consistency of most improved trusts ##########################################
+best_trusts_dd <- dd_file_acute_trusts_FINAL %>%
+  filter(org_code %in% best_trusts)
 
-most_improved_timeseries <- left_join(dd_file_acute_trusts_FINAL,hospital_beds,by=c('month','org_code')) %>% 
+best_trusts_beds <- hospital_beds %>%
+  filter(org_code %in% best_trusts,
+         month %in% best_trusts_dd$month)
+
+best_trusts_series <- best_trusts_dd %>%
+  left_join(best_trusts_beds, by=c('month','org_code')) %>% 
   mutate(month = my(month),
          days_in_month = days_in_month(month)) %>% 
-  filter(dd_bed_days > 0, # only select out trusts which have delayed discharges
-         !is.na(acute_beds),# remove one trust which doesn't have some bed info for Nov/Dec due to merger
-         org_code %in% best_trusts) %>% 
-         group_by(month) %>% 
-  summarise(dd_bed_days = sum(as.numeric(dd_bed_days)),
-            total_acute_beds = sum(acute_beds),
-            total_adult_beds = sum(adult_acute_beds),
-            days_in_month = max(days_in_month)) %>% 
-  ungroup() %>% 
-  mutate(best_trusts_perc_bed_delays = (dd_bed_days/days_in_month)/total_adult_beds*100)
+  group_by(month) %>%
+  mutate(perc_bed_delays = (dd_bed_days/days_in_month)/adult_acute_beds*100)
+
+best_trusts_timeseries <- ggplot(best_trusts_series, aes(x = month, y = perc_bed_delays, color = org_code, group = org_code)) +
+  geom_line(linewidth = 1) +
+  geom_point() +
+  scale_x_date(date_breaks = "1 month", date_labels = "%b %Y") +
+  scale_y_continuous(breaks = scales::pretty_breaks((n=10))) +
+  labs(title = "Consistency of the best trusts",
+       subtitle = "Proportion of bed days occupied by delayed discharge patients",
+       x = "Month",
+       y = "Percentage of bed days",
+       color = "Trust") +
+  theme_minimal() +
+  theme(plot.title = element_text(size = 14, face = "bold"),
+        legend.position = "bottom")
+
+best_trusts_timeseries
 
 # Flourish data ################################################################
 
@@ -99,7 +114,7 @@ writeData(DD_Flourish_Data, "Figure 7b", national_delay_length)
 
 # Most improved consistency
 addWorksheet(DD_Flourish_Data, "Most Improved Consistency")
-writeData(DD_Flourish_Data, "Most Improved Consistency", most_improved_timeseries)
+writeData(DD_Flourish_Data, "Most Improved Consistency", best_trusts_series)
 
 # All trusts staffing
 addWorksheet(DD_Flourish_Data, "All trusts staffing")
@@ -107,7 +122,6 @@ writeData(DD_Flourish_Data, "All trusts staffing", all_trust_staffing)
 
 # Save Flourish Data
 saveWorkbook(DD_Flourish_Data, "DD_Flourish_Data.xlsx", overwrite = TRUE)
-
 
 # CLEAN #######################################################################
 
