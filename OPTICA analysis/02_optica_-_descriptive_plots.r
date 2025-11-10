@@ -2446,9 +2446,7 @@ matplot(out_qa.arr.ls$mo[,
         col = c(rep.int(1, times = length(optica_status.dat$trust_code)), 4), 
         lwd = c(rep.int(1, times = length(optica_status.dat$trust_code)), 6), 
         main = "", 
-        xlab = switch(match(lg, table = names(out_qa.arr.ls)), 
-                      "Week", "Month"
-                      ), 
+        xlab = "Month", 
         ylab = "Proportion of undischarged patients (%)", 
         ylim = range(pretty(out_qa.arr.ls$mo[, , , "prop_bed"], 
                             n = 8
@@ -2792,4 +2790,5 @@ dev.print(png,
 # unlink(file.path(output.dir, 
 #                  "Graphs/Report/prop_bed_mo_pooled_stg_thf.*"
 #                  )
+
 #        )  # Remove time-series plot files
