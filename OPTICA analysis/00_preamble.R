@@ -1,44 +1,85 @@
+###########################################
+##                                       ##
+## Analysis of delayed discharge         ##
+## statistics across acute NHS trusts    ##
+## in England by OPTICA deployment       ##
+##                                       ##
+## ===================================== ##
+##                                       ##
+## Developer: Stefano Conti              ##
+##            (e. stefano.conti@nhs.net) ##
+##                                       ##
+###########################################
 
-#install.packages("ggrepel")
 
-#load packages
+##############
+## Preamble ##
+##############
 
-library(ggrepel)
+rm(list = ls())  # Clear work-space
 
-library(tibble) # for results table data manipulation
+graphics.off()  # Shut all graphical devices
 
-library(tidyverse) # for data manipulation and plots 
+needed_package_names.vec <- c("abind")  # Set character vector of required R libraries
 
-library(dplyr) # for data manipulation
+installed_package_log.vec <- sapply(needed_package_names.vec, 
+                                    FUN = require, character.only = TRUE, quietly = TRUE
+                                    )  # Derive logical vector of required installed R libraries
 
-library(here) # used to get easier filepath references for objects not in Git
+if(! all(installed_package_log.vec))
+  {
+  needed.missing_package_names.vec <- needed_package_names.vec[! installed_package_log.vec]  # Derive character vector of required missing R libraries
+  
+  install.packages(needed.missing_package_names.vec)  # Install required missing R libraries
+  }
 
-library(tidyr) # for data manipulation
+sapply(needed_package_names.vec, FUN = require, character.only = TRUE)  # Load required R libraries
 
-library(janitor) # for data manipulation
 
-library(abind) # to join arrays
+old_par <- par(no.readonly = TRUE)  # Set list of graphical parameters
 
-#library(bcp) # for Barry and Hartigan change-point model
+root.dir <- file.path("~/A/Non-IAU/Projects/Live/OPTICA")  # Set project root directory
 
-library(forecast) # time-series forecasting
+data.dir <- file.path(root.dir, "Data")  # Set project data directory
 
-library(lme4) # for GLMM
+output.dir <- file.path(root.dir, "R/Output")  # Set project output directory
 
-library(MASS) # for "Modern Applied Statistics with S" utilities
+dir.create(file.path(output.dir, 
+                     "Graphs/Report"
+                     ), 
+           showWarnings = FALSE, recursive = TRUE
+           )  # Set project report folder
 
-library(multcomp) # for multiple inferences
+lapply(file.path(output.dir, "Graphs", 
+                 outer(c("QA", "Non-QA"), 
+                       outer(c("Descriptive", "Inference"), 
+                             outer(paste("Undischarged out of", 
+                                         c("beds", "dischargeable"), 
+                                         sep = " "
+                                         ), 
+                                   outer(c("Weekly", "Monthly"), 
+                                         c(paste0(c("Non-", rep("", times = 2)), 
+                                                  "OPTICA trusts", 
+                                                  c("", paste0(" (", c("calendar", "lapsed"), " time)"))
+                                                  ), 
+                                           "Pooled trusts"
+                                           ), 
+                                         FUN = file.path
+                                         ), 
+                                   FUN = file.path
+                                   ), 
+                             FUN = file.path
+                             ), 
+                       FUN = file.path
+                       )
+                 ), 
+       FUN = dir.create, showWarnings = FALSE, recursive = TRUE
+       )  # Set project folder structure
 
-library(readxl) # for importing MS Excel spreadsheets
 
-library(gsynth) # to use synthetic control methods
+# rate_scale <- 1e2  # Set multiplicative factor for rate calculations
 
-library(panelView) # to produce gsynth plots
+res_scale <- 3e2  # Set resolution parameter for .png plots
 
-library(parallel) # to check number of cores
 
-library(forcats) # to relevel rows for forest plot
-
-pre.post_key.vec.ls <- list(pre=rev(-seq.int(24)), 
-                            post=seq.int(24)
-)  # Set list by study period of key intervention times
+setwd(root.dir)  # Set working directory
