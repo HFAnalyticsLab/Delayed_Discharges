@@ -31,6 +31,8 @@ source('https://raw.githubusercontent.com/zeyadissa/open_health_data/main/src/fu
 DRD_url <- ('https://www.england.nhs.uk/statistics/statistical-work-areas/discharge-delays/discharge-ready-date/')
 
 # Zeyad's function to pull filelinks containing "webfile"
+# GS - Previously this was 12 but think has changed as new files added to the site
+
 DRDlinks <- GetLinks(DRD_url, 'Discharge-Ready-Date-monthly-data-webfile')
 print(DRDlinks)
 
