@@ -32,7 +32,7 @@ discharge.bed_d.dat <- read.table(file.path(data.dir, "discharge_sitrep_table2wi
                                                 ), 
                                   colClasses = c("character", "factor", "integer", "NULL", "character", 
                                                  rep("NULL", times = 2), "integer", rep("NULL", times = 3)
-                                                 )  # Load daily delayed discharge and monthly bed occupancy sit-rep data-frame
+                                                 )
                                   )  # Load daily delayed discharge and monthly bed occupancy sit-rep data-frame
 
 discharge.bed_d.dat <- within(discharge.bed_d.dat, 
@@ -615,4 +615,5 @@ save(list = outer(c("freq", "out"),
      file = file.path(data.dir, 
                       "freq.out_1yrprepost_stg_qa.RData"
                       )
+
      )  # Save QAed staggered restricted delayed discharge frequencies and outcomes arrays and data-frames lists in .RData format
