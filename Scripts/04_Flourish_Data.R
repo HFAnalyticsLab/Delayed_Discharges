@@ -64,7 +64,7 @@ best_trusts_timeseries <- ggplot(best_trusts_series, aes(x = month, y = perc_bed
   geom_point() +
   scale_x_date(date_breaks = "1 month", date_labels = "%b %Y") +
   scale_y_continuous(breaks = scales::pretty_breaks((n=10))) +
-  labs(title = "Consistency of the best trusts",
+  labs(title = "Consistency of the most improved trusts",
        subtitle = "Proportion of bed days occupied by delayed discharge patients",
        x = "Month",
        y = "Proportion of bed days (%)",
