@@ -518,7 +518,7 @@ Jul_24 <- Jul_24 %>%
 Aug_24 <- Aug_24 %>% 
   mutate(month = 'Aug-24')
 Sep_24 <- Sep_24 %>% 
-  mutate(month = 'Sept-24')
+  mutate(month = 'Sep-24')
 Oct_24 <- Oct_24 %>% 
   mutate(month = 'Oct-24')
 Nov_24 <- Nov_24 %>% 
@@ -551,7 +551,7 @@ Aug_25 <- Aug_25 %>%
 
 names(Sep_25) <- make.unique(names(Sep_25))
 Sep_25 <- Sep_25 %>%
-  mutate(month = 'Sep_25')
+  mutate(month = 'Sep-25')
 
 # Bring together the Sept-23 to Mar-24 data files.
 delayed_discharges_sep23_mar24 <- rbind(Sep_23,Oct_23,Dec_23,Jan_24,Feb_24,Mar_24) %>% 
