@@ -1,14 +1,12 @@
 
 # 28/07/2025 - Trust-level beds data extraction
-# 05/08/2025 - Cleaned
+# 13/11/2025 - Final Publication update
 
 # 1 Load packages & filelinks #################################################
-
 library(readxl)
 library(curl)
 
-# APRIL 24 
-
+# APRIL 24  
 url <- "https://www.england.nhs.uk/statistics/wp-content/uploads/sites/2/2025/07/202404-April-2024-sitrep-data-FINAL-revised.xlsx"
 temp_file <- tempfile(fileext = ".xlsx")
 
@@ -29,9 +27,7 @@ apr_24_beds <- read_excel(temp_file, sheet = 2,skip=14) %>%
   mutate(month = 'Apr-24') %>% 
   select(month,org_code,acute_beds,adult_acute_beds,occupied_beds,occupancy_rate)
 
-
 # MAY 24 
-
 url <- "https://www.england.nhs.uk/statistics/wp-content/uploads/sites/2/2025/07/202405-May-2024-sitrep-data-FINAL-revised.xlsx"
 temp_file <- tempfile(fileext = ".xlsx")
 
@@ -51,9 +47,7 @@ may_24_beds <- read_excel(temp_file, sheet = 2,skip=14) %>%
   mutate(month = 'May-24') %>% 
   select(month,org_code,acute_beds,adult_acute_beds,occupied_beds,occupancy_rate)
 
-
 # JUNE 24 
-
 url <- "https://www.england.nhs.uk/statistics/wp-content/uploads/sites/2/2025/07/202406-June-2024-sitrep-data-FINAL-revised.xlsx"
 temp_file <- tempfile(fileext = ".xlsx")
 
@@ -73,9 +67,7 @@ jun_24_beds <- read_excel(temp_file, sheet = 2,skip=14) %>%
   mutate(month = 'Jun-24') %>% 
   select(month,org_code,acute_beds,adult_acute_beds,occupied_beds,occupancy_rate)
 
-
 # JULY 24 
-
 url <- "https://www.england.nhs.uk/statistics/wp-content/uploads/sites/2/2025/07/202407-July-2024-beds-sitrep-data-FINAL-revised.xlsx"
 temp_file <- tempfile(fileext = ".xlsx")
 
@@ -95,9 +87,7 @@ jul_24_beds <- read_excel(temp_file, sheet = 2,skip=14) %>%
   mutate(month = 'Jul-24') %>% 
   select(month,org_code,acute_beds,adult_acute_beds,occupied_beds,occupancy_rate)
 
-
 # AUGUST 24 
-
 url <- "https://www.england.nhs.uk/statistics/wp-content/uploads/sites/2/2025/07/202408-August-2024-beds-sitrep-data-FINAL-revised.xlsx"
 temp_file <- tempfile(fileext = ".xlsx")
 
@@ -117,9 +107,7 @@ aug_24_beds <- read_excel(temp_file, sheet = 2,skip=14) %>%
   mutate(month = 'Aug-24') %>% 
   select(month,org_code,acute_beds,adult_acute_beds,occupied_beds,occupancy_rate)
 
-
 # SEPTEMBER 24 
-
 url <- "https://www.england.nhs.uk/statistics/wp-content/uploads/sites/2/2025/07/202409-September-2024-beds-sitrep-data-FINAL-revised.xlsx"
 temp_file <- tempfile(fileext = ".xlsx")
 
@@ -139,9 +127,7 @@ sep_24_beds <- read_excel(temp_file, sheet = 2,skip=14) %>%
   mutate(month = 'Sept-24') %>% 
   select(month,org_code,acute_beds,adult_acute_beds,occupied_beds,occupancy_rate)
 
-
 # OCTOBER 24 
-
 url <- "https://www.england.nhs.uk/statistics/wp-content/uploads/sites/2/2025/07/202410-October-2024-beds-sitrep-data-FINAL-revised.xlsx"
 temp_file <- tempfile(fileext = ".xlsx")
 
@@ -161,9 +147,7 @@ oct_24_beds <- read_excel(temp_file, sheet = 2,skip=14) %>%
   mutate(month = 'Oct-24') %>% 
   select(month,org_code,acute_beds,adult_acute_beds,occupied_beds,occupancy_rate)
 
-
 # NOVEMBER 24 
-
 url <- "https://www.england.nhs.uk/statistics/wp-content/uploads/sites/2/2025/07/202411-November-2024-beds-sitrep-data-FINAL-revised.xlsx"
 temp_file <- tempfile(fileext = ".xlsx")
 
@@ -183,9 +167,7 @@ nov_24_beds <- read_excel(temp_file, sheet = 2,skip=14) %>%
   mutate(month = 'Nov-24') %>% 
   select(month,org_code,acute_beds,adult_acute_beds,occupied_beds,occupancy_rate)
 
-
 # DECEMBER 24 
-
 url <- "https://www.england.nhs.uk/statistics/wp-content/uploads/sites/2/2025/07/202412-December-2024-beds-sitrep-data-FINAL-revised.xlsx"
 temp_file <- tempfile(fileext = ".xlsx")
 
@@ -205,9 +187,7 @@ dec_24_beds <- read_excel(temp_file, sheet = 2,skip=14) %>%
   mutate(month = 'Dec-24') %>% 
   select(month,org_code,acute_beds,adult_acute_beds,occupied_beds,occupancy_rate)
 
-
 # JANUARY 25 
-
 url <- "https://www.england.nhs.uk/statistics/wp-content/uploads/sites/2/2025/07/202501-January-2025-beds-sitrep-data-FINAL-revised.xlsx"
 temp_file <- tempfile(fileext = ".xlsx")
 
@@ -227,9 +207,7 @@ jan_25_beds <- read_excel(temp_file, sheet = 2,skip=14) %>%
   mutate(month = 'Jan-25') %>% 
   select(month,org_code,acute_beds,adult_acute_beds,occupied_beds,occupancy_rate)
 
-
 # FEBRUARY 25 
-
 url <- "https://www.england.nhs.uk/statistics/wp-content/uploads/sites/2/2025/07/202502-February-2025-beds-sitrep-data-FINAL-revised.xlsx"
 temp_file <- tempfile(fileext = ".xlsx")
 
@@ -249,9 +227,7 @@ feb_25_beds <- read_excel(temp_file, sheet = 2,skip=14) %>%
   mutate(month = 'Feb-25') %>% 
   select(month,org_code,acute_beds,adult_acute_beds,occupied_beds,occupancy_rate)
 
-
 # MARCH 25 
-
 url <- "https://www.england.nhs.uk/statistics/wp-content/uploads/sites/2/2025/07/202503-March-2025-beds-sitrep-data-FINAL-revised.xlsx"
 temp_file <- tempfile(fileext = ".xlsx")
 
@@ -271,9 +247,7 @@ mar_25_beds <- read_excel(temp_file, sheet = 2,skip=14) %>%
   mutate(month = 'Mar-25') %>% 
   select(month,org_code,acute_beds,adult_acute_beds,occupied_beds,occupancy_rate)
 
-
 # APRIL 25 
-
 url <- "https://www.england.nhs.uk/statistics/wp-content/uploads/sites/2/2025/06/202504-April-2025-beds-sitrep-data-finalversion.xlsx"
 temp_file <- tempfile(fileext = ".xlsx")
 
@@ -293,9 +267,7 @@ apr_25_beds <- read_excel(temp_file, sheet = 2,skip=14) %>%
   mutate(month = 'Apr-25') %>% 
   select(month,org_code,acute_beds,adult_acute_beds,occupied_beds,occupancy_rate)
 
-
 # MAY 25 
-
 url <- "https://www.england.nhs.uk/statistics/wp-content/uploads/sites/2/2025/07/202505-May-2025-beds-sitrep-data-finalversion.xlsx"
 temp_file <- tempfile(fileext = ".xlsx")
 
@@ -316,7 +288,6 @@ may_25_beds <- read_excel(temp_file, sheet = 2,skip=14) %>%
   select(month,org_code,acute_beds,adult_acute_beds,occupied_beds,occupancy_rate)
 
 # JUN 25
-
 url <- "https://www.england.nhs.uk/statistics/wp-content/uploads/sites/2/2025/08/202506-June-2025-beds-sitrep-data-finalversion.xlsx"
 temp_file <- tempfile(fileext = ".xlsx")
 
@@ -337,7 +308,6 @@ jun_25_beds <- read_excel(temp_file, sheet = 2,skip=14) %>%
   select(month,org_code,acute_beds,adult_acute_beds,occupied_beds,occupancy_rate)
 
 # JUL 25
-
 url <- "https://www.england.nhs.uk/statistics/wp-content/uploads/sites/2/2025/09/202506-July-2025-beds-sitrep-data-finalversion-v2.xlsx"
 temp_file <- tempfile(fileext = ".xlsx")
 
@@ -358,8 +328,7 @@ jul_25_beds <- read_excel(temp_file, sheet = 2,skip=14) %>%
   select(month,org_code,acute_beds,adult_acute_beds,occupied_beds,occupancy_rate)
 
 # AUG 25
-
-url <- "https://www.england.nhs.uk/statistics/wp-content/uploads/sites/2/2025/09/202506-August-2025-beds-sitrep-data-provisionalversion-v2.xlsx"
+url <- "https://www.england.nhs.uk/statistics/wp-content/uploads/sites/2/2025/10/202508-August-2025-beds-sitrep-data-finalversion-v1.1.xlsx"
 temp_file <- tempfile(fileext = ".xlsx")
 
 # Download the file
@@ -378,9 +347,8 @@ aug_25_beds <- read_excel(temp_file, sheet = 2,skip=14) %>%
   mutate(month = 'Aug-25') %>% 
   select(month,org_code,acute_beds,adult_acute_beds,occupied_beds,occupancy_rate)
 
-# SEP 25 (provisional)
-
-url <- "https://www.england.nhs.uk/statistics/wp-content/uploads/sites/2/2025/10/202509-September-2025-beds-sitrep-data-provisionalversion-v1.1.xlsx"
+# SEP 25 
+url <- "https://www.england.nhs.uk/statistics/wp-content/uploads/sites/2/2025/11/202509-September-2025-beds-sitrep-data-finalversion.xlsx"
 temp_file <- tempfile(fileext = ".xlsx")
 
 # Download the file
@@ -399,9 +367,7 @@ sep_25_beds <- read_excel(temp_file, sheet = 2,skip=14) %>%
   mutate(month = 'Sep-25') %>% 
   select(month,org_code,acute_beds,adult_acute_beds,occupied_beds,occupancy_rate)
 
-
 # Bind bed data ###############################################################
-
 hospital_beds <- rbind(apr_24_beds,
                        may_24_beds,
                        jun_24_beds,
@@ -422,9 +388,15 @@ hospital_beds <- rbind(apr_24_beds,
                        sep_25_beds)
 
 # 2 Proportion of beds used for DD data #######################################
+# Convert month columns to date before joining
+dd_file_acute_trusts_FINAL <- dd_file_acute_trusts_FINAL %>%
+  mutate(month = my(as.character(month)))
+
+hospital_beds <- hospital_beds %>%
+  mutate(month = my(as.character(month)))
+
 figure_1b_data <- left_join(dd_file_acute_trusts_FINAL,hospital_beds,by=c('month','org_code')) %>% 
-  mutate(month = my(month),
-         days_in_month = days_in_month(month)) %>% 
+  mutate(days_in_month = days_in_month(month)) %>% 
   filter(dd_bed_days > 0, # only select out trusts which have delayed discharges
          !is.na(acute_beds)) %>%  # remove one trust which doesn't have some bed info for Nov/Dec due to merger
   group_by(month) %>% 
@@ -442,10 +414,16 @@ figure_1_data <- dd_file_national_FINAL %>%
 figure_1_data$perc_bed_delays <- figure_1b_data$perc_bed_delays
 
 # 3 Variation by trust in change of the % of discharges delayed DATA ##########
+# Convert back to month format for figure 2
+dd_file_acute_trusts_FINAL <- dd_file_acute_trusts_FINAL %>%
+  mutate(month = format(month, "%b-%y"))
+
+hospital_beds <- hospital_beds %>%
+  mutate(month = format(month, "%b-%y"))
 
 figure_2b_data <- left_join(dd_file_acute_trusts_FINAL,hospital_beds,by=c('month','org_code')) %>% 
-  filter(month %in% c('Jun-24','Jul-24','Aug-24','Jun-25','Jul-25','Aug-25')) %>% 
-  mutate(period = if_else(month %in% c('Jun-24','Jul-24','Aug-24'),'pre','post')) %>% 
+  filter(month %in% c('Jul-24','Aug-24','Sep-24','Jul-25','Aug-25','Sep-25')) %>% 
+  mutate(period = if_else(month %in% c('Jul-24','Aug-24','Sep-24'),'pre','post')) %>% 
   group_by(period,org_code) %>% 
   summarise(patients_discharged_volume = sum(as.numeric(patients_discharged_volume)),
             no_delay_volume = sum(as.numeric(no_delay_volume))) %>% 
@@ -460,10 +438,9 @@ figure_2b_data <- left_join(dd_file_acute_trusts_FINAL,hospital_beds,by=c('month
   mutate(difference = post - pre)
 
 # 4 Variation by trust in change in average delay length DATA #################
-
 figure_2c_data <- left_join(dd_file_acute_trusts_FINAL,hospital_beds,by=c('month','org_code')) %>% 
-  filter(month %in% c('Jun-24','Jul-24','Aug-24','Jun-25','Jul-25','Aug-25')) %>% 
-  mutate(period = if_else(month %in% c('Jun-24','Jul-24','Aug-24'),'pre','post')) %>% 
+  filter(month %in% c('Jul-24','Aug-24','Sep-24','Jul-25','Aug-25','Sep-25')) %>% 
+  mutate(period = if_else(month %in% c('Jul-24','Aug-24','Sep-24'),'pre','post')) %>% 
   group_by(period,org_code) %>% 
   summarise(patients_discharged_volume = sum(as.numeric(patients_discharged_volume)),
             no_delay_volume = sum(as.numeric(no_delay_volume)),
@@ -479,10 +456,9 @@ figure_2c_data <- left_join(dd_file_acute_trusts_FINAL,hospital_beds,by=c('month
   mutate(difference = post - pre)
 
 # 5 Variation by trust in change in the % of bed days used by delayed discharge DATA #####
-
 figure_2_data <- left_join(dd_file_acute_trusts_FINAL,hospital_beds,by=c('month','org_code')) %>% 
-  filter(month %in% c('Jun-24','Jul-24','Aug-24','Jun-25','Jul-25','Aug-25')) %>% 
-  mutate(period = if_else(month %in% c('Jun-24','Jul-24','Aug-24'),'pre','post')) %>% 
+  filter(month %in% c('Jul-24','Aug-24','Sep-24','Jul-25','Aug-25','Sep-25')) %>% 
+  mutate(period = if_else(month %in% c('Jul-24','Aug-24','Sep-24'),'pre','post')) %>% 
   mutate(month = my(month),
          days_in_month = days_in_month(month)) %>%
   filter(dd_bed_days > 0, #only select out trusts which have delayed discharges
@@ -523,10 +499,8 @@ trust_change <- figure_2_data %>%
 trust_change <- trust_change %>%
   mutate(Total = sum(n),
          pct_of_trusts = (n/Total))
-  
 
 # 6 Ranking trusts by the % of bed days used by delayed discharge DATA ########
-
 figure_3_data <- figure_2_data %>% 
   mutate(rank_pre = min_rank(pre),
          rank_post = min_rank(post),
@@ -549,8 +523,8 @@ dd_file_acute_trusts_FINAL <- dd_file_acute_trusts_FINAL %>%
     perc_patients_delayed = ((total_delay_volume/patients_discharged_volume) *100))
 
 figure_3b_data <- left_join(dd_file_acute_trusts_FINAL,hospital_beds,by=c('month','org_code')) %>% 
-  filter(month %in% c('Jun-24','Jul-24','Aug-24','Jun-25','Jul-25','Aug-25')) %>% 
-  mutate(period = if_else(month %in% c('Jun-24','Jul-24','Aug-24'),'pre','post')) %>% 
+  filter(month %in% c('Jul-24','Aug-24','Sep-24','Jul-25','Aug-25','Sep-25')) %>% 
+  mutate(period = if_else(month %in% c('Jul-24','Aug-24','Sep-24'),'pre','post')) %>% 
   mutate(month = my(month),
          days_in_month = days_in_month(month)) %>%
   filter(dd_bed_days > 0, #only select out trusts which have delayed discharges
@@ -570,13 +544,21 @@ greater_than_2.5p_reduction <- figure_3_data %>%
 best_trusts_frame <- as.data.frame(best_trusts <- c(greater_than_2.5p_reduction$org_code))
 best_trusts <- (best_trusts <- c(greater_than_2.5p_reduction$org_code))
 
+# Remove RNS and RVR as lacking DRD data for recent months 
+# and remove RAX and RJR for inconsistent performance over the long term (see plot)
+remove_orgs <- c('RNS','RAX','RJR','RVR')
+best_trusts <- best_trusts[!best_trusts %in% remove_orgs]
+best_trusts_frame <- best_trusts_frame %>%
+  rename(org_code = 'best_trusts <- c(greater_than_2.5p_reduction$org_code)') %>%
+  filter(!org_code %in% remove_orgs)
+
 # Hospital bed rankings
 hospital_bed_change <- hospital_beds %>%
   filter(org_code %in% best_trusts) %>%
   group_by(org_code) %>%
   summarize(
-    Pre_beds = mean(acute_beds[month %in% c("Jun-24","Jul-24","Aug-24")]),
-    Post_beds = mean(acute_beds[month %in% c("Jun-25","Jul-25","Aug-25")]),
+    Pre_beds = mean(acute_beds[month %in% c("Jul-24","Aug-24","Sep-24")]),
+    Post_beds = mean(acute_beds[month %in% c("Jul-25","Aug-25","Sep-25")]),
     difference = (Post_beds-Pre_beds),
     pct_difference = ((Post_beds-Pre_beds)/Pre_beds))
 
@@ -589,14 +571,12 @@ overall_means <- hospital_bed_change %>%
 # Median beds for ALL trusts
 all_trusts_beds <- hospital_beds %>%
   summarize(
-    All_Median_Pre_beds = median(acute_beds[month %in% c("Jun-24","Jul-24","Aug-24")], na.rm = TRUE),
-    All_Median_Post_beds = median(acute_beds[month %in% c("Jun-25","Jul-25","Aug-25")], na.rm = TRUE))
+    All_Median_Pre_beds = median(acute_beds[month %in% c("Jul-24","Aug-24","Sep-24")], na.rm = TRUE),
+    All_Median_Post_beds = median(acute_beds[month %in% c("Jul-25","Aug-25","Sep-25")], na.rm = TRUE))
 
 figure_4b_data <- bind_cols(hospital_bed_change, all_trusts_beds, overall_means)
 
-
 # Clean #######################################################################
-
 rm(url)
 rm(apr_24_beds)
 rm(may_24_beds)

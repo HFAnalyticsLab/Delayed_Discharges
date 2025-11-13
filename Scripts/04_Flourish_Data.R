@@ -1,11 +1,12 @@
 
 # 29/08/2025 - Discharge Ready Data (DRD) Flourish Data
+# 13/11/2025 - Final Publication update
 
 # 07 Flourish data #############################################################
 
 # Number of beds occupied by patients fit for discharge, latest date ###########
 latest_occupied <- hospital_beds %>%
-  filter(month == 'Aug-25')%>%
+  filter(month == 'Sep-25')%>%
   mutate(total_acute_beds = sum(acute_beds)) 
 
 latest_beds <- latest_occupied$total_acute_beds[nrow(latest_occupied)]
@@ -24,14 +25,10 @@ over_occupied_trusts <- over_occupied_trusts %>%
 # Number of trusts in the analysis
 trust_count <- unique(figure_2_data$org_code)
 
-colMeans(!is.na (dd_file_acute_trusts_FINAL) & dd_file_acute_trusts_FINAL != "", na.rm = FALSE)
-
 full_trusts_data <- dd_file_acute_trusts_FINAL %>%
   group_by(org_code) %>%
   filter(!any(is.na(patients_discharged_volume))) %>%
   ungroup()
-
-colMeans(!is.na (full_trusts_data) & full_trusts_data != "", na.rm = FALSE)
 
 # Number of trusts with full data
 full_trust_count <- unique(full_trusts_data$org_code)
@@ -41,15 +38,26 @@ best_trusts_dd <- dd_file_acute_trusts_FINAL %>%
   filter(org_code %in% best_trusts)
 
 best_trusts_beds <- hospital_beds %>%
-  filter(org_code %in% best_trusts,
-         month %in% best_trusts_dd$month)
+  filter(org_code %in% best_trusts)
 
-best_trusts_series <- best_trusts_dd %>%
-  left_join(best_trusts_beds, by=c('month','org_code')) %>% 
-  mutate(month = my(month),
-         days_in_month = days_in_month(month)) %>% 
-  group_by(month) %>%
-  mutate(perc_bed_delays = (dd_bed_days/days_in_month)/adult_acute_beds*100)
+# Clean & standardize month columns to real Date objects
+dd_clean <- dd_file_acute_trusts_FINAL %>%
+  filter(org_code %in% best_trusts) %>%
+  mutate(
+    org_code = trimws(as.character(org_code)),
+    month = my(as.character(month)))
+
+beds_clean <- hospital_beds %>%
+  filter(org_code %in% best_trusts) %>%
+  mutate(
+    org_code = trimws(as.character(org_code)),
+    month = my(as.character(month)))
+
+best_trusts_series <- dd_clean %>%
+  left_join(beds_clean, by = c("month", "org_code")) %>%
+  mutate(
+    days_in_month = days_in_month(month),
+    perc_bed_delays = (dd_bed_days / days_in_month) / adult_acute_beds * 100)
 
 best_trusts_timeseries <- ggplot(best_trusts_series, aes(x = month, y = perc_bed_delays, color = org_code, group = org_code)) +
   geom_line(linewidth = 1) +
@@ -59,13 +67,33 @@ best_trusts_timeseries <- ggplot(best_trusts_series, aes(x = month, y = perc_bed
   labs(title = "Consistency of the best trusts",
        subtitle = "Proportion of bed days occupied by delayed discharge patients",
        x = "Month",
-       y = "Percentage of bed days",
+       y = "Proportion of bed days (%)",
        color = "Trust") +
   theme_minimal() +
   theme(plot.title = element_text(size = 14, face = "bold"),
-        legend.position = "bottom")
+        legend.position = "bottom",
+        legend.text = element_text(size = 8),
+        legend.title = element_text(size = 9, face = "bold"),
+        axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
+  guides(color = guide_legend(nrow = 1, byrow = TRUE))
 
 best_trusts_timeseries
+ggsave("best_trusts_timeseries.png", best_trusts_timeseries)
+
+# FYI for trust selection
+greater_than_3.5p_reduction <- figure_3_data %>%
+  select(org_code,difference) %>%
+  filter(difference <= -3.5)
+
+# FYI for trust selection
+greater_than_3.0p_reduction <- figure_3_data %>%
+  select(org_code,difference) %>%
+  filter(difference <= -3.0)
+
+# FYI for trust selection 
+greater_than_2.0p_reduction <- figure_3_data %>%
+  select(org_code,difference) %>%
+  filter(difference <= -2.0)
 
 # Flourish data ################################################################
 
@@ -125,13 +153,15 @@ saveWorkbook(DD_Flourish_Data, "DD_Flourish_Data.xlsx", overwrite = TRUE)
 
 # CLEAN #######################################################################
 
-
-
-
-
-
-
-
-
-
+rm(n)
+rm(Month_list)
+rm(DRD_url)
+rm(DRDlinks)
+rm(Timeframe)
+rm(temp_file)
+rm(overall_means)
+rm(output)
+rm(output_test)
+rm(output_test_2)
+rm(output_test_3)
 
