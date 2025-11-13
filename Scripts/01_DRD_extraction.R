@@ -30,7 +30,7 @@ source('https://raw.githubusercontent.com/zeyadissa/open_health_data/main/src/fu
 # 2 Read in DRD data ##########################################################
 DRD_url <- ('https://www.england.nhs.uk/statistics/statistical-work-areas/discharge-delays/discharge-ready-date/')
 
-# Zeyad's function captures 12 files
+# Zeyad's function to pull filelinks containing "webfile"
 DRDlinks <- GetLinks(DRD_url, 'Discharge-Ready-Date-monthly-data-webfile')
 print(DRDlinks)
 
@@ -60,8 +60,7 @@ rm(DRD_Aug24)
 
 # Check if the file exists
 sapply(DRDlinks, function(link) {
-  status_code(HEAD(link))
-})
+  status_code(HEAD(link))})
 
 # Names files Month/Year (only works for webfiles)
 names_vec <- str_extract(DRDlinks, "(?<=webfile-)[A-Za-z]+[-]?[0-9]{4}")
@@ -79,8 +78,7 @@ for (i in seq_along(DRDlinks)) {
   temp_file <- tempfile(fileext = ".xlsx")
   download.file(DRDlinks[i], temp_file, mode = "wb")
   df <- read_excel(temp_file, sheet = 'Provider')
-  assign(names_vec[i], df, envir = .GlobalEnv)
-}
+  assign(names_vec[i], df, envir = .GlobalEnv)}
 
 # 3 Individual DRD cleaning ###################################################
 
@@ -88,11 +86,9 @@ for (i in seq_along(DRDlinks)) {
 Sep_23 <- NA1
 
 Sep_23 <- Sep_23 %>%
-  {
-    header_row_index <- which(.[[1]] == "Region")
+  {header_row_index <- which(.[[1]] == "Region")
     colnames(.) <- as.character(unlist(.[header_row_index, ]))
-    .[(header_row_index + 1):nrow(.), ]
-  }
+    .[(header_row_index + 1):nrow(.), ]}
 
 Sep_23 <- Sep_23[, sapply(Sep_23, function(col) !all(is.na(col)))]
 
@@ -100,11 +96,9 @@ Sep_23 <- Sep_23[, sapply(Sep_23, function(col) !all(is.na(col)))]
 Oct_23 <- NA2
 
 Oct_23 <- Oct_23 %>%
-  {
-    header_row_index <- which(.[[1]] == "Region")
+  {header_row_index <- which(.[[1]] == "Region")
     colnames(.) <- as.character(unlist(.[header_row_index, ]))
-    .[(header_row_index + 1):nrow(.), ]
-  }
+    .[(header_row_index + 1):nrow(.), ]}
 
 Oct_23 <- Oct_23[, sapply(Oct_23, function(col) !all(is.na(col)))]
 
@@ -112,11 +106,9 @@ Oct_23 <- Oct_23[, sapply(Oct_23, function(col) !all(is.na(col)))]
 Nov_23 <- November2023
 
 Nov_23 <- Nov_23 %>%
-  {
-    header_row_index <- which(.[[1]] == "Code")
+  {header_row_index <- which(.[[1]] == "Code")
     colnames(.) <- as.character(unlist(.[header_row_index, ]))
-    .[(header_row_index + 1):nrow(.), ]
-  }
+    .[(header_row_index + 1):nrow(.), ]}
 
 Nov_23 <- Nov_23[, sapply(Nov_23, function(col) !all(is.na(col)))]
 
@@ -124,11 +116,9 @@ Nov_23 <- Nov_23[, sapply(Nov_23, function(col) !all(is.na(col)))]
 Dec_23 <- NA3
 
 Dec_23 <- Dec_23 %>%
-  {
-    header_row_index <- which(.[[1]] == "Region")
+  {header_row_index <- which(.[[1]] == "Region")
     colnames(.) <- as.character(unlist(.[header_row_index, ]))
-    .[(header_row_index + 1):nrow(.), ]
-  }
+    .[(header_row_index + 1):nrow(.), ]}
 
 Dec_23 <- Dec_23[, sapply(Dec_23, function(col) !all(is.na(col)))]
 
@@ -136,11 +126,9 @@ Dec_23 <- Dec_23[, sapply(Dec_23, function(col) !all(is.na(col)))]
 Jan_24 <- NA4
 
 Jan_24 <- Jan_24 %>%
-  {
-    header_row_index <- which(.[[1]] == "Region")
+  {header_row_index <- which(.[[1]] == "Region")
     colnames(.) <- as.character(unlist(.[header_row_index, ]))
-    .[(header_row_index + 1):nrow(.), ]
-  }
+    .[(header_row_index + 1):nrow(.), ]}
 
 Jan_24 <- Jan_24[, sapply(Jan_24, function(col) !all(is.na(col)))]
 
@@ -148,11 +136,9 @@ Jan_24 <- Jan_24[, sapply(Jan_24, function(col) !all(is.na(col)))]
 Feb_24 <- NA5
 
 Feb_24 <- Feb_24 %>%
-  {
-    header_row_index <- which(.[[1]] == "Region")
+  {header_row_index <- which(.[[1]] == "Region")
     colnames(.) <- as.character(unlist(.[header_row_index, ]))
-    .[(header_row_index + 1):nrow(.), ]
-  }
+    .[(header_row_index + 1):nrow(.), ]}
 
 Feb_24 <- Feb_24[, sapply(Feb_24, function(col) !all(is.na(col)))]
 
@@ -160,11 +146,9 @@ Feb_24 <- Feb_24[, sapply(Feb_24, function(col) !all(is.na(col)))]
 Mar_24 <- NA6
 
 Mar_24 <- Mar_24 %>%
-  {
-    header_row_index <- which(.[[1]] == "Region")
+  {header_row_index <- which(.[[1]] == "Region")
     colnames(.) <- as.character(unlist(.[header_row_index, ]))
-    .[(header_row_index + 1):nrow(.), ]
-  }
+    .[(header_row_index + 1):nrow(.), ]}
 
 Mar_24 <- Mar_24[, sapply(Mar_24, function(col) !all(is.na(col)))]
 
@@ -172,11 +156,9 @@ Mar_24 <- Mar_24[, sapply(Mar_24, function(col) !all(is.na(col)))]
 Apr_24 <- April2024
 
 Apr_24 <- Apr_24 %>%
-  {
-    header_row_index <- which(.[[1]] == "Region")
+  {header_row_index <- which(.[[1]] == "Region")
     colnames(.) <- as.character(unlist(.[header_row_index, ]))
-    .[(header_row_index + 1):nrow(.), ]
-  }
+    .[(header_row_index + 1):nrow(.), ]}
 
 #Apr_24 <- Apr_24[-c(40)] # April 2024 appears to have additional code column
 Apr_24 <- Apr_24[, sapply(Apr_24, function(col) !all(is.na(col)))]
@@ -186,11 +168,9 @@ Apr_24 <- Apr_24[, -ncol(Apr_24)]
 May_24 <- May2024
 
 May_24 <- May_24 %>%
-  {
-    header_row_index <- which(.[[1]] == "Region")
+  {header_row_index <- which(.[[1]] == "Region")
     colnames(.) <- as.character(unlist(.[header_row_index, ]))
-    .[(header_row_index + 1):nrow(.), ]
-  }
+    .[(header_row_index + 1):nrow(.), ]}
 
 May_24 <- May_24[, sapply(May_24, function(col) !all(is.na(col)))]
 
@@ -198,11 +178,9 @@ May_24 <- May_24[, sapply(May_24, function(col) !all(is.na(col)))]
 Jun_24 <- June2024
 
 Jun_24 <- Jun_24 %>%
-  {
-    header_row_index <- which(.[[1]] == "Region")
+  {header_row_index <- which(.[[1]] == "Region")
     colnames(.) <- as.character(unlist(.[header_row_index, ]))
-    .[(header_row_index + 1):nrow(.), ]
-  }
+    .[(header_row_index + 1):nrow(.), ]}
 
 Jun_24 <- Jun_24[, sapply(Jun_24, function(col) !all(is.na(col)))]
 
@@ -210,11 +188,9 @@ Jun_24 <- Jun_24[, sapply(Jun_24, function(col) !all(is.na(col)))]
 Jul_24 <- July2024
 
 Jul_24 <- Jul_24 %>%
-  {
-    header_row_index <- which(.[[1]] == "Region")
+  {header_row_index <- which(.[[1]] == "Region")
     colnames(.) <- as.character(unlist(.[header_row_index, ]))
-    .[(header_row_index + 1):nrow(.), ]
-  }
+    .[(header_row_index + 1):nrow(.), ]}
 
 Jul_24 <- Jul_24[, sapply(Jul_24, function(col) !all(is.na(col)))]
 
@@ -222,11 +198,9 @@ Jul_24 <- Jul_24[, sapply(Jul_24, function(col) !all(is.na(col)))]
 Aug_24 <- August2024
 
 Aug_24 <- Aug_24 %>%
-  {
-    header_row_index <- which(.[[1]] == "Region")
+  {header_row_index <- which(.[[1]] == "Region")
     colnames(.) <- as.character(unlist(.[header_row_index, ]))
-    .[(header_row_index + 1):nrow(.), ]
-  }
+    .[(header_row_index + 1):nrow(.), ]}
 
 Aug_24 <- Aug_24[, sapply(Aug_24, function(col) !all(is.na(col)))]
 
@@ -234,11 +208,9 @@ Aug_24 <- Aug_24[, sapply(Aug_24, function(col) !all(is.na(col)))]
 Sep_24 <- September2024
 
 Sep_24 <- Sep_24 %>%
-  {
-    header_row_index <- which(.[[1]] == "Region")
+  {header_row_index <- which(.[[1]] == "Region")
     colnames(.) <- as.character(unlist(.[header_row_index, ]))
-    .[(header_row_index + 1):nrow(.), ]
-  }
+    .[(header_row_index + 1):nrow(.), ]}
 
 Sep_24 <- Sep_24[, sapply(Sep_24, function(col) !all(is.na(col)))]
 
@@ -246,11 +218,9 @@ Sep_24 <- Sep_24[, sapply(Sep_24, function(col) !all(is.na(col)))]
 Oct_24 <- October2024
 
 Oct_24 <- Oct_24 %>%
-  {
-    header_row_index <- which(.[[1]] == "Region")
+  {header_row_index <- which(.[[1]] == "Region")
     colnames(.) <- as.character(unlist(.[header_row_index, ]))
-    .[(header_row_index + 1):nrow(.), ]
-  }
+    .[(header_row_index + 1):nrow(.), ]}
 
 Oct_24 <- Oct_24[, sapply(Oct_24, function(col) !all(is.na(col)))]
 
@@ -258,11 +228,9 @@ Oct_24 <- Oct_24[, sapply(Oct_24, function(col) !all(is.na(col)))]
 Nov_24 <- November2024
 
 Nov_24 <- Nov_24 %>%
-  {
-    header_row_index <- which(.[[1]] == "Region")
+  {header_row_index <- which(.[[1]] == "Region")
     colnames(.) <- as.character(unlist(.[header_row_index, ]))
-    .[(header_row_index + 1):nrow(.), ]
-  }
+    .[(header_row_index + 1):nrow(.), ]}
 
 Nov_24 <- Nov_24[, sapply(Nov_24, function(col) !all(is.na(col)))]
 
@@ -270,11 +238,9 @@ Nov_24 <- Nov_24[, sapply(Nov_24, function(col) !all(is.na(col)))]
 Dec_24 <- December2024
 
 Dec_24 <- Dec_24 %>%
-  {
-    header_row_index <- which(.[[1]] == "Region")
+  {header_row_index <- which(.[[1]] == "Region")
     colnames(.) <- as.character(unlist(.[header_row_index, ]))
-    .[(header_row_index + 1):nrow(.), ]
-  }
+    .[(header_row_index + 1):nrow(.), ]}
 
 Dec_24 <- Dec_24[, sapply(Dec_24, function(col) !all(is.na(col)))]
 
@@ -282,11 +248,9 @@ Dec_24 <- Dec_24[, sapply(Dec_24, function(col) !all(is.na(col)))]
 Jan_25 <- January2025
 
 Jan_25 <- Jan_25 %>%
-  {
-    header_row_index <- which(.[[1]] == "Region")
+  {header_row_index <- which(.[[1]] == "Region")
     colnames(.) <- as.character(unlist(.[header_row_index, ]))
-    .[(header_row_index + 1):nrow(.), ]
-  }
+    .[(header_row_index + 1):nrow(.), ]}
 
 Jan_25 <- Jan_25[, sapply(Jan_25, function(col) !all(is.na(col)))]
 
@@ -297,11 +261,9 @@ setdiff(Dec_24$`Organisation Name`, Jan_25$`Organisation Name`)
 Feb_25 <- February2025
 
 Feb_25 <- Feb_25 %>%
-  {
-    header_row_index <- which(.[[1]] == "Region")
+  {header_row_index <- which(.[[1]] == "Region")
     colnames(.) <- as.character(unlist(.[header_row_index, ]))
-    .[(header_row_index + 1):nrow(.), ]
-  }
+    .[(header_row_index + 1):nrow(.), ]}
 
 Feb_25 <- Feb_25[, sapply(Feb_25, function(col) !all(is.na(col)))]
 
@@ -309,11 +271,9 @@ Feb_25 <- Feb_25[, sapply(Feb_25, function(col) !all(is.na(col)))]
 Mar_25 <- March2025
 
 Mar_25 <- Mar_25 %>%
-  {
-    header_row_index <- which(.[[1]] == "Region")
+  {header_row_index <- which(.[[1]] == "Region")
     colnames(.) <- as.character(unlist(.[header_row_index, ]))
-    .[(header_row_index + 1):nrow(.), ]
-  }
+    .[(header_row_index + 1):nrow(.), ]}
 
 Mar_25 <- Mar_25[, sapply(Mar_25, function(col) !all(is.na(col)))]
 
@@ -321,11 +281,9 @@ Mar_25 <- Mar_25[, sapply(Mar_25, function(col) !all(is.na(col)))]
 Apr_25 <- April2025
 
 Apr_25 <- Apr_25 %>%
-  {
-    header_row_index <- which(.[[1]] == "Region")
+  {header_row_index <- which(.[[1]] == "Region")
     colnames(.) <- as.character(unlist(.[header_row_index, ]))
-    .[(header_row_index + 1):nrow(.), ]
-  }
+    .[(header_row_index + 1):nrow(.), ]}
 
 Apr_25 <- Apr_25[, sapply(Apr_25, function(col) !all(is.na(col)))]
 
@@ -333,11 +291,9 @@ Apr_25 <- Apr_25[, sapply(Apr_25, function(col) !all(is.na(col)))]
 May_25 <- May2025
 
 May_25 <- May_25 %>%
-  {
-    header_row_index <- which(.[[1]] == "Region")
+  {header_row_index <- which(.[[1]] == "Region")
     colnames(.) <- as.character(unlist(.[header_row_index, ]))
-    .[(header_row_index + 1):nrow(.), ]
-  }
+    .[(header_row_index + 1):nrow(.), ]}
 
 May_25 <- May_25[, sapply(May_25, function(col) !all(is.na(col)))]
 
@@ -347,11 +303,9 @@ May_25 <- May_25[, sapply(May_25, function(col) !all(is.na(col)))]
 Jun_25 <- June2025
 
 Jun_25 <- Jun_25 %>%
- {
-    header_row_index <- which(.[[1]] == "Region")
+ {header_row_index <- which(.[[1]] == "Region")
     colnames(.) <- as.character(unlist(.[header_row_index, ]))
-    .[(header_row_index + 1):nrow(.), ]
-  }
+    .[(header_row_index + 1):nrow(.), ]}
 
 Jun_25 <- Jun_25[, sapply(Jun_25, function(col) !all(is.na(col)))]
 
@@ -359,11 +313,9 @@ Jun_25 <- Jun_25[, sapply(Jun_25, function(col) !all(is.na(col)))]
 Jul_25 <- July2025
 
 Jul_25 <- Jul_25 %>%
-  {
-    header_row_index <- which(.[[1]] == "Region")
+  {header_row_index <- which(.[[1]] == "Region")
     colnames(.) <- as.character(unlist(.[header_row_index, ]))
-    .[(header_row_index + 1):nrow(.), ]
-  }
+    .[(header_row_index + 1):nrow(.), ]}
 
 Jul_25 <- Jul_25[, sapply(Jul_25, function(col) !all(is.na(col)))]
 
@@ -371,11 +323,9 @@ Jul_25 <- Jul_25[, sapply(Jul_25, function(col) !all(is.na(col)))]
 Aug_25 <- August2025
 
 Aug_25 <- Aug_25 %>%
-  {
-    header_row_index <- which(.[[1]] == "Region")
+  {header_row_index <- which(.[[1]] == "Region")
     colnames(.) <- as.character(unlist(.[header_row_index, ]))
-    .[(header_row_index + 1):nrow(.), ]
-  }
+    .[(header_row_index + 1):nrow(.), ]}
 
 Aug_25 <- Aug_25[, sapply(Aug_25, function(col) !all(is.na(col)))]
 
@@ -383,11 +333,9 @@ Aug_25 <- Aug_25[, sapply(Aug_25, function(col) !all(is.na(col)))]
 Sep_25 <- September2025
 
 Sep_25 <- Sep_25 %>%
-  {
-    header_row_index <- which(.[[1]] == "Region")
+  {header_row_index <- which(.[[1]] == "Region")
     colnames(.) <- as.character(unlist(.[header_row_index, ]))
-    .[(header_row_index + 1):nrow(.), ]
-  }
+    .[(header_row_index + 1):nrow(.), ]}
 
 Sep_25 <- Sep_25[, sapply(Sep_25, function(col) !all(is.na(col)))]
 
@@ -454,17 +402,14 @@ beds_timeseries_url <- c('https://www.england.nhs.uk/statistics/wp-content/uploa
 beds_timeseries <- read.xlsx(beds_timeseries_url, sheet = 'Timeseries all acute trusts')
 
 beds_timeseries <- beds_timeseries %>%
-  {
-    header_row_index <- which(.[[1]] == 'Month')
+  {header_row_index <- which(.[[1]] == 'Month')
     colnames(.) <- as.character(unlist(.[header_row_index, ]))
-    .[(header_row_index + 1):nrow(.), ]
-  }
+    .[(header_row_index + 1):nrow(.), ]}
 
 beds_timeseries <- beds_timeseries[-nrow(beds_timeseries), ]
 
 abbreviate_date <- function(x) {
-  paste0(substr(x, 1, 3), substr(x, nchar(x) - 1, nchar(x)))
-}
+  paste0(substr(x, 1, 3), substr(x, nchar(x) - 1, nchar(x)))}
 
 beds_timeseries$Month <- sapply(beds_timeseries$Month, abbreviate_date)
 
@@ -488,8 +433,7 @@ colnames(beds_timeseries) <- c("Month","G&A beds available","G&A core beds avail
 # 6 England DRD timeseries ##################################################
 England_FULL <- read.xlsx("https://www.england.nhs.uk/statistics/wp-content/uploads/sites/2/2025/11/Discharge-Ready-Date-Timeseries-webfile-Sept-2023-Sept-2025.xlsx", sheet = "Timeseries")
 England_FULL <- England_FULL %>%
-  {
-    header_row_index <- which(.[[1]] == "Month")
+  {header_row_index <- which(.[[1]] == "Month")
     colnames(.) <- as.character(unlist(.[header_row_index, ]))
     .[(header_row_index + 1):nrow(.), ]}
 
@@ -512,8 +456,12 @@ Month_list <- c("Sep23","Oct23","Nov23","Dec23","Jan24","Feb24","Mar24","Apr24",
                 "Sep25")
 
 England_FULL$Month <- Month_list
-print(colnames_Eng)
 England_FULL[, -1] <- lapply(England_FULL[, -1], as.numeric)
+
+#####
+# GS - NAs are introduced in the line above but this is only because of missing data.
+#####
+
 rownames(England_FULL) <- NULL
 
 England_FULL$Month <- factor(England_FULL$Month, levels = England_FULL$Month)
@@ -776,8 +724,7 @@ output_test_3 <- output_test %>%
 
 # 11 Other cleaning for flourish export ########################################
 
-# Convert dataset to numerics
-dd_file_national_FINAL[dd_file_national_FINAL == 0] <- NA
+# Convert dataset to numerics for analysis and factorise month column
 dd_file_national_FINAL[ , -c(1, 2)] <- lapply(dd_file_national_FINAL[ , -c(1, 2)], as.numeric)
 dd_file_national_FINAL$month <- factor(dd_file_national_FINAL$month, 
                                        levels = unique(dd_file_national_FINAL$month))
@@ -838,10 +785,18 @@ dd_file_Jul_Aug_Sep_national <- dd_file_national_FINAL %>%
   mutate(time_period = if_else(month %in% c('Jul-24','Aug-24','Sep-24'),'pre','post'))
 
 # Convert to numerics
-dd_file_Jul_Aug_Sep_national[ , -c(1, 2)] <- lapply(dd_file_Jul_Aug_Sep_national[ , -c(1, 2)], as.numeric)
 
-Jul_Sep2024 <- colMeans(dd_file_Jul_Aug_Sep_national[1:3, -(1:2)])
-Jul_Sep2025 <- colMeans(dd_file_Jul_Aug_Sep_national[4:6, -(1:2)])
+######
+# GS - NAs had previously been introduced below but fixed to only target columns needed for analysis
+######
+ 
+cols_to_convert <- -c(1, 2, ncol(dd_file_Jul_Aug_Sep_national))
+dd_file_Jul_Aug_Sep_national[, cols_to_convert] <- lapply(
+  dd_file_Jul_Aug_Sep_national[, cols_to_convert], as.numeric)
+
+cols_to_use <- -c(1, 2, ncol(dd_file_Jul_Aug_Sep_national))
+Jul_Sep2024 <- colMeans(dd_file_Jul_Aug_Sep_national[1:3, cols_to_use])
+Jul_Sep2025 <- colMeans(dd_file_Jul_Aug_Sep_national[4:6, cols_to_use])
 
 dd_file_Jul_Aug_Sep_avg <- rbind(Jul_Sep2024, Jul_Sep2025)
 dd_file_Jul_Aug_Sep_avg <- as.data.frame(dd_file_Jul_Aug_Sep_avg)

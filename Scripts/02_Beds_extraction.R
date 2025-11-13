@@ -27,6 +27,13 @@ apr_24_beds <- read_excel(temp_file, sheet = 2,skip=14) %>%
   mutate(month = 'Apr-24') %>% 
   select(month,org_code,acute_beds,adult_acute_beds,occupied_beds,occupancy_rate)
 
+#####
+# GS - the Flag == 1 filter in these sheets helps target just the trusts 
+# without, you also get the top lines of national data
+#####
+
+
+
 # MAY 24 
 url <- "https://www.england.nhs.uk/statistics/wp-content/uploads/sites/2/2025/07/202405-May-2024-sitrep-data-FINAL-revised.xlsx"
 temp_file <- tempfile(fileext = ".xlsx")
@@ -508,7 +515,14 @@ figure_3_data <- figure_2_data %>%
 
 # 7 Ranking trusts by the % of discharges that are delayed DATA ###############
 ## QA JH introducing NA here
-dd_file_acute_trusts_FINAL[dd_file_acute_trusts_FINAL == 0] <- NA
+
+######
+# GS - I have removed the recoding of zeroes here as uneccessary as well as the flag column.
+# The code below introduces NAs but again this is OK as its just for the trusts/months with missing data.
+######
+
+dd_file_acute_trusts_FINAL <- dd_file_acute_trusts_FINAL %>%
+  select(-Flag)
 dd_file_acute_trusts_FINAL[ , -c(1, 2)] <- lapply(dd_file_acute_trusts_FINAL[ , -c(1, 2)], as.numeric)
 
 dd_file_acute_trusts_FINAL <- dd_file_acute_trusts_FINAL %>%
