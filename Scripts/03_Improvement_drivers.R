@@ -477,7 +477,7 @@ september_25_pathway <- read_excel(temp_file, sheet = 6, skip=4) %>%
 # Staffing - May-Jul 24 vs May-Jul 25
 # This is latest data available - will update on 27th Nov 2025
 all_trust_staffing <- may_24_staffing %>%
-  rbind(may_24_staffing, jun_24_staffing, jul_24_staffing, may_25_staffing, jun_25_staffing, jul_25_staffing) %>% #FT - changed this 
+  rbind(jun_24_staffing, jul_24_staffing, may_25_staffing, jun_25_staffing, jul_25_staffing) %>% #FT - changed this 
   group_by(org_code)
   
 all_trusts_staff_medians <- all_trust_staffing %>%
@@ -514,7 +514,7 @@ figure_5_data <- figure_5_data %>%
 
 # Discharge destination - Jul-Sep 24 vs 25
 all_trusts_destination <- july_24_pathway %>%
-  rbind(july_24_pathway, august_24_pathway, september_24_pathway, july_25_pathway, august_25_pathway, september_25_pathway) # FT - changed here to include july
+  rbind(august_24_pathway, september_24_pathway, july_25_pathway, august_25_pathway, september_25_pathway) 
 
 all_trusts_destination_medians <- all_trusts_destination %>%
   ungroup() %>%
