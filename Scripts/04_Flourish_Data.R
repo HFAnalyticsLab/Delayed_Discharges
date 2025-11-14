@@ -106,6 +106,10 @@ writeData(DD_Flourish_Data, "Best_Trusts", best_trusts)
 addWorksheet(DD_Flourish_Data, "Figure 1")
 writeData(DD_Flourish_Data, "Figure 1", figure_1_data)
 
+# Delay length national
+national_delay_length <- dd_file_national_FINAL %>%
+  select(month, org_code, average_delay_los_minus_0_day_delay)
+
 # Percentage of discharges that are delayed + Proportion of beds occupied
 addWorksheet(DD_Flourish_Data, "National Delay length")
 writeData(DD_Flourish_Data, "National Delay length", national_delay_length)
@@ -137,9 +141,7 @@ writeData(DD_Flourish_Data, "Figure 6", figure_6_data)
 addWorksheet(DD_Flourish_Data, "Figure 7")
 writeData(DD_Flourish_Data, "Figure 7", figure_7_data)
 
-# Delay length national
-national_delay_length <- dd_file_national_FINAL %>%
-  select(month, org_code, average_delay_los_minus_0_day_delay)
+
 
 addWorksheet(DD_Flourish_Data, "Figure 7b")
 writeData(DD_Flourish_Data, "Figure 7b", national_delay_length)
