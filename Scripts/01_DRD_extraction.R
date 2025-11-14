@@ -32,6 +32,7 @@ DRD_url <- ('https://www.england.nhs.uk/statistics/statistical-work-areas/discha
 
 # Zeyad's function to pull filelinks containing "webfile"
 # GS - Previously this was 12 but think has changed as new files added to the site.
+# GS - the DRDlinks function will be pulling the most recent webfiles so have kept Jul/Aug from here and removed the others
 
 DRDlinks <- GetLinks(DRD_url, 'Discharge-Ready-Date-monthly-data-webfile')
 print(DRDlinks)
@@ -43,10 +44,8 @@ DRD_Dec23 <- ('https://www.england.nhs.uk/statistics/wp-content/uploads/sites/2/
 DRD_Jan24 <- ('https://www.england.nhs.uk/statistics/wp-content/uploads/sites/2/2025/01/Discharge-Ready-Date-monthly-data-Jan-2024-revised.xlsx')
 DRD_Feb24 <- ('https://www.england.nhs.uk/statistics/wp-content/uploads/sites/2/2025/01/Discharge-Ready-Date-monthly-data-Feb-2024-revised.xlsx')
 DRD_Mar24 <- ('https://www.england.nhs.uk/statistics/wp-content/uploads/sites/2/2025/01/Discharge-Ready-Date-monthly-data-March-2024-revised.xlsx')
-DRD_Jul24 <- ('https://www.england.nhs.uk/statistics/wp-content/uploads/sites/2/2025/01/Discharge-Ready-Date-monthly-data-July-2024-revised-1.xlsx')
-DRD_Aug24 <- ('https://www.england.nhs.uk/statistics/wp-content/uploads/sites/2/2025/01/Discharge-Ready-Date-monthly-data-Aug-2024-revised.xlsx')
 
-Remaining_DRD <- c(DRD_Sep23, DRD_Oct23, DRD_Dec23, DRD_Jan24, DRD_Feb24, DRD_Mar24, DRD_Jul24, DRD_Aug24)
+Remaining_DRD <- c(DRD_Sep23, DRD_Oct23, DRD_Dec23, DRD_Jan24, DRD_Feb24, DRD_Mar24)
 DRDlinks <- c(DRDlinks, Remaining_DRD) 
 
 # Tidy file links
@@ -57,8 +56,6 @@ rm(DRD_Dec23)
 rm(DRD_Jan24)
 rm(DRD_Feb24) 
 rm(DRD_Mar24) 
-rm(DRD_Jul24)
-rm(DRD_Aug24)
 
 # Check if the file exists
 sapply(DRDlinks, function(link) {
@@ -597,8 +594,21 @@ delayed_discharges_apr24_sep25 <- rbind(Apr_24,
     select(-c(Region,ICB,`Data Source`))
 
 # Bring all the files together and select out the variables of interest.
-dd_file <- rbind(delayed_discharges_sep23_mar24,
-                 delayed_discharges_apr24_sep25) %>% 
+
+#####
+# GS - the two datasets have the same columns but just in a different order -
+# so have reordered and can continue with the rbind.
+#####
+
+names(delayed_discharges_sep23_mar24)
+names(delayed_discharges_apr24_sep25)
+
+setequal(names(delayed_discharges_sep23_mar24), names(delayed_discharges_apr24_sep25))
+
+delayed_discharges_apr24_sep25 <- delayed_discharges_apr24_sep25[ names(delayed_discharges_sep23_mar24)]
+
+dd_file <- rbind(delayed_discharges_sep23_mar24,delayed_discharges_apr24_sep25) %>% 
+  
   select(month,org_code,patients_discharged_volume, dd_bed_days,no_delay_perc,delay_perc,
          no_delay_volume, `1_day_delay_volume`, `2_3_day_delay_volume`, `4_6_day_delay_volume`,
          `7_13_day_delay_volume`, `14_20_day_delay_volume`, `21plus_day_delay_volume`,
