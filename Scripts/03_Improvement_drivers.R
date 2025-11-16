@@ -309,7 +309,7 @@ july_24_pathway <- read_excel(temp_file, sheet = 6, skip=4) %>%
          pathway_one = `Pathway 1 Total`,
          pathway_two = `Pathway 2 Total`,
          pathway_three = `Pathway 3 Total`) %>% 
-  mutate(month = 'Jul-24') %>% #FT - I changed this from July-24 to Jul-24 as all the later code uses Jul-24
+  mutate(month = 'July-24') %>% 
   select(month,org_code,pathway_zero,pathway_one,pathway_two,pathway_three)
 
 # AUGUST 24 
@@ -564,7 +564,7 @@ rm(august_24_pathway)
 rm(august_24_staffing)
 rm(september_24_pathway)
 rm(july_24_pathway)
-rm(jul_24_staffing)
+rm(july_24_staffing)
 rm(july_25_pathway)
 rm(august_25_pathway)
 rm(september_25_pathway)

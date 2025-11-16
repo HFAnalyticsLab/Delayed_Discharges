@@ -2,7 +2,7 @@
 # 16/06/2025 - Discharge Ready Date (DRD) & Beds data extraction
 # 13/11/2025 - Final Publication update
 
-# Clear environment
+# Clear environment 
 rm(list = ls())
 
 # 1 Load packages & filelinks #################################################

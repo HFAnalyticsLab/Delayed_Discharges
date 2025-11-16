@@ -171,20 +171,20 @@ rm(output_test)
 rm(output_test_2)
 rm(output_test_3)
 
-#total_discharges_plot <- ggplot(dd_file_national_FINAL, aes(x = month, y = patients_discharged_volume, group = 1)) +
-#  geom_line(color = "firebrick1", linewidth = 1.2) +
-#  geom_point() +
-#    scale_y_continuous(breaks = scales::pretty_breaks((n=10))) +
-#  labs(title = "Total discharges",
-#       subtitle = "Discharges",
-#       x = "Month",
-#       y = "Discharges") +
-#  theme_minimal() +
-#  theme(plot.title = element_text(size = 14, face = "bold"),
-#        legend.position = "bottom",
-#        legend.text = element_text(size = 8),
-#        legend.title = element_text(size = 9, face = "bold"),
-#        axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
-#  guides(color = guide_legend(nrow = 1, byrow = TRUE))
+total_discharges_plot <- ggplot(dd_file_national_FINAL, aes(x = month, y = patients_discharged_volume, group = 1)) +
+  geom_line(color = "firebrick1", linewidth = 1.2) +
+  geom_point() +
+    scale_y_continuous(breaks = scales::pretty_breaks((n=10))) +
+  labs(title = "Total discharges",
+       subtitle = "Discharges",
+       x = "Month",
+       y = "Discharges") +
+  theme_minimal() +
+  theme(plot.title = element_text(size = 14, face = "bold"),
+        legend.position = "bottom",
+        legend.text = element_text(size = 8),
+        legend.title = element_text(size = 9, face = "bold"),
+        axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
+  guides(color = guide_legend(nrow = 1, byrow = TRUE))
 
-#total_discharges_plot
+total_discharges_plot
