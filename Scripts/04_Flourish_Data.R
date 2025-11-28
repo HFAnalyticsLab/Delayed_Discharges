@@ -188,3 +188,41 @@ total_discharges_plot <- ggplot(dd_file_national_FINAL, aes(x = month, y = patie
   guides(color = guide_legend(nrow = 1, byrow = TRUE))
 
 total_discharges_plot
+
+trusts_in <- unique(dd_file_acute_trusts_FINAL$org_code)
+
+# General bed days (capacity) check
+
+general_bed_days <- figure_1b_data %>%
+  select(month, dd_bed_days, total_acute_beds, total_adult_beds, days_in_month) %>%
+  group_by(month) %>%
+  mutate(general_bed_days = (total_acute_beds*days_in_month))
+
+general_bed_days_sheet <- createWorkbook()
+
+addWorksheet(general_bed_days_sheet, "Bed_days")
+writeData(general_bed_days_sheet, "Bed_days", general_bed_days)
+saveWorkbook(general_bed_days_sheet, "general_bed_days_sheet.xlsx", overwrite = TRUE)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
